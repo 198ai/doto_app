@@ -41,7 +41,7 @@ class _TabsState extends State<Tabs> {
               icon: Icon(Icons.calendar_today), label: "カレンダー"),
           BottomNavigationBarItem(
               icon: Icon(Icons.addchart_sharp), label: "統計"),
-          BottomNavigationBarItem(icon: Icon(Icons.people), label: "グループ")
+          // BottomNavigationBarItem(icon: Icon(Icons.people), label: "グループ")
         ],
       ),
       drawer: Drawer(
