@@ -46,24 +46,50 @@ class _TabsState extends State<Tabs> {
       ),
       drawer: Drawer(
         child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
           children: <Widget>[
             Row(
               children: <Widget>[
                 Expanded(
+                  child: InkWell(
+                  onTap: () {
+                    Navigator.pushNamed(context, '/login');
+                  },
                   child: UserAccountsDrawerHeader(
-                    accountName: Text("未登録"),
-                    accountEmail: Text("123@mail.com"),
+                    accountName: Text("未登録/サインイン"),
+                    accountEmail: Text("メールアドレス"),
                     currentAccountPicture: CircleAvatar(
-                      backgroundImage: NetworkImage(
-                          "http://www.starico-16.com/stamp/outline/a1128491-0.png"),
+                      backgroundImage: NetworkImage("https://www.itying.com/images/flutter/3.png")
                     ),
-                    decoration: BoxDecoration(color: Colors.pink[50]),
+                    decoration:BoxDecoration(                        
+                        image: DecorationImage(
+                          image: NetworkImage("https://www.itying.com/images/flutter/2.png"),
+                          fit:BoxFit.cover,
+                        )
+                    ),
                   ),
+                    ),
                 ),
+               
+                // Expanded(
+                //   child: UserAccountsDrawerHeader(
+                //     accountName: Text("未登録/サインイン"),
+                //     accountEmail: Text("メールアドレス"),
+                //     currentAccountPicture: CircleAvatar(
+                //       backgroundImage: NetworkImage("https://www.itying.com/images/flutter/3.png")
+                //     ),
+                //     decoration:BoxDecoration(                        
+                //         image: DecorationImage(
+                //           image: NetworkImage("https://www.itying.com/images/flutter/2.png"),
+                //           fit:BoxFit.cover,
+                //         )
+                //     ),
+                //   ),
+                // ),
               ],
             ),
             ListTile(
-              leading: CircleAvatar(child: Icon(Icons.help_outline_sharp)),
+              leading: CircleAvatar(child: Icon(Icons.help_outline_sharp,color: Colors.yellow[50])),
               title: Text("ヘルプ"),
             ),
             Divider(),

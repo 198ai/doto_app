@@ -18,7 +18,7 @@ class _MyAppState extends State<MyApp> {
     return MaterialApp(      
       // home: Tabs(),
       debugShowCheckedModeBanner: false,
-      initialRoute: '/',
+      initialRoute: '/task',
       onGenerateRoute:onGenerateRoute
     );
   }
