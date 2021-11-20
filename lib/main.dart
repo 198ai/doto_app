@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 // import 'pages/tabs/Tabs.dart';
 
@@ -15,11 +16,13 @@ class MyApp extends StatefulWidget {
 class _MyAppState extends State<MyApp> {
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(      
-      // home: Tabs(),
+    return  ScreenUtilInit(
+      designSize: Size(428, 926),
+      builder: () =>MaterialApp(      
+     //home: Tabs(),
       debugShowCheckedModeBanner: false,
-      initialRoute: '/task',
+      initialRoute: '/',
       onGenerateRoute:onGenerateRoute
-    );
+    ));
   }
 }

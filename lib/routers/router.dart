@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import '../pages/tabs/Tabs.dart';
-import '../screens/tasks/tasks.dart';
 import '../pages/Start.dart';
 import '../pages/Login.dart';
 //ルーティング
@@ -8,7 +7,6 @@ final Map<String,Function> routes = {
   '/': (context) => Tabs(),
   '/start': (context) => StartPage(),
   '/login': (context) => LoginPage(),
-  '/task' :(context)=> Tasks(),
 };
 
 
