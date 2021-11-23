@@ -10,6 +10,8 @@ import '../../services/ScreenAdapter.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:vibration/vibration.dart';
 
+import '../Start.dart';
+
 class ToDoListPage extends StatefulWidget {
   ToDoListPage({Key? key}) : super(key: key);
 
@@ -23,6 +25,8 @@ class _ToDoListPageState extends State<ToDoListPage> {
   String _time = "";
   String _date = "";
   int id = 0;
+  late int days;
+  late int inSeconds;
   final textController = TextEditingController();
   final timeController = TextEditingController();
   final dateController = TextEditingController();
@@ -114,9 +118,9 @@ class _ToDoListPageState extends State<ToDoListPage> {
     SharedPreferences list = await SharedPreferences.getInstance();
     list.setStringList("todos", storge);
     var time = textController.text + "time" + item.id.toString();
-    await saveTime(time, timeController.text);
+    await saveTime(time, inSeconds.toString());
     var date = textController.text + "date" + item.id.toString();
-    await saveTime(date, dateController.text);
+    await saveTime(date, days.toString());
   }
 
   //LIST削除する時、
@@ -171,8 +175,8 @@ class _ToDoListPageState extends State<ToDoListPage> {
                   var startDate =
                       new DateTime(dateTime.year, dateTime.month, dateTime.day);
                   var endDate = new DateTime.now();
-                  var days = startDate.difference(endDate).inDays;
-                  dateController.text = days.toString() + "日";
+                  days = startDate.difference(endDate).inDays;
+                  dateController.text = days.toString()+"日";
                 },
               ),
             ),
@@ -183,10 +187,10 @@ class _ToDoListPageState extends State<ToDoListPage> {
   String _formatDateTime(int seconds) {
     int hour = seconds ~/ 3600;
     int minute = seconds % 3600 ~/ 60;
-    timeController.text =
-        """${_convertTwoDigits(hour) + "時間"}:${_convertTwoDigits(minute) + "分"}""";
+    _time =
+        """${_convertTwoDigits(hour) + "時間"}${_convertTwoDigits(minute) + "分"}""";
 
-    return timeController.text;
+    return _time;
   }
 
   String _convertTwoDigits(int number) {
@@ -227,7 +231,9 @@ class _ToDoListPageState extends State<ToDoListPage> {
                 mode: CupertinoTimerPickerMode.hm,
                 onTimerDurationChanged: (Duration changedtimer) {
                   setState(() {
-                    _formatDateTime(changedtimer.inSeconds);
+                    // _formatDateTime(changedtimer.inSeconds);
+                    timeController.text = _formatDateTime(changedtimer.inSeconds);
+                    inSeconds = changedtimer.inSeconds;
                     //_chooseTime = _chooseTime.substring(0,_chooseTime.length-10);
                   });
                 },
@@ -499,13 +505,13 @@ class _ToDoListPageState extends State<ToDoListPage> {
                                           color: Color.fromRGBO(16, 16, 16, 1)),
                                     ),
                                     Text(
-                                      "${item.date}",
+                                      "${item.date}" + "日",
                                       style: TextStyle(
                                           fontSize: ScreenAdapter.size(13),
                                           color: Color.fromRGBO(16, 16, 16, 1)),
                                     ),
                                     Text(
-                                      "${item.time}",
+                                      "${_formatDateTime(int.parse(item.time))}",
                                       style: TextStyle(
                                           fontSize: ScreenAdapter.size(13),
                                           color: Color.fromRGBO(16, 16, 16, 1)),
@@ -528,8 +534,15 @@ class _ToDoListPageState extends State<ToDoListPage> {
                                 color: Color.fromARGB(74, 16, 16, 16),
                                 fontWeight: FontWeight.bold),
                           ),
-                          onPressed: () {
-                            Navigator.pushNamed(context, '/start');
+                          onPressed: ()async {
+                            //Navigator.pushNamed(context, '/start');
+                            Navigator.of(context).push(MaterialPageRoute(
+                                //传值
+                                builder: (context) =>
+                                    StartPage(date:int.parse(item.date), time:int.parse(item.time))
+                                //没传值
+                                //builder: (context)=>Detail()
+                                ));
                           },
                         ),
                       ),

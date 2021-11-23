@@ -3,16 +3,26 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 
 class StartPage extends StatefulWidget {
-  StartPage({Key? key}) : super(key: key);
+  int time;
+  int date;
+  StartPage({
+    Key? key,
+    this.date = 0,
+    this.time = 0,
+  }) : super(key: key);
 
-  _StartPageState createState() => _StartPageState();
+  _StartPageState createState() => _StartPageState(this.date, this.time);
 }
 
 class _StartPageState extends State<StartPage> {
   GlobalKey<_StartPageState> globalKey = GlobalKey();
+  int time;
+  int date;
+  _StartPageState(this.date, this.time) : super();
 
   /// 初期値
   var _timeString = '00:00:00';
+  var _countdownTime;
   var hour;
   var minutes;
   var second;
@@ -29,6 +39,61 @@ class _StartPageState extends State<StartPage> {
   List _deltaList = []; //储存差值 类型int 单位mill second
   int _maxIndex = 0; // 最大值的索引
   int _minIndex = 0; // 最小值的索引
+
+  @override
+  void initState() {
+    super.initState();
+    //先判断初期值是否存在
+    /**
+     * 有初期值就倒计时，没有就正向记时
+     * 每次暂停，记录经过值
+     * 返回到主页的时候已经有的值减去经过的值，更新页面
+     */
+    _timeString = _formatDateTime(this.time);
+    print(_timeString);
+    //获取当期时间
+    var now = DateTime.now();
+    //获取 2 分钟的时间间隔
+    var twoHours = now.add(Duration(seconds: time)).difference(now);
+    //获取总秒数，2 分钟为 120 秒
+    time = twoHours.inSeconds;
+    startTimer();
+  }
+  void startTimer() {
+    //设置 1 秒回调一次
+    const period = const Duration(seconds: 1);
+    _timer = Timer.periodic(period, (timer) {
+      //更新界面
+      setState(() {
+        //秒数减一，因为一秒回调一次
+        time--;
+      });
+      if (time == 0) {
+        //倒计时秒数为0，取消定时器
+        cancelTimer();
+      }
+    });
+  }
+
+   void cancelTimer() {
+    if (_timer != null) {
+      _timer.cancel();
+      _timer = null;
+    }
+  }
+  //时间格式化，根据总秒数转换为对应的 hh:mm:ss 格式
+  String constructTime(int seconds) {
+    int hour = seconds ~/ 3600;
+    int minute = seconds % 3600 ~/ 60;
+    int second = seconds % 60;
+    return formatTime(hour) + ":" + formatTime(minute) + ":" + formatTime(second);
+  }
+
+  //数字格式化，将 0~9 的时间转换为 00~09
+  String formatTime(int timeNum) {
+    return timeNum < 10 ? "0" + timeNum.toString() : timeNum.toString();
+  }
+
   // 计次操作
   void lap() {
     if (!_isStart) {
@@ -59,15 +124,17 @@ class _StartPageState extends State<StartPage> {
   }
 
   void _startTimer() {
-    setState(() {
-      _isStart = !_isStart;
-      if (_isStart) {
-        _startTime = DateTime.now();
-        _timer = Timer.periodic(Duration(seconds: 1), _onTimer);
-      } else {
-        _timer.cancel();
-      }
-    });
+   
+      setState(() {
+        _isStart = !_isStart;
+        if (_isStart) {
+          _startTime = DateTime.now();
+          _timer = Timer.periodic(Duration(seconds: 1), _onTimer);
+        } else {
+          _timer.cancel();
+        }
+      });
+    
   }
 
   void _onTimer(Timer timer) {
@@ -108,29 +175,32 @@ class _StartPageState extends State<StartPage> {
   var differTime;
   // 格式化输出DateTime, 主要进行的是补0操作
   String _formatDateTime(int seconds) {
-      int hour = seconds ~/ 3600;
-      int minute = seconds % 3600 ~/ 60;
-      int second = seconds % 60;
+    int hour = seconds ~/ 3600;
+    int minute = seconds % 3600 ~/ 60;
+    int second = seconds % 60;
     differTime =
         """${_convertTwoDigits(hour)}:${_convertTwoDigits(minute)}:${_convertTwoDigits(second)}""";
     return differTime;
   }
+
   @override
   void dispose() {
     super.dispose();
-     if (_timer != null) {   // 页面销毁时触发定时器销毁
-      if (_timer.isActive) {  // 判断定时器是否是激活状态
+    if (_timer != null) {
+      // 页面销毁时触发定时器销毁
+      if (_timer.isActive) {
+        // 判断定时器是否是激活状态
         _timer.cancel();
       }
     }
     laps.clear();
     _deltaList.clear();
-      _timeString = '00:00:00';
-      _isStart = false;
-      _maxIndex = 0;
-      _minIndex = 0;
-     
+    _timeString = '00:00:00';
+    _isStart = false;
+    _maxIndex = 0;
+    _minIndex = 0;
   }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -147,11 +217,17 @@ class _StartPageState extends State<StartPage> {
                   child: Container(
                       margin: EdgeInsets.only(top: 50),
                       alignment: Alignment.topCenter,
-                      child: Text(_timeString,
+                      child: time ==0 ?
+                      Text(_timeString,
                           style: TextStyle(
                             fontSize: 50,
                             color: Colors.black87,
-                          )))),
+                          )):Text(constructTime(time),
+                            style: TextStyle(
+                            fontSize: 50,
+                            color: Colors.black87,
+                          )))
+                          ),
               Expanded(
                 flex: 1,
                 child: Row(
@@ -244,4 +320,3 @@ class _StartPageState extends State<StartPage> {
     );
   }
 }
-
