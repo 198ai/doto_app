@@ -20,9 +20,9 @@ class _ToDoListPageState extends State<ToDoListPage> {
   List<TodoModel> todos = [];
   List<String> storge = [];
   List<String> done = [];
+  String _time = "";
+  String _date = "";
   int id = 0;
-  var _chooseTime;
-  var _chooseDate;
   final textController = TextEditingController();
   final timeController = TextEditingController();
   final dateController = TextEditingController();
@@ -58,6 +58,14 @@ class _ToDoListPageState extends State<ToDoListPage> {
             title: e,
             complete: false,
           );
+          var date = e + "date" + item.id.toString();
+          var time = e + "time" + item.id.toString();
+          retult.getString(date) == null
+              ? item.date = ""
+              : item.date = retult.getString(e + "date" + item.id.toString());
+          retult.getString(time) == null
+              ? item.time = ""
+              : item.time = retult.getString(e + "time" + item.id.toString());
           setState(() {
             todos.add(item);
           });
@@ -76,11 +84,25 @@ class _ToDoListPageState extends State<ToDoListPage> {
     super.dispose();
   }
 
+  //時間と日付保存
+  saveTime(String name, String value) async {
+    SharedPreferences setTime = await SharedPreferences.getInstance();
+    await setTime.setString(name, value);
+    print(setTime.getString(name) + name);
+  }
+
+  getTime(String name) async {
+    SharedPreferences getName = await SharedPreferences.getInstance();
+    getName.getString(name);
+  }
+
 //ToDoListのCard内容はポップアップから渡されている
-  _editParentText(editText) async {
+  _editParentText(editText, getdate, gettime) async {
     TodoModel item = TodoModel(
       id: id++,
       title: editText,
+      date: getdate,
+      time: gettime,
       complete: false,
     );
     //画面をリロードして、新たな項目を表示する
@@ -91,17 +113,24 @@ class _ToDoListPageState extends State<ToDoListPage> {
     //ローカルにLISTを保存する
     SharedPreferences list = await SharedPreferences.getInstance();
     list.setStringList("todos", storge);
+    var time = textController.text + "time" + item.id.toString();
+    await saveTime(time, timeController.text);
+    var date = textController.text + "date" + item.id.toString();
+    await saveTime(date, dateController.text);
   }
 
   //LIST削除する時、
   void deleteTodo(index) async {
     SharedPreferences list = await SharedPreferences.getInstance();
     List<TodoModel> newTodos = todos;
+    var name = newTodos[index].title;
     newTodos.remove(newTodos[index]);
     storge.removeAt(index);
     setState(() {
       todos = newTodos;
       list.setStringList("todos", storge);
+      list.remove(name + "date" + index);
+      list.remove(name + "time" + index);
     });
   }
 
@@ -148,7 +177,7 @@ class _ToDoListPageState extends State<ToDoListPage> {
               ),
             ),
           ]);
-        }).whenComplete(() {});
+        }).whenComplete(() async {});
   }
 
   String _formatDateTime(int seconds) {
@@ -156,6 +185,7 @@ class _ToDoListPageState extends State<ToDoListPage> {
     int minute = seconds % 3600 ~/ 60;
     timeController.text =
         """${_convertTwoDigits(hour) + "時間"}:${_convertTwoDigits(minute) + "分"}""";
+
     return timeController.text;
   }
 
@@ -204,7 +234,7 @@ class _ToDoListPageState extends State<ToDoListPage> {
               ),
             ),
           ]);
-        }).whenComplete(() {});
+        }).whenComplete(() async {});
   }
 
 //画面のHTML
@@ -228,22 +258,28 @@ class _ToDoListPageState extends State<ToDoListPage> {
                       return Dialog(
                         child: Container(
                           color: Colors.white,
-                          width: 50,
-                          height: 300,
+                          width: 260,
+                          height: 400,
                           child: Center(
                             child: SingleChildScrollView(
                                 child: Column(
                               children: [
                                 Padding(
-                                    padding: EdgeInsets.fromLTRB(30, 5, 30, 0),
-                                    child: Text("新たな挑戦を始めるね！＾-＾素晴らしい！")),
+                                  padding: EdgeInsets.fromLTRB(30, 30, 30, 30),
+                                  child: Column(
+                                    children: [
+                                      Text("新たな挑戦を始めるね！"),
+                                      Text("＾-＾素晴らしい！")
+                                    ],
+                                  ),
+                                ),
                                 Padding(
                                   padding: EdgeInsets.fromLTRB(30, 0, 30, 0),
                                   child: TextField(
                                     style: TextStyle(color: Colors.black87),
                                     controller: textController,
                                     decoration: InputDecoration(
-                                        icon:Icon(Icons.article_outlined) ,
+                                        icon: Icon(Icons.article_outlined),
                                         labelText: "タスク名称",
                                         enabledBorder: UnderlineInputBorder(
                                           borderSide:
@@ -263,8 +299,8 @@ class _ToDoListPageState extends State<ToDoListPage> {
                                           hintText: "時間選択",
                                         ),
                                         controller: timeController,
-                                        onTap: () {
-                                          _showTimePicker();
+                                        onTap: () async {
+                                          await _showTimePicker();
                                         })),
                                 Padding(
                                     padding: EdgeInsets.fromLTRB(30, 0, 30, 0),
@@ -290,6 +326,8 @@ class _ToDoListPageState extends State<ToDoListPage> {
                                           TextButton(
                                             onPressed: () {
                                               textController.text = "";
+                                              dateController.text = "";
+                                              timeController.text = "";
                                               Navigator.of(context).pop();
                                             },
                                             child: Text(
@@ -300,11 +338,14 @@ class _ToDoListPageState extends State<ToDoListPage> {
                                             ),
                                           ),
                                           TextButton(
-                                              onPressed: () {
+                                              onPressed: () async {
                                                 Navigator.of(context).pop();
+
                                                 setState(() {
                                                   _editParentText(
-                                                      textController.text);
+                                                      textController.text,
+                                                      dateController.text,
+                                                      timeController.text);
                                                 });
                                               },
                                               child: Text(
@@ -417,43 +458,81 @@ class _ToDoListPageState extends State<ToDoListPage> {
           }
         },
         child: Card(
-          elevation: 15.0, //设置阴影
-          margin: EdgeInsets.only(
-              top: ScreenAdapter.height(25),
-              left: ScreenAdapter.width(21),
-              right: ScreenAdapter.width(21)),
-          shape: const RoundedRectangleBorder(
-              borderRadius: BorderRadius.all(Radius.circular(14.0))), //设置圆角
-          child: Padding(
-            padding: EdgeInsets.all(20),
-            child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Text(
-                    '${item.title}', //'标题'
-                    style: TextStyle(
-                        fontSize: ScreenAdapter.size(35),
-                        color: Color.fromRGBO(16, 16, 16, 1),
-                        fontWeight: FontWeight.bold),
-                  ),
-                  // subtitle: new Text('子标题'),
-                  TextButton(
-                    style: ButtonStyle(
-                      padding: MaterialStateProperty.all(EdgeInsets.zero),
-                    ),
-                    child: Text(
-                      "スタート",
-                      style: TextStyle(
-                          fontSize: ScreenAdapter.size(20),
-                          color: Color.fromARGB(74, 16, 16, 16),
-                          fontWeight: FontWeight.bold),
-                    ),
-                    onPressed: () {
-                      Navigator.pushNamed(context, '/start');
-                    },
-                  ),
-                ]),
-          ),
-        ));
+            elevation: 15.0, //设置阴影
+            margin: EdgeInsets.only(
+                top: ScreenAdapter.height(25),
+                left: ScreenAdapter.width(21),
+                right: ScreenAdapter.width(21)),
+            shape: const RoundedRectangleBorder(
+                borderRadius: BorderRadius.all(Radius.circular(14.0))), //设置圆角
+            child: SingleChildScrollView(
+                scrollDirection: Axis.horizontal,
+                child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Padding(
+                        padding: EdgeInsets.all(20),
+                        child: Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Container(
+                                width: 100,
+                                margin: EdgeInsets.only(right: 20),
+                                child: Text(
+                                  '${item.title}',
+                                  maxLines: 4,
+                                  overflow: TextOverflow.ellipsis, //'标题'
+                                  style: TextStyle(
+                                      fontSize: ScreenAdapter.size(20),
+                                      color: Color.fromRGBO(16, 16, 16, 1),
+                                      fontWeight: FontWeight.bold),
+                                ),
+                              ),
+                              Container(
+                                margin: EdgeInsets.only(right: 10),
+                                child: Column(
+                                  children: [
+                                    Text(
+                                      '完成するまで:',
+                                      style: TextStyle(
+                                          fontSize: ScreenAdapter.size(15),
+                                          color: Color.fromRGBO(16, 16, 16, 1)),
+                                    ),
+                                    Text(
+                                      "${item.date}",
+                                      style: TextStyle(
+                                          fontSize: ScreenAdapter.size(13),
+                                          color: Color.fromRGBO(16, 16, 16, 1)),
+                                    ),
+                                    Text(
+                                      "${item.time}",
+                                      style: TextStyle(
+                                          fontSize: ScreenAdapter.size(13),
+                                          color: Color.fromRGBO(16, 16, 16, 1)),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ]),
+                      ),
+                      Container(
+                        margin: EdgeInsets.only(left: 10),
+                        child: TextButton(
+                          style: ButtonStyle(
+                            padding: MaterialStateProperty.all(EdgeInsets.zero),
+                          ),
+                          child: Text(
+                            "スタート",
+                            style: TextStyle(
+                                fontSize: ScreenAdapter.size(20),
+                                color: Color.fromARGB(74, 16, 16, 16),
+                                fontWeight: FontWeight.bold),
+                          ),
+                          onPressed: () {
+                            Navigator.pushNamed(context, '/start');
+                          },
+                        ),
+                      ),
+                    ]))));
   }
 }
