@@ -1,3 +1,4 @@
+import 'package:doto_app/pages/HasDone.dart';
 import 'package:flutter/material.dart';
 import '../pages/tabs/Tabs.dart';
 import '../pages/Start.dart';
@@ -6,6 +7,7 @@ import '../pages/Login.dart';
 final Map<String,Function> routes = {
   '/': (context) => Tabs(),
   '/start': (context) => StartPage(),
+  '/hasdone':(context)=>HasDonePage(),
   '/login': (context) => LoginPage(),
 };
 

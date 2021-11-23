@@ -1,4 +1,6 @@
 
+
+
 import 'package:flutter/material.dart';
 
 class DialogEX extends AlertDialog {
@@ -53,15 +55,18 @@ class _DialogContentState extends State<DialogContent> {
 
   @override
   Widget build(BuildContext context) {
-    return  Column(
+    return  Dialog(
+          child: Container(
+            color: Colors.white,
+            width: 50,
+            height: 300,
+            child: 
+    
+    Column(
           children: [
-            Container(
-                alignment: Alignment.center,
-                child: Text(
-                  widget.title,
-                  style: TextStyle(color: Colors.grey),
-                )),
-          
+            Padding(
+          padding: EdgeInsets.fromLTRB(30, 30, 30, 0),
+          child:Text("今日も新たな挑戦を始めるね！＾-＾素晴らしい！")),
             Padding(
               padding: EdgeInsets.fromLTRB(30, 0, 30, 0),
               child: TextField(
@@ -77,52 +82,15 @@ class _DialogContentState extends State<DialogContent> {
                     )),
               ),
             ),
-            //  Padding(
-            //   padding: EdgeInsets.fromLTRB(30, 0, 30, 0),
-            //   child: TextField(
-            //     style: TextStyle(color: Colors.black87),
-            //     controller: textController,
-            //     decoration: InputDecoration(
-            //        labelText: "タイマーだよ",
-            //         enabledBorder: UnderlineInputBorder(
-            //           borderSide: BorderSide(color: Colors.blue),
-            //         ),
-            //         focusedBorder: UnderlineInputBorder(
-            //           borderSide: BorderSide(color: Colors.blue),
-            //         )),
-            //   ),
-            // ),
-            //  Padding(
-            //   padding: EdgeInsets.fromLTRB(30, 0, 30, 0),
-            //   child: TextField(
-            //     style: TextStyle(color: Colors.black87),
-            //     controller: textController,
-            //     decoration: InputDecoration(
-            //         enabledBorder: UnderlineInputBorder(
-            //           borderSide: BorderSide(color: Colors.blue),
-            //         ),
-            //         focusedBorder: UnderlineInputBorder(
-            //           borderSide: BorderSide(color: Colors.blue),
-            //         )),
-            //   ),
-            // ),
-            Spacer(),
             Container(
               height: btnHeight,
               margin: EdgeInsets.fromLTRB(0, 30, 0, 0),
               child: Column(
                 children: [
-                  // Container(
-                  //   // 按钮上面的横线
-                  //   width: double.infinity,
-                  //   color: Colors.blue,
-                  //   height: borderWidth,
-                  //   margin: EdgeInsets.only(bottom: 4.0),
-                  // ),
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                     children: [
-                      ElevatedButton(
+                      TextButton(
                         onPressed: () {
                           textController.text = "";
                           widget.cancelBtnTap();
@@ -130,10 +98,10 @@ class _DialogContentState extends State<DialogContent> {
                         },
                         child: Text(
                           widget.cancelBtnTitle,
-                          style: TextStyle(fontSize: 15, color: Colors.white),
+                          style: TextStyle(fontSize: 15, color: Colors.blue),
                         ),
                       ),
-                      ElevatedButton(
+                      TextButton(
                           onPressed: () {
                             widget.okBtnTap();
                             Navigator.of(context).pop();
@@ -143,7 +111,7 @@ class _DialogContentState extends State<DialogContent> {
                           },
                           child: Text(
                             widget.okBtnTitle,
-                            style: TextStyle(fontSize: 15, color: Colors.white),
+                            style: TextStyle(fontSize: 15, color: Colors.blue),
                           )),
                     ],
                   ),
@@ -151,6 +119,7 @@ class _DialogContentState extends State<DialogContent> {
               ),
             )
           ],
+    ))
         );
   }
 }
