@@ -115,7 +115,22 @@ class _StartPageState extends State<StartPage> {
         """${_convertTwoDigits(hour)}:${_convertTwoDigits(minute)}:${_convertTwoDigits(second)}""";
     return differTime;
   }
-
+  @override
+  void dispose() {
+    super.dispose();
+     if (_timer != null) {   // 页面销毁时触发定时器销毁
+      if (_timer.isActive) {  // 判断定时器是否是激活状态
+        _timer.cancel();
+      }
+    }
+    laps.clear();
+    _deltaList.clear();
+      _timeString = '00:00:00';
+      _isStart = false;
+      _maxIndex = 0;
+      _minIndex = 0;
+     
+  }
   @override
   Widget build(BuildContext context) {
     return Scaffold(

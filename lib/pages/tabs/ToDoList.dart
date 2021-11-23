@@ -23,13 +23,14 @@ class _ToDoListPageState extends State<ToDoListPage> {
   int id = 0;
   var _chooseTime;
   var _chooseDate;
-  Duration initialtimer = new Duration();
   final textController = TextEditingController();
   final timeController = TextEditingController();
+  final dateController = TextEditingController();
   void _printLatestValue() {
     print('Second text field: ${textController.text}');
   }
-   void _printTimeValue() {
+
+  void _printTimeValue() {
     print('Second text field: ${timeController.text}');
   }
 
@@ -39,6 +40,9 @@ class _ToDoListPageState extends State<ToDoListPage> {
     //追加ポップアップに書いた内容を記録
     textController.addListener(_printLatestValue);
     timeController.addListener(_printTimeValue);
+    dateController.addListener(() {
+      print(dateController.text);
+    });
     //ローカルストレージから、値をLISTに渡す、初期化する
     Future(() async {
       SharedPreferences retult = await SharedPreferences.getInstance();
@@ -68,6 +72,7 @@ class _ToDoListPageState extends State<ToDoListPage> {
   void dispose() {
     textController.dispose();
     timeController.dispose();
+    dateController.dispose();
     super.dispose();
   }
 
@@ -102,25 +107,6 @@ class _ToDoListPageState extends State<ToDoListPage> {
 
   //時間の選択
   _showDatePicker() async {
-    var date = await showDatePicker(
-        context: context,
-        initialDate: DateTime.now(),
-        firstDate: DateTime(1970),
-        lastDate: DateTime(2050));
-    setState(() {
-      this._chooseDate = date.toString().split(" ")[0];
-    });
-  }
-
-  Future _showTimePicker() async {
-    // var time =
-    //     await showTimePicker(context: context, initialTime: TimeOfDay.now());
-
-    // setState(() {
-    //   this._chooseTime = time.toString().split("TimeOfDay(")[1].split(")")[0];
-    // });
-
-    var now = DateTime.now();
     await showModalBottomSheet(
         context: context,
         builder: (context) {
@@ -128,7 +114,7 @@ class _ToDoListPageState extends State<ToDoListPage> {
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: <Widget>[
-                FlatButton(
+                TextButton(
                     onPressed: () {
                       Navigator.pop(context);
                     },
@@ -136,7 +122,65 @@ class _ToDoListPageState extends State<ToDoListPage> {
                       'キャンセル',
                       style: TextStyle(fontSize: 13),
                     )),
-                FlatButton(
+                // ignore: deprecated_member_use
+                TextButton(
+                    onPressed: () {
+                      Navigator.pop(context);
+                    },
+                    child: Text(
+                      '確認',
+                      style: TextStyle(fontSize: 13),
+                    )),
+              ],
+            ),
+            Container(
+              height: MediaQuery.of(context).copyWith().size.height / 3,
+              child: CupertinoDatePicker(
+                mode: CupertinoDatePickerMode.date, //这里改模式
+                onDateTimeChanged: (dateTime) {
+                  print("${dateTime.year}-${dateTime.month}-${dateTime.day}");
+                  var startDate =
+                      new DateTime(dateTime.year, dateTime.month, dateTime.day);
+                  var endDate = new DateTime.now();
+                  var days = startDate.difference(endDate).inDays;
+                  dateController.text = days.toString() + "日";
+                },
+              ),
+            ),
+          ]);
+        }).whenComplete(() {});
+  }
+
+  String _formatDateTime(int seconds) {
+    int hour = seconds ~/ 3600;
+    int minute = seconds % 3600 ~/ 60;
+    timeController.text =
+        """${_convertTwoDigits(hour) + "時間"}:${_convertTwoDigits(minute) + "分"}""";
+    return timeController.text;
+  }
+
+  String _convertTwoDigits(int number) {
+    return number >= 10 ? "$number" : "0$number";
+  }
+
+  Future _showTimePicker() async {
+    await showModalBottomSheet(
+        context: context,
+        builder: (context) {
+          return Column(mainAxisSize: MainAxisSize.min, children: <Widget>[
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: <Widget>[
+                TextButton(
+                    onPressed: () {
+                      Navigator.pop(context);
+                    },
+                    child: Text(
+                      'キャンセル',
+                      style: TextStyle(fontSize: 13),
+                    )),
+                // ignore: deprecated_member_use
+                TextButton(
                     onPressed: () {
                       Navigator.pop(context);
                     },
@@ -153,22 +197,19 @@ class _ToDoListPageState extends State<ToDoListPage> {
                 mode: CupertinoTimerPickerMode.hm,
                 onTimerDurationChanged: (Duration changedtimer) {
                   setState(() {
-                    timeController.text = changedtimer.toString();
+                    _formatDateTime(changedtimer.inSeconds);
+                    //_chooseTime = _chooseTime.substring(0,_chooseTime.length-10);
                   });
                 },
               ),
             ),
           ]);
-        }).whenComplete(() {
-      print(initialtimer.inMinutes);
-    });
-    return initialtimer.inMinutes;
+        }).whenComplete(() {});
   }
 
 //画面のHTML
   @override
   Widget build(BuildContext context) {
-    bool label = false;
     return Scaffold(
         resizeToAvoidBottomInset: false,
         appBar: PreferredSize(
@@ -195,14 +236,15 @@ class _ToDoListPageState extends State<ToDoListPage> {
                               children: [
                                 Padding(
                                     padding: EdgeInsets.fromLTRB(30, 5, 30, 0),
-                                    child: Text("今日も新たな挑戦を始めるね！＾-＾素晴らしい！")),
+                                    child: Text("新たな挑戦を始めるね！＾-＾素晴らしい！")),
                                 Padding(
                                   padding: EdgeInsets.fromLTRB(30, 0, 30, 0),
                                   child: TextField(
                                     style: TextStyle(color: Colors.black87),
                                     controller: textController,
                                     decoration: InputDecoration(
-                                        labelText: "どうな名前がいいのかな。。。",
+                                        icon:Icon(Icons.article_outlined) ,
+                                        labelText: "タスク名称",
                                         enabledBorder: UnderlineInputBorder(
                                           borderSide:
                                               BorderSide(color: Colors.blue),
@@ -215,32 +257,27 @@ class _ToDoListPageState extends State<ToDoListPage> {
                                 ),
                                 Padding(
                                     padding: EdgeInsets.fromLTRB(30, 0, 30, 0),
-                                    child:TextField(
-                                      decoration: new InputDecoration(
-                                      icon: Icon(Icons.timelapse),
-                                      labelText: "時間を選択してください",
-                                      ),
-                                    controller:timeController ,
-                                    onTap:(){
-                                          _showTimePicker();
-                                    }) ),
-                                Padding(
-                                  padding: EdgeInsets.fromLTRB(30, 0, 30, 0),
-                                  child: TextField(
-                                    style: TextStyle(color: Colors.black87),
-                                    controller: textController,
-                                    decoration: InputDecoration(
-                                        labelText: "どうな名前がいいのかな。。。",
-                                        enabledBorder: UnderlineInputBorder(
-                                          borderSide:
-                                              BorderSide(color: Colors.blue),
+                                    child: TextField(
+                                        decoration: new InputDecoration(
+                                          icon: Icon(Icons.access_time),
+                                          hintText: "時間選択",
                                         ),
-                                        focusedBorder: UnderlineInputBorder(
-                                          borderSide:
-                                              BorderSide(color: Colors.blue),
-                                        )),
-                                  ),
-                                ),
+                                        controller: timeController,
+                                        onTap: () {
+                                          _showTimePicker();
+                                        })),
+                                Padding(
+                                    padding: EdgeInsets.fromLTRB(30, 0, 30, 0),
+                                    child: TextField(
+                                        decoration: new InputDecoration(
+                                          icon: Icon(
+                                              Icons.calendar_today_outlined),
+                                          hintText: "完成予定日選択",
+                                        ),
+                                        controller: dateController,
+                                        onTap: () {
+                                          _showDatePicker();
+                                        })),
                                 Container(
                                   height: btnHeight,
                                   margin: EdgeInsets.fromLTRB(0, 30, 0, 0),
@@ -253,7 +290,6 @@ class _ToDoListPageState extends State<ToDoListPage> {
                                           TextButton(
                                             onPressed: () {
                                               textController.text = "";
-
                                               Navigator.of(context).pop();
                                             },
                                             child: Text(
@@ -266,7 +302,10 @@ class _ToDoListPageState extends State<ToDoListPage> {
                                           TextButton(
                                               onPressed: () {
                                                 Navigator.of(context).pop();
-                                                setState(() {});
+                                                setState(() {
+                                                  _editParentText(
+                                                      textController.text);
+                                                });
                                               },
                                               child: Text(
                                                 "チャレンジする",
