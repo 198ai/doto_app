@@ -133,7 +133,6 @@ class _ToDoListPageState extends State<ToDoListPage> {
     var date = textController.text + "date" + item.id.toString();
     await saveTime(date, days.toString());
   }
-
   //用户名输入框的焦点控制
   FocusNode _dateFocusNode = new FocusNode();
   FocusNode _timeFocusNode = new FocusNode();
@@ -253,10 +252,6 @@ class _ToDoListPageState extends State<ToDoListPage> {
         }).whenComplete(() async {});
   }
 
-  bool textGet = true;
-  bool dateGte = true;
-  bool timeGet = true;
-
 //画面のHTML
   @override
   Widget build(BuildContext context) {
@@ -304,7 +299,7 @@ class _ToDoListPageState extends State<ToDoListPage> {
                                     decoration: InputDecoration(
                                         icon: Icon(Icons.article_outlined),
                                         labelText: "タスク名称",
-                                        errorText: "タスク名称の入力を忘れたよ",
+                                        errorText:"タスク名称の入力を忘れたよ",
                                         enabledBorder: UnderlineInputBorder(
                                           borderSide:
                                               BorderSide(color: Colors.blue),
@@ -321,7 +316,7 @@ class _ToDoListPageState extends State<ToDoListPage> {
                                         decoration: new InputDecoration(
                                           icon: Icon(Icons.access_time),
                                           hintText: "時間選択",
-                                          errorText: "時間の入力を忘れたよ",
+                                          errorText:"時間の入力を忘れたよ",
                                         ),
                                         controller: timeController,
                                         onTap: () async {
@@ -334,7 +329,7 @@ class _ToDoListPageState extends State<ToDoListPage> {
                                           icon: Icon(
                                               Icons.calendar_today_outlined),
                                           hintText: "完成予定日選択",
-                                          errorText: "完成予定日の入力を忘れたよ",
+                                          errorText:"完成予定日の入力を忘れたよ",
                                         ),
                                         controller: dateController,
                                         onTap: () {
@@ -365,15 +360,13 @@ class _ToDoListPageState extends State<ToDoListPage> {
                                           ),
                                           TextButton(
                                               onPressed: () async {
-                                                textGet = false;
-
-                                                // Navigator.of(context).pop();
-                                                // setState(() {
-                                                //   _editParentText(
-                                                //       textController.text,
-                                                //       days.toString(),
-                                                //       inSeconds.toString());
-                                                // });
+                                                Navigator.of(context).pop();
+                                                setState(() {
+                                                  _editParentText(
+                                                      textController.text,
+                                                      days.toString(),
+                                                      inSeconds.toString());
+                                                });
                                               },
                                               child: Text(
                                                 "チャレンジする",
