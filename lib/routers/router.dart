@@ -1,3 +1,4 @@
+import 'package:doto_app/pages/Countdown.dart';
 import 'package:doto_app/pages/HasDone.dart';
 import 'package:flutter/material.dart';
 import '../pages/tabs/Tabs.dart';
@@ -9,6 +10,7 @@ final Map<String,Function> routes = {
   '/start': (context) => StartPage(),
   '/hasdone':(context)=>HasDonePage(),
   '/login': (context) => LoginPage(),
+  '/countdown': (context) =>CountDown(),
 };
 
 

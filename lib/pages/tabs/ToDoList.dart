@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'package:doto_app/pages/Countdown.dart';
 import 'package:doto_app/pages/HasDone.dart';
 import 'package:doto_app/widget/dialog.dart';
 import 'package:doto_app/widget/drawer.dart';
@@ -564,7 +565,7 @@ class _ToDoListPageState extends State<ToDoListPage> {
                             //Navigator.pushNamed(context, '/start');
                             Navigator.of(context).push(MaterialPageRoute(
                                 //传值
-                                builder: (context) => StartPage(
+                                builder: (context) => CountDown(
                                     date: int.parse(item.date),
                                     time: int.parse(item.time))
                                 //没传值
