@@ -186,6 +186,7 @@ class _StartPageState extends State<StartPage> {
   @override
   void dispose() {
     super.dispose();
+    cancelTimer();
     if (_timer != null) {
       // 页面销毁时触发定时器销毁
       if (_timer.isActive) {
