@@ -96,17 +96,25 @@ class _CountdownState extends State<CountDown> {
           centerTitle: true,
           title: Text('タイマー'),
         ),
-        body: Column(
+        body: Stack(
+        children: [Column(
           children: [
-            Center(
+             Container(
+                      margin: EdgeInsets.only(top: 150),
+                      alignment: Alignment.topCenter,
                 child: Text(constructTime(seconds),
-                    style: TextStyle(fontSize: 50, color: Colors.black87))),
-            TextButton(
-                child: Text("停止"),
+                    style: TextStyle(fontSize: 80, color: Colors.black87))),
+            
+            Container(
+                      margin: EdgeInsets.only(top: 150),
+                      alignment: Alignment.topCenter,
+            child:TextButton(
+                child: Text("停止",style: TextStyle(fontSize: 50, color: Colors.black87)
+                ),
                 onPressed: () {
                   stopTimer();
-                }),
+                }),)
           ],
-        ));
+        )]));
   }
 }
