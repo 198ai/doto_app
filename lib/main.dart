@@ -9,7 +9,8 @@ void main() => runApp(MyApp());
 
 class MyApp extends StatefulWidget {
   MyApp({Key? key}) : super(key: key);
-
+  
+  static final RouteObserver<PageRoute> routeObserver = RouteObserver<PageRoute>();
   _MyAppState createState() => _MyAppState();
 }
 
@@ -20,6 +21,7 @@ class _MyAppState extends State<MyApp> {
       designSize: Size(428, 926),
       builder: () =>MaterialApp(      
      //home: Tabs(),
+      navigatorObservers: [MyApp.routeObserver], //添加路由观察者
       debugShowCheckedModeBanner: false,
       initialRoute: '/',
       onGenerateRoute:onGenerateRoute

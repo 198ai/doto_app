@@ -6,6 +6,7 @@ import 'package:doto_app/widget/drawer.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import '../../main.dart';
 import '../../model/tasklist.dart';
 import '../../services/ScreenAdapter.dart';
 //ローカルストレージ保存するため
@@ -15,7 +16,8 @@ import 'package:vibration/vibration.dart';
 import '../Start.dart';
 
 class ToDoListPage extends StatefulWidget {
-  ToDoListPage({Key? key}) : super(key: key);
+  int time;
+  ToDoListPage({Key? key, this.time = 0}) : super(key: key);
 
   _ToDoListPageState createState() => _ToDoListPageState();
 }
@@ -28,7 +30,7 @@ class ToDoListPage extends StatefulWidget {
  *   必须写完成时间，不写不能跳转
  * 可以重复同一名字
  */
-class _ToDoListPageState extends State<ToDoListPage> {
+class _ToDoListPageState extends State<ToDoListPage> with RouteAware {
   List<TodoModel> todos = [];
   List<String> storge = [];
   List<String> done = [];
@@ -46,6 +48,66 @@ class _ToDoListPageState extends State<ToDoListPage> {
 
   void _printTimeValue() {
     print('Second text field: ${timeController.text}');
+  }
+
+  @override
+  void didChangeDependencies() {
+    MyApp.routeObserver
+        .subscribe(this, ModalRoute.of(context) as PageRoute); //订阅
+    super.didChangeDependencies();
+  }
+
+  @override
+  void didPopNext() async {
+    debugPrint("------>アジェンダ画面に戻った");
+    super.didPopNext();
+    List<TodoModel> newtodos = [];
+    Future(() async {
+      SharedPreferences retult = await SharedPreferences.getInstance();
+      retult.getStringList("todos") == null
+          ? storge = []
+          : storge = retult.getStringList("todos");
+      print(storge);
+
+      if (storge != []) {
+        storge.forEach((e) {
+          TodoModel item = TodoModel(
+            id: id++,
+            title: e,
+            complete: false,
+          );
+          var date = e + "date" + item.id.toString();
+          var time = e + "time" + item.id.toString();
+          print(date);
+          print(time);
+          retult.getString(date) == null
+              ? item.date = ""
+              : item.date = retult.getString(e + "date" + item.id.toString());
+          retult.getString(time) == null
+              ? item.time = ""
+              : item.time = retult.getString(e + "time" + item.id.toString());
+          newtodos.add(item);
+        });
+      }
+      setState(() {
+        todos = newtodos;
+      });
+      _listView();
+    });
+  }
+
+  @override
+  void didPushNext() {
+    super.didPushNext();
+    // 当前页面push到其他页面走这里
+    debugPrint("------>アジェンダ画面から出る");
+  }
+
+  change() {
+    setState(() {
+      todos[1].time = widget.time.toString();
+    });
+    _listView();
   }
 
   @override
@@ -97,6 +159,7 @@ class _ToDoListPageState extends State<ToDoListPage> {
     textController.dispose();
     timeController.dispose();
     dateController.dispose();
+    MyApp.routeObserver.unsubscribe(this); //取消订阅
     super.dispose();
   }
 
@@ -133,7 +196,10 @@ class _ToDoListPageState extends State<ToDoListPage> {
     await saveTime(time, inSeconds.toString());
     var date = textController.text + "date" + item.id.toString();
     await saveTime(date, days.toString());
+    print(date);
+    print(time);
   }
+
   //用户名输入框的焦点控制
   FocusNode _dateFocusNode = new FocusNode();
   FocusNode _timeFocusNode = new FocusNode();
@@ -300,7 +366,6 @@ class _ToDoListPageState extends State<ToDoListPage> {
                                     decoration: InputDecoration(
                                         icon: Icon(Icons.article_outlined),
                                         labelText: "タスク名称",
-                                        errorText:"タスク名称の入力を忘れたよ",
                                         enabledBorder: UnderlineInputBorder(
                                           borderSide:
                                               BorderSide(color: Colors.blue),
@@ -317,7 +382,6 @@ class _ToDoListPageState extends State<ToDoListPage> {
                                         decoration: new InputDecoration(
                                           icon: Icon(Icons.access_time),
                                           hintText: "時間選択",
-                                          errorText:"時間の入力を忘れたよ",
                                         ),
                                         controller: timeController,
                                         onTap: () async {
@@ -330,7 +394,6 @@ class _ToDoListPageState extends State<ToDoListPage> {
                                           icon: Icon(
                                               Icons.calendar_today_outlined),
                                           hintText: "完成予定日選択",
-                                          errorText:"完成予定日の入力を忘れたよ",
                                         ),
                                         controller: dateController,
                                         onTap: () {
@@ -363,10 +426,15 @@ class _ToDoListPageState extends State<ToDoListPage> {
                                               onPressed: () async {
                                                 Navigator.of(context).pop();
                                                 setState(() {
-                                                  _editParentText(
+                                                  if(
+                                              textController.text != "" &&
+                                              dateController.text != "" &&
+                                              timeController.text != ""){
+                                                    _editParentText(
                                                       textController.text,
                                                       days.toString(),
                                                       inSeconds.toString());
+                                                  }
                                                 });
                                               },
                                               child: Text(
@@ -412,11 +480,11 @@ class _ToDoListPageState extends State<ToDoListPage> {
   GestureDetector _normalCard(item, index) {
     return GestureDetector(
         onLongPressStart: (details) async {
-          if (await Vibration.hasVibrator()) {
-            Vibration.vibrate(
-              duration: 100,
-            );
-          }
+          // if (await Vibration.hasVibrator()) {
+          //   Vibration.vibrate(
+          //     duration: 100,
+          //   );
+          // }
           SharedPreferences list = await SharedPreferences.getInstance();
           int selected = await showMenu(
             context: context,
@@ -528,9 +596,7 @@ class _ToDoListPageState extends State<ToDoListPage> {
                                           color: Color.fromRGBO(16, 16, 16, 1)),
                                     ),
                                     Text(
-                                      item.date == ""
-                                          ? item.date = ""
-                                          : "${item.date}" + "日",
+                                      "${item.date}" + "日",
                                       style: TextStyle(
                                           fontSize: ScreenAdapter.size(13),
                                           color: Color.fromRGBO(16, 16, 16, 1)),
@@ -566,8 +632,13 @@ class _ToDoListPageState extends State<ToDoListPage> {
                             Navigator.of(context).push(MaterialPageRoute(
                                 //传值
                                 builder: (context) => CountDown(
-                                    date: int.parse(item.date),
-                                    time: int.parse(item.time))
+                                      date: int.parse(item.date),
+                                      time: int.parse(item.time),
+                                      name: item.title +
+                                          "time" +
+                                          index.toString(),
+                                      index: index,
+                                    )
                                 //没传值
                                 //builder: (context)=>Detail()
                                 ));

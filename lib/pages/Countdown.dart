@@ -1,23 +1,27 @@
 import 'dart:async';
 
+import 'package:doto_app/pages/tabs/Tabs.dart';
+import 'package:doto_app/pages/tabs/ToDoList.dart';
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class CountDown extends StatefulWidget {
   int time;
   int date;
-  CountDown({
-    Key? key,
-    this.date = 0,
-    this.time = 0,
-  }) : super(key: key);
+  String name;
+  int index;
+  CountDown({Key? key, this.date = 0, this.time = 0, this.name = "",this.index =0,})
+      : super(key: key);
   @override
-  _CountdownState createState() => _CountdownState(this.date, this.time);
+  _CountdownState createState() =>
+      _CountdownState(this.date, this.time, this.name);
 }
 
 class _CountdownState extends State<CountDown> {
   int time;
   int date;
-  _CountdownState(this.date, this.time) : super();
+  String name;
+  _CountdownState(this.date, this.time, this.name) : super();
   var _timer;
   int seconds = 0;
   bool running = false;
@@ -42,6 +46,10 @@ class _CountdownState extends State<CountDown> {
   void initState() {
     super.initState();
     startTimer();
+    Future(() async {
+      SharedPreferences list = await SharedPreferences.getInstance();
+      print(list.getString(name));
+    });
   }
 
   void startTimer() {
@@ -65,10 +73,13 @@ class _CountdownState extends State<CountDown> {
     });
   }
 
-  void stopTimer() {
+  void stopTimer() async {
+    SharedPreferences list = await SharedPreferences.getInstance();
     if (running && seconds != 0) {
       time = seconds;
       cancelTimer();
+      list.setString(name, time.toString());
+      print(list.getString(name));
       _timer = null;
     } else {
       startTimer();
@@ -93,28 +104,39 @@ class _CountdownState extends State<CountDown> {
   Widget build(BuildContext context) {
     return Scaffold(
         appBar: AppBar(
+          leading: new IconButton(
+            icon: new Icon(Icons.arrow_back_ios),
+            onPressed: () => {
+              stopTimer(),
+              Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => Tabs(tabSelected: 0))
+              )
+            },
+          ),
           centerTitle: true,
           title: Text('タイマー'),
         ),
-        body: Stack(
-        children: [Column(
-          children: [
-             Container(
-                      margin: EdgeInsets.only(top: 150),
-                      alignment: Alignment.topCenter,
-                child: Text(constructTime(seconds),
-                    style: TextStyle(fontSize: 80, color: Colors.black87))),
-            
-            Container(
-                      margin: EdgeInsets.only(top: 150),
-                      alignment: Alignment.topCenter,
-            child:TextButton(
-                child: Text("停止",style: TextStyle(fontSize: 50, color: Colors.black87)
-                ),
-                onPressed: () {
-                  stopTimer();
-                }),)
-          ],
-        )]));
+        body: Stack(children: [
+          Column(
+            children: [
+              Container(
+                  margin: EdgeInsets.only(top: 150),
+                  alignment: Alignment.topCenter,
+                  child: Text(constructTime(seconds),
+                      style: TextStyle(fontSize: 80, color: Colors.black87))),
+              Container(
+                margin: EdgeInsets.only(top: 150),
+                alignment: Alignment.topCenter,
+                child: TextButton(
+                    child: Text("停止",
+                        style: TextStyle(fontSize: 50, color: Colors.black87)),
+                    onPressed: () {
+                      stopTimer();
+                    }),
+              )
+            ],
+          )
+        ]));
   }
 }

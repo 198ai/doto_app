@@ -6,8 +6,8 @@ import 'Count.dart';
 import 'Group.dart';
 
 class Tabs extends StatefulWidget {
-  Tabs({Key? key}) : super(key: key);
-
+  Tabs({Key? key,this.tabSelected = 0}) : super(key: key);
+  int tabSelected;
   _TabsState createState() => _TabsState();
 }
 
