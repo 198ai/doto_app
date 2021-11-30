@@ -424,16 +424,26 @@ class _ToDoListPageState extends State<ToDoListPage> with RouteAware {
                                           ),
                                           TextButton(
                                               onPressed: () async {
-                                                Navigator.of(context).pop();
-                                                setState(() {
+                                              setState(() {
                                                   if(
-                                              textController.text != "" &&
-                                              dateController.text != "" &&
-                                              timeController.text != ""){
+                                              textController.text == "" &&
+                                              dateController.text == "" &&
+                                              timeController.text == ""){
+                                                ScaffoldMessenger.of(context).showSnackBar(
+                                                  const SnackBar(
+                                                    content: Text('全ての内容を入力してください'),
+                                                    duration: Duration(seconds: 3),
+                                                  ),
+                                                );
+                                                //Navigator.pop(context);
+                                                return;
+                                              }
+                                              else{
                                                     _editParentText(
                                                       textController.text,
                                                       days.toString(),
                                                       inSeconds.toString());
+                                                      Navigator.of(context).pop();
                                                   }
                                                 });
                                               },

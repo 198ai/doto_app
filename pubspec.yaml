@@ -33,7 +33,7 @@ dependencies:
   provider: ^4.3.2+4
   vibration: ^1.7.3
   dio: ^4.0.0
-  table_calendar: ^3.0.2
+  table_calendar: ^3.0.3
   syncfusion_flutter_datepicker: ^19.3.45
   syncfusion_flutter_calendar: ^19.3.48
 dev_dependencies:
