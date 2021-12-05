@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import '../services/ScreenAdapter.dart';
 import '../widget/JdText.dart';
 import '../widget/JdButton.dart';
-import 'package:dio/dio.dart';
 
 class LoginPage extends StatefulWidget {
   LoginPage({Key? key}) : super(key: key);
@@ -16,19 +15,18 @@ class _LoginPageState extends State<LoginPage> {
   final myController = TextEditingController();
   final myController2 = TextEditingController();
   login() async {
-    Dio dio = Dio();
-    try {
-      var response = await dio.post("https://jd.itying.com/api/doLogin",
-          data: {"username": 18546952856, "password": 12345});
+  //   try {
+  //     var response = await dio.post("https://jd.itying.com/api/doLogin",
+  //         data: {"username": 18546952856, "password": 12345});
       
-      if (response.statusCode == 200) {
-        print("登録成功");
-        print(response);
-      }
-    } catch (e) {
-      print(e);
-    }
-    print("$username$password");
+  //     if (response.statusCode == 200) {
+  //       print("登録成功");
+  //       print(response);
+  //     }
+  //   } catch (e) {
+  //     print(e);
+  //   }
+  //   print("$username$password");
   }
 
   void _usernameValue() {

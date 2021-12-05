@@ -1,3 +1,5 @@
+import 'dart:collection';
+
 import 'package:doto_app/services/ScreenAdapter.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -11,6 +13,23 @@ class CalendarPage extends StatefulWidget {
   CalendarPage({Key? key}) : super(key: key);
 
   _CalendarPageState createState() => _CalendarPageState();
+}
+
+class EventModel {
+  EventModel({
+    required this.events,
+  });
+
+  List<MyEvents> events;
+
+  factory EventModel.fromJson(Map<String, dynamic> json) => EventModel(
+        events: List<MyEvents>.from(
+            json["Events"].map((x) => MyEvents.fromJson(x))),
+      );
+
+  Map<String, dynamic> toJson() => {
+        "Events": List<dynamic>.from(events.map((x) => x.toJson())),
+      };
 }
 
 class MyEvents {
@@ -43,10 +62,12 @@ class _CalendarPageState extends State<CalendarPage> {
   late Map<DateTime, List<MyEvents>> mySelectedEvents;
   late Map setData;
   List setdate = [];
-  late Map<DateTime, List<dynamic>> _events;
+  late Map<DateTime, List<MyEvents>> _events; //ローカルに保存用
   late SharedPreferences prefs;
-  late CalendarController _controller;
   List<MyEvents> list = [];
+  int getHashCode(DateTime key) {
+    return key.day * 1000000 + key.month * 10000 + key.year;
+  }
 
   @override
   void initState() {
@@ -57,18 +78,9 @@ class _CalendarPageState extends State<CalendarPage> {
     Future(() async {
       prefs = await SharedPreferences.getInstance();
       setState(() {
-        Map<DateTime, List<dynamic>> map = Map<DateTime, List<dynamic>>.from(
-            decodeMap(json.decode(prefs.getString("events") ?? "{}")));
-        map.forEach((key, value) {
-          value.forEach((e) {
-            list.add(MyEvents.fromJson(e));
-          });
-          mySelectedEvents[key] = list;
-          _listOfDayEvents(key);
-          print(_listOfDayEvents(key));
-        });
+        mySelectedEvents =
+            decodeMap(json.decode(prefs.getString("events") ?? "{}"));
       });
-      //mySelectedEvents = _events;
     });
   }
 
@@ -80,10 +92,18 @@ class _CalendarPageState extends State<CalendarPage> {
     return newMap;
   }
 
-  Map<DateTime, dynamic> decodeMap(Map<String, dynamic> map) {
-    Map<DateTime, dynamic> newMap = {};
+  Map<DateTime, List<MyEvents>> decodeMap(Map<String, dynamic> map) {
+    //print(map);
+    Map<DateTime, List<MyEvents>> newMap = {};
+    List<MyEvents> list = [];
     map.forEach((key, value) {
-      newMap[DateTime.parse(key)] = map[key];
+      value.forEach((e) {
+        list.add(MyEvents.fromJson(e));
+      });
+      if (list != []) {
+        newMap[DateTime.parse(key)] = list;
+        list = [];
+      }
     });
     return newMap;
   }
@@ -96,7 +116,12 @@ class _CalendarPageState extends State<CalendarPage> {
   }
 
   List<MyEvents> _listOfDayEvents(DateTime dateTime) {
-    return mySelectedEvents[dateTime] ?? [];
+    final _events = LinkedHashMap<DateTime, List<MyEvents>>(
+      equals: isSameDay,
+      hashCode: getHashCode,
+    )..addAll(mySelectedEvents);
+
+    return _events[dateTime] ?? [];
   }
 
   Widget buildTextField(
@@ -169,8 +194,19 @@ class _CalendarPageState extends State<CalendarPage> {
                           ];
                         }
                       });
+                      //mySelectedEvents = {};
+                      //print("添加后的列表$mySelectedEvents");
+
+                      mySelectedEvents.forEach((key, value) {
+                        value.isNotEmpty ? _events[key] = value : null;
+                      });
+                      //mySelectedEvents = {};
                       prefs.setString(
-                          "events", json.encode(encodeMap(mySelectedEvents)));
+                          "events", json.encode(encodeMap(_events)));
+                      print("保存的时候$_events");
+                      // _events = decodeMap(
+                      //     json.decode(prefs.getString("events") ?? "{}"));
+                      // print(_events);
                       titleController.clear();
                       descpController.clear();
                       Navigator.pop(context);
@@ -185,6 +221,7 @@ class _CalendarPageState extends State<CalendarPage> {
 
   @override
   Widget build(BuildContext context) {
+    print(mySelectedEvents[selectedCalendarDate]);
     return Scaffold(
         appBar:
             AppBar(centerTitle: true, title: Text("カレンダー"), actions: <Widget>[
@@ -198,126 +235,138 @@ class _CalendarPageState extends State<CalendarPage> {
         ]),
         body: SingleChildScrollView(
             child: Column(children: [
-          Calender(),
-          ..._listOfDayEvents(selectedCalendarDate!).map((myEvents) => ListTile(
-                onTap: () {},
-                leading: const Icon(
-                  Icons.access_alarms_sharp,
+          Card(
+            margin: EdgeInsets.all(15.0),
+            elevation: 15.0,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.all(
+                Radius.circular(10),
+              ),
+              //カレンダー外側の枠
+              side: BorderSide(color: Colors.white, width: 2.0),
+            ),
+            child: TableCalendar(
+              //今日の時間
+              focusedDay: _focusedCalendarDate,
+              // 2000年から
+              firstDay: _initialCalendarDate,
+              // 3000年まで
+              lastDay: _lastCalendarDate,
+              calendarFormat: _calendarFormat,
+              weekendDays: [DateTime.sunday, 6],
+              startingDayOfWeek: StartingDayOfWeek.monday,
+              daysOfWeekHeight: 40.0,
+              rowHeight: 60.0,
+              //eventLoader: _listOfDayEvents,
+              eventLoader: _listOfDayEvents,
+              headerStyle: HeaderStyle(
+                titleCentered: true,
+                formatButtonVisible: false,
+                titleTextStyle: TextStyle(color: Colors.black, fontSize: 20.0),
+                decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.only(
+                        topLeft: Radius.circular(10),
+                        topRight: Radius.circular(10))),
+                // formatButtonTextStyle:
+                //     TextStyle(color: Colors.pink, fontSize: 16.0),
+                // formatButtonDecoration: BoxDecoration(
+                //   color: Colors.black,
+                //   borderRadius: BorderRadius.all(
+                //     Radius.circular(5.0),
+                //   ),
+                // ),
+
+                //矢印
+                leftChevronIcon: Icon(
+                  Icons.chevron_left,
                   color: Colors.black,
+                  size: 28,
                 ),
-                title: Padding(
-                  padding: const EdgeInsets.only(bottom: 8.0),
-                  child: Text('タイトル:   ${myEvents.eventTitle}'),
+                rightChevronIcon: Icon(
+                  Icons.chevron_right,
+                  color: Colors.black,
+                  size: 28,
                 ),
-                subtitle: Text('メモ:   ${myEvents.eventDescp}'),
-                trailing: IconButton(
-                    onPressed: () {
-                      var index = _listOfDayEvents(selectedCalendarDate!)
-                          .indexOf(myEvents);
-                      setState(() {
-                        _listOfDayEvents(selectedCalendarDate!).removeAt(index);
-                      });
-                    },
-                    icon: Icon(Icons.delete)),
-              ))
+              ),
+              // Calendar Days Styling
+              daysOfWeekStyle: const DaysOfWeekStyle(
+                // Weekend days color (Sat,Sun)
+                weekendStyle: TextStyle(color: Colors.pink),
+              ),
+              // Calendar Dates styling
+              calendarStyle: const CalendarStyle(
+                // Weekend dates color (Sat & Sun Column)
+                weekendTextStyle: TextStyle(color: Colors.pink),
+                // highlighted color for today
+                todayDecoration: BoxDecoration(
+                  color: Colors.blue,
+                  shape: BoxShape.circle,
+                ),
+                // highlighted color for selected day
+                selectedDecoration: BoxDecoration(
+                  color: Colors.blue,
+                  shape: BoxShape.circle,
+                ),
+                markerDecoration:
+                    BoxDecoration(color: Colors.pink, shape: BoxShape.circle),
+              ),
+              selectedDayPredicate: (currentSelectedDate) {
+                // as per the documentation 'selectedDayPredicate' needs to determine
+                // current selected day
+                return (isSameDay(selectedCalendarDate!, currentSelectedDate));
+              },
+              onPageChanged: (focusedDay) {
+                _focusedCalendarDate = focusedDay;
+              },
+              onFormatChanged: (format) {
+                if (_calendarFormat != format) {
+                  setState(() {
+                    _calendarFormat = format;
+                  });
+                }
+              },
+              onDaySelected: (selectedDay, focusedDay) {
+                // as per the documentation
+                if (!isSameDay(selectedCalendarDate, selectedDay)) {
+                  setState(() {
+                    selectedCalendarDate = selectedDay;
+                    _focusedCalendarDate = focusedDay;
+                  });
+                }
+              },
+            ),
+          ),
+          ListView(
+            shrinkWrap: true,
+            children: _listOfDayEvents(selectedCalendarDate!)
+                .map((myEvents) => ListTile(
+                      onTap: () {},
+                      leading: const Icon(
+                        Icons.access_alarms_sharp,
+                        color: Colors.black,
+                      ),
+                      title: Padding(
+                        padding: const EdgeInsets.only(bottom: 8.0),
+                        child: Text('タイトル:   ${myEvents.eventTitle}'),
+                      ),
+                      subtitle: Text('メモ:   ${myEvents.eventDescp}'),
+                      trailing: IconButton(
+                          onPressed: () {
+                            var index = _listOfDayEvents(selectedCalendarDate!)
+                                .indexOf(myEvents);
+                            setState(() {
+                              _listOfDayEvents(selectedCalendarDate!)
+                                  .removeAt(index);
+                            });
+                            //还要删除对应的MAp的时间
+                            prefs.setString("events",
+                                json.encode(encodeMap(mySelectedEvents)));
+                          },
+                          icon: Icon(Icons.delete)),
+                    ))
+                .toList(),
+          )
         ])));
-  }
-
-  Widget Calender() {
-    return Card(
-      margin: EdgeInsets.all(15.0),
-      elevation: 15.0,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.all(
-          Radius.circular(10),
-        ),
-        //カレンダー外側の枠
-        side: BorderSide(color: Colors.white, width: 2.0),
-      ),
-      child: TableCalendar(
-        //今日の時間
-        focusedDay: _focusedCalendarDate,
-        // 2000年から
-        firstDay: _initialCalendarDate,
-        // 3000年まで
-        lastDay: _lastCalendarDate,
-        calendarFormat: _calendarFormat,
-        weekendDays: [DateTime.sunday, 6],
-        startingDayOfWeek: StartingDayOfWeek.monday,
-        daysOfWeekHeight: 40.0,
-        rowHeight: 60.0,
-        eventLoader: _listOfDayEvents,
-        headerStyle: HeaderStyle(
-          titleTextStyle: TextStyle(color: Colors.black, fontSize: 20.0),
-          decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.only(
-                  topLeft: Radius.circular(10), topRight: Radius.circular(10))),
-          // formatButtonTextStyle:
-          //     TextStyle(color: Colors.pink, fontSize: 16.0),
-          // formatButtonDecoration: BoxDecoration(
-          //   color: Colors.black,
-          //   borderRadius: BorderRadius.all(
-          //     Radius.circular(5.0),
-          //   ),
-          // ),
-
-          //矢印
-          leftChevronIcon: Icon(
-            Icons.chevron_left,
-            color: Colors.black,
-            size: 28,
-          ),
-          rightChevronIcon: Icon(
-            Icons.chevron_right,
-            color: Colors.black,
-            size: 28,
-          ),
-        ),
-        // Calendar Days Styling
-        daysOfWeekStyle: const DaysOfWeekStyle(
-          // Weekend days color (Sat,Sun)
-          weekendStyle: TextStyle(color: Colors.pink),
-        ),
-        // Calendar Dates styling
-        calendarStyle: const CalendarStyle(
-          // Weekend dates color (Sat & Sun Column)
-          weekendTextStyle: TextStyle(color: Colors.pink),
-          // highlighted color for today
-          todayDecoration: BoxDecoration(
-            color: Colors.blue,
-            shape: BoxShape.circle,
-          ),
-          // highlighted color for selected day
-          selectedDecoration: BoxDecoration(
-            color: Colors.blue,
-            shape: BoxShape.circle,
-          ),
-          markerDecoration:
-              BoxDecoration(color: Colors.pink, shape: BoxShape.circle),
-        ),
-        selectedDayPredicate: (currentSelectedDate) {
-          // as per the documentation 'selectedDayPredicate' needs to determine
-          // current selected day
-          return (isSameDay(selectedCalendarDate!, currentSelectedDate));
-        },
-        onFormatChanged: (format) {
-          if (_calendarFormat != format) {
-            setState(() {
-              _calendarFormat = format;
-            });
-          }
-        },
-        onDaySelected: (selectedDay, focusedDay) {
-          // as per the documentation
-          if (!isSameDay(selectedCalendarDate, selectedDay)) {
-            setState(() {
-              selectedCalendarDate = selectedDay;
-              _focusedCalendarDate = focusedDay;
-            });
-          }
-        },
-      ),
-    );
   }
 }
