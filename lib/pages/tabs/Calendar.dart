@@ -93,10 +93,10 @@ class _CalendarPageState extends State<CalendarPage> {
   }
 
   Map<DateTime, List<MyEvents>> decodeMap(Map<String, dynamic> map) {
-    //print(map);
     Map<DateTime, List<MyEvents>> newMap = {};
     List<MyEvents> list = [];
     map.forEach((key, value) {
+      print("遍历$key++++++$value");
       value.forEach((e) {
         list.add(MyEvents.fromJson(e));
       });
@@ -182,31 +182,28 @@ class _CalendarPageState extends State<CalendarPage> {
                       return;
                     } else {
                       setState(() {
-                        if (mySelectedEvents[selectedCalendarDate] != null) {
-                          mySelectedEvents[selectedCalendarDate]?.add(MyEvents(
+                        var date = DateFormat('yyyy-MM-dd')
+                              .format(selectedCalendarDate!);
+                        if (mySelectedEvents[DateTime.parse(date)] != null) {
+                          
+                          mySelectedEvents[DateTime.parse(date)]?.add(MyEvents(
                               eventTitle: titleController.text,
                               eventDescp: descpController.text));
                         } else {
-                          mySelectedEvents[selectedCalendarDate!] = [
+                          mySelectedEvents[DateTime.parse(date)] = [
                             MyEvents(
                                 eventTitle: titleController.text,
                                 eventDescp: descpController.text)
                           ];
                         }
                       });
-                      //mySelectedEvents = {};
-                      //print("添加后的列表$mySelectedEvents");
-
                       mySelectedEvents.forEach((key, value) {
-                        value.isNotEmpty ? _events[key] = value : null;
+                        var date = DateFormat('yyyy-MM-dd').format(key);
+                        _events[DateTime.parse(date)] = value;
                       });
-                      //mySelectedEvents = {};
+                      print(mySelectedEvents);
                       prefs.setString(
                           "events", json.encode(encodeMap(_events)));
-                      print("保存的时候$_events");
-                      // _events = decodeMap(
-                      //     json.decode(prefs.getString("events") ?? "{}"));
-                      // print(_events);
                       titleController.clear();
                       descpController.clear();
                       Navigator.pop(context);
@@ -221,7 +218,6 @@ class _CalendarPageState extends State<CalendarPage> {
 
   @override
   Widget build(BuildContext context) {
-    print(mySelectedEvents[selectedCalendarDate]);
     return Scaffold(
         appBar:
             AppBar(centerTitle: true, title: Text("カレンダー"), actions: <Widget>[
