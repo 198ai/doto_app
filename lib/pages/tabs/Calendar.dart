@@ -15,23 +15,6 @@ class CalendarPage extends StatefulWidget {
   _CalendarPageState createState() => _CalendarPageState();
 }
 
-class EventModel {
-  EventModel({
-    required this.events,
-  });
-
-  List<MyEvents> events;
-
-  factory EventModel.fromJson(Map<String, dynamic> json) => EventModel(
-        events: List<MyEvents>.from(
-            json["Events"].map((x) => MyEvents.fromJson(x))),
-      );
-
-  Map<String, dynamic> toJson() => {
-        "Events": List<dynamic>.from(events.map((x) => x.toJson())),
-      };
-}
-
 class MyEvents {
   final String eventTitle;
   final String eventDescp;
@@ -96,7 +79,6 @@ class _CalendarPageState extends State<CalendarPage> {
     Map<DateTime, List<MyEvents>> newMap = {};
     List<MyEvents> list = [];
     map.forEach((key, value) {
-      print("遍历$key++++++$value");
       value.forEach((e) {
         list.add(MyEvents.fromJson(e));
       });
@@ -201,7 +183,6 @@ class _CalendarPageState extends State<CalendarPage> {
                         var date = DateFormat('yyyy-MM-dd').format(key);
                         _events[DateTime.parse(date)] = value;
                       });
-                      print(mySelectedEvents);
                       prefs.setString(
                           "events", json.encode(encodeMap(_events)));
                       titleController.clear();
@@ -242,6 +223,7 @@ class _CalendarPageState extends State<CalendarPage> {
               side: BorderSide(color: Colors.white, width: 2.0),
             ),
             child: TableCalendar(
+              locale: 'ja_JP',
               //今日の時間
               focusedDay: _focusedCalendarDate,
               // 2000年から
@@ -255,6 +237,12 @@ class _CalendarPageState extends State<CalendarPage> {
               rowHeight: 60.0,
               //eventLoader: _listOfDayEvents,
               eventLoader: _listOfDayEvents,
+              calendarBuilders: CalendarBuilders(
+        markerBuilder: (context, date, events) {
+          if (events.isNotEmpty) {
+            return _buildEventsMarker(date, events);
+          }
+        },),
               headerStyle: HeaderStyle(
                 titleCentered: true,
                 formatButtonVisible: false,
@@ -272,7 +260,6 @@ class _CalendarPageState extends State<CalendarPage> {
                 //     Radius.circular(5.0),
                 //   ),
                 // ),
-
                 //矢印
                 leftChevronIcon: Icon(
                   Icons.chevron_left,
@@ -333,9 +320,10 @@ class _CalendarPageState extends State<CalendarPage> {
               },
             ),
           ),
-          ListView(
-            shrinkWrap: true,
-            children: _listOfDayEvents(selectedCalendarDate!)
+          // ListView(
+          //   shrinkWrap: true,
+          //   children: 
+          ..._listOfDayEvents(selectedCalendarDate!)
                 .map((myEvents) => ListTile(
                       onTap: () {},
                       leading: const Icon(
@@ -361,8 +349,33 @@ class _CalendarPageState extends State<CalendarPage> {
                           },
                           icon: Icon(Icons.delete)),
                     ))
-                .toList(),
-          )
+                //.toList(),
+          //)
         ])));
   }
+
+  Widget _buildEventsMarker(DateTime date, List events) {
+  return Positioned(
+    right: 5,
+    bottom: 5,
+    child: AnimatedContainer(
+      duration: const Duration(milliseconds: 300),
+      decoration: BoxDecoration(
+        shape: BoxShape.circle,
+        color: Colors.red[300],
+      ),
+      width: 16.0,
+      height: 16.0,
+      child: Center(
+        child: Text(
+          '${events.length}',
+          style: TextStyle().copyWith(
+            color: Colors.white,
+            fontSize: 12.0,
+          ),
+        ),
+      ),
+    ),
+  );
+}
 }

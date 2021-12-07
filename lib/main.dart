@@ -1,11 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:intl/date_symbol_data_local.dart';
 
 // import 'pages/tabs/Tabs.dart';
 
 import 'routers/router.dart';
-
-void main() => runApp(MyApp());
+void main() {
+  initializeDateFormatting().then((_) =>runApp(MyApp()));
+}
 
 class MyApp extends StatefulWidget {
   MyApp({Key? key}) : super(key: key);
