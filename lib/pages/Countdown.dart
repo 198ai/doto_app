@@ -1,5 +1,7 @@
 import 'dart:async';
+import 'dart:convert';
 
+import 'package:doto_app/model/tasklist.dart';
 import 'package:doto_app/pages/tabs/Tabs.dart';
 import 'package:doto_app/pages/tabs/ToDoList.dart';
 import 'package:flutter/material.dart';
@@ -10,8 +12,13 @@ class CountDown extends StatefulWidget {
   int date;
   String name;
   int index;
-  CountDown({Key? key, this.date = 0, this.time = 0, this.name = "",this.index =0,})
-      : super(key: key);
+  CountDown({
+    Key? key,
+    this.date = 0,
+    this.time = 0,
+    this.name = "",
+    this.index = 0,
+  }) : super(key: key);
   @override
   _CountdownState createState() =>
       _CountdownState(this.date, this.time, this.name);
@@ -25,6 +32,8 @@ class _CountdownState extends State<CountDown> {
   var _timer;
   int seconds = 0;
   bool running = false;
+  List<TodoModel> todos = [];
+  List storge = []; //ローカルから取り出した値をここに
   //时间格式化，根据总秒数转换为对应的 hh:mm:ss 格式
   String constructTime(int seconds) {
     int hour = seconds ~/ 3600;
@@ -48,7 +57,13 @@ class _CountdownState extends State<CountDown> {
     startTimer();
     Future(() async {
       SharedPreferences list = await SharedPreferences.getInstance();
-      print(list.getString(name));
+      list.getString("toDoList") == null
+          ? storge = []
+          : storge = json.decode(list.getString("toDoList") ?? "{}");
+      print(storge);
+      storge.forEach((e) {
+        todos.add(TodoModel.fromJson(json.decode(e)));
+      });
     });
   }
 
@@ -78,12 +93,19 @@ class _CountdownState extends State<CountDown> {
     if (running && seconds != 0) {
       time = seconds;
       cancelTimer();
-      list.setString(name, time.toString());
-      print(list.getString(name));
+      saveTime(time);
       _timer = null;
     } else {
       startTimer();
     }
+  }
+
+  //変更された時間を再保存
+  void saveTime(int time) async {
+    todos[widget.index].time =time.toString();
+    SharedPreferences list = await SharedPreferences.getInstance();
+    List<String> events = todos.map((f) => json.encode(f.toJson())).toList();
+    list.setString("toDoList", json.encode(events));
   }
 
   void cancelTimer() {
@@ -108,10 +130,8 @@ class _CountdownState extends State<CountDown> {
             icon: new Icon(Icons.arrow_back_ios),
             onPressed: () => {
               stopTimer(),
-              Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (context) => Tabs(tabSelected: 0))
-              )
+              Navigator.push(context,
+                  MaterialPageRoute(builder: (context) => Tabs(tabSelected: 0)))
             },
           ),
           centerTitle: true,

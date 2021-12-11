@@ -24,10 +24,10 @@ class _HasDonePageState extends State<HasDonePage> {
   void initState() {
     super.initState();
     if (getdone != "") {
-      TodoModel item = TodoModel(id: id++, title: getdone, complete: true);
-      setState(() {
-        hasdone.add(item);
-      });
+      // TodoModel item = TodoModel(id: id++, title: getdone, complete: true);
+      // setState(() {
+      //   hasdone.add(item);
+      // });
     }
     Future(() async {
       SharedPreferences retult = await SharedPreferences.getInstance();
@@ -37,14 +37,14 @@ class _HasDonePageState extends State<HasDonePage> {
       print(done);
       if (done != []) {
         done.forEach((done) {
-          TodoModel item = TodoModel(
-            id: id++,
-            title: done,
-            complete: true,
-          );
-          setState(() {
-            hasdone.add(item);
-          });
+          // TodoModel item = TodoModel(
+          //   id: id++,
+          //   title: done,
+          //   complete: true,
+          // );
+          // setState(() {
+          //   hasdone.add(item);
+          // });
         });
       }
       _listView();

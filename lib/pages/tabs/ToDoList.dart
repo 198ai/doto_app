@@ -1,11 +1,14 @@
 import 'dart:async';
+import 'dart:convert';
 import 'package:doto_app/pages/Countdown.dart';
 import 'package:doto_app/pages/HasDone.dart';
+import 'package:doto_app/pages/tabs/Calendar.dart';
 import 'package:doto_app/widget/dialog.dart';
 import 'package:doto_app/widget/drawer.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:intl/intl.dart';
 import '../../main.dart';
 import '../../model/tasklist.dart';
 import '../../services/ScreenAdapter.dart';
@@ -22,23 +25,15 @@ class ToDoListPage extends StatefulWidget {
   _ToDoListPageState createState() => _ToDoListPageState();
 }
 
-/**
- * 现有bug
- * 完成后时间原则出不来
- *    只有时间为零的时候才能出现完成
- * 没写时间的时候，时间也会出来
- *   必须写完成时间，不写不能跳转
- * 可以重复同一名字
- */
 class _ToDoListPageState extends State<ToDoListPage> with RouteAware {
   List<TodoModel> todos = [];
-  List<String> storge = [];
+  List storge = []; //ローカルから取り出した値をここに
   List<String> done = [];
   String _time = "";
-  String _date = "";
   int id = 0;
   late int days;
   late int inSeconds;
+  late String enddate;
   final textController = TextEditingController();
   final timeController = TextEditingController();
   final dateController = TextEditingController();
@@ -61,38 +56,19 @@ class _ToDoListPageState extends State<ToDoListPage> with RouteAware {
   void didPopNext() async {
     debugPrint("------>アジェンダ画面に戻った");
     super.didPopNext();
-    List<TodoModel> newtodos = [];
+    todos = [];
     Future(() async {
       SharedPreferences retult = await SharedPreferences.getInstance();
-      retult.getStringList("todos") == null
+      retult.getString("toDoList") == null
           ? storge = []
-          : storge = retult.getStringList("todos");
+          : storge = json.decode(retult.getString("toDoList") ?? "{}");
       print(storge);
-
-      if (storge != []) {
-        storge.forEach((e) {
-          TodoModel item = TodoModel(
-            id: id++,
-            title: e,
-            complete: false,
-          );
-          var date = e + "date" + item.id.toString();
-          var time = e + "time" + item.id.toString();
-          print(date);
-          print(time);
-          retult.getString(date) == null
-              ? item.date = ""
-              : item.date = retult.getString(e + "date" + item.id.toString());
-          retult.getString(time) == null
-              ? item.time = ""
-              : item.time = retult.getString(e + "time" + item.id.toString());
-          newtodos.add(item);
-        });
-      }
-      setState(() {
-        todos = newtodos;
+      storge.forEach((e) {
+        todos.add(TodoModel.fromJson(json.decode(e)));
       });
-      _listView();
+      setState(() {
+        _listView();
+      });
     });
   }
 
@@ -101,13 +77,6 @@ class _ToDoListPageState extends State<ToDoListPage> with RouteAware {
     super.didPushNext();
     // 当前页面push到其他页面走这里
     debugPrint("------>アジェンダ画面から出る");
-  }
-
-  change() {
-    setState(() {
-      todos[1].time = widget.time.toString();
-    });
-    _listView();
   }
 
   @override
@@ -122,34 +91,35 @@ class _ToDoListPageState extends State<ToDoListPage> with RouteAware {
     //ローカルストレージから、値をLISTに渡す、初期化する
     Future(() async {
       SharedPreferences retult = await SharedPreferences.getInstance();
-      retult.getStringList("todos") == null
+      retult.getString("toDoList") == null
           ? storge = []
-          : storge = retult.getStringList("todos");
+          : storge = json.decode(retult.getString("toDoList") ?? "{}");
       print(storge);
-
-      if (storge != []) {
-        storge.forEach((e) {
-          TodoModel item = TodoModel(
-            id: id++,
-            title: e,
-            complete: false,
-          );
-          var date = e + "date" + item.id.toString();
-          var time = e + "time" + item.id.toString();
-          print(date);
-          print(time);
-          retult.getString(date) == null
-              ? item.date = ""
-              : item.date = retult.getString(e + "date" + item.id.toString());
-          retult.getString(time) == null
-              ? item.time = ""
-              : item.time = retult.getString(e + "time" + item.id.toString());
-          setState(() {
-            todos.add(item);
-          });
+      storge.forEach((e) {
+        //画面リロード
+        todos.add(TodoModel.fromJson(json.decode(e)));
+        todos.forEach((e) async {
+          await dateChange(e.endDate);
         });
-      }
-      _listView();
+      });
+      setState(() {
+        _listView();
+      });
+    });
+  }
+
+  //日付変更検査
+  dateChange(String date) async {
+    //String から時間に変換
+    DateFormat inputFormat = DateFormat('yyyy-MM-dd');
+    DateTime input = inputFormat.parse(date);
+    var startDate = new DateTime(input.year, input.month, input.day);
+    var endDate = new DateTime.now();
+    setState(() {
+      //完成するまでの日付更新
+      todos.forEach((e) {
+        e.date = startDate.difference(endDate).inDays.toString();
+      });
     });
   }
 
@@ -163,41 +133,25 @@ class _ToDoListPageState extends State<ToDoListPage> with RouteAware {
     super.dispose();
   }
 
-  //時間と日付保存
-  saveTime(String name, String value) async {
-    SharedPreferences setTime = await SharedPreferences.getInstance();
-    await setTime.setString(name, value);
-    print(setTime.getString(name) + name);
-  }
-
-  getTime(String name) async {
-    SharedPreferences getName = await SharedPreferences.getInstance();
-    getName.getString(name);
-  }
-
 //ToDoListのCard内容はポップアップから渡されている
-  _editParentText(String editText, String getdate, String gettime) async {
+  _editParentText(String editText, String getdate, String gettime,
+      String getendDate) async {
     TodoModel item = TodoModel(
       id: id++,
       title: editText,
       date: getdate,
       time: gettime,
       complete: false,
+      endDate: getendDate,
     );
     //画面をリロードして、新たな項目を表示する
     setState(() {
       todos.add(item);
-      storge.add(item.title);
     });
     //ローカルにLISTを保存する
     SharedPreferences list = await SharedPreferences.getInstance();
-    list.setStringList("todos", storge);
-    var time = textController.text + "time" + item.id.toString();
-    await saveTime(time, inSeconds.toString());
-    var date = textController.text + "date" + item.id.toString();
-    await saveTime(date, days.toString());
-    print(date);
-    print(time);
+    List<String> events = todos.map((f) => json.encode(f.toJson())).toList();
+    list.setString("toDoList", json.encode(events));
   }
 
   //用户名输入框的焦点控制
@@ -251,6 +205,8 @@ class _ToDoListPageState extends State<ToDoListPage> with RouteAware {
                       new DateTime(dateTime.year, dateTime.month, dateTime.day);
                   var endDate = new DateTime.now();
                   days = startDate.difference(endDate).inDays;
+                  enddate =
+                      "${dateTime.year}-${dateTime.month}-${dateTime.day}";
                   dateController.text = days.toString() + "日";
                 },
               ),
@@ -424,26 +380,31 @@ class _ToDoListPageState extends State<ToDoListPage> with RouteAware {
                                           ),
                                           TextButton(
                                               onPressed: () async {
-                                              setState(() {
-                                                  if(
-                                              textController.text == "" &&
-                                              dateController.text == "" &&
-                                              timeController.text == ""){
-                                                ScaffoldMessenger.of(context).showSnackBar(
-                                                  const SnackBar(
-                                                    content: Text('全ての内容を入力してください'),
-                                                    duration: Duration(seconds: 3),
-                                                  ),
-                                                );
-                                                //Navigator.pop(context);
-                                                return;
-                                              }
-                                              else{
+                                                setState(() {
+                                                  if (textController.text == "" &&
+                                                      dateController.text ==
+                                                          "" &&
+                                                      timeController.text ==
+                                                          "") {
+                                                    ScaffoldMessenger.of(
+                                                            context)
+                                                        .showSnackBar(
+                                                      const SnackBar(
+                                                        content: Text(
+                                                            '全ての内容を入力してください'),
+                                                        duration: Duration(
+                                                            seconds: 3),
+                                                      ),
+                                                    );
+                                                    //Navigator.pop(context);
+                                                    return;
+                                                  } else {
                                                     _editParentText(
-                                                      textController.text,
-                                                      days.toString(),
-                                                      inSeconds.toString());
-                                                      Navigator.of(context).pop();
+                                                        textController.text,
+                                                        days.toString(),
+                                                        inSeconds.toString(),
+                                                        enddate.toString());
+                                                    Navigator.of(context).pop();
                                                   }
                                                 });
                                               },
@@ -490,11 +451,12 @@ class _ToDoListPageState extends State<ToDoListPage> with RouteAware {
   GestureDetector _normalCard(item, index) {
     return GestureDetector(
         onLongPressStart: (details) async {
-          // if (await Vibration.hasVibrator()) {
-          //   Vibration.vibrate(
-          //     duration: 100,
-          //   );
-          // }
+          //実機振動機能、エミュレータの時、コミットアウトする
+          if (await Vibration.hasVibrator()) {
+            Vibration.vibrate(
+              duration: 100,
+            );
+          }
           SharedPreferences list = await SharedPreferences.getInstance();
           int selected = await showMenu(
             context: context,
@@ -535,18 +497,14 @@ class _ToDoListPageState extends State<ToDoListPage> with RouteAware {
             ],
           );
           if (selected == 0) {
-            String date = todos[index].title + "date" + index.toString();
-            String time = todos[index].title + "time" + index.toString();
             setState(() {
               todos.removeAt(index);
               storge.removeAt(index);
-              list.setStringList("todos", storge);
-              list.remove(date);
-              list.remove(time);
+              List<String> events =
+                  todos.map((f) => json.encode(f.toJson())).toList();
+              list.setString("toDoList", json.encode(events));
             });
           } else if (selected == 1) {
-            String date = todos[index].title + "date" + index.toString();
-            String time = todos[index].title + "time" + index.toString();
             setState(() {
               list.getStringList("done") == null
                   ? done = []
@@ -555,9 +513,9 @@ class _ToDoListPageState extends State<ToDoListPage> with RouteAware {
               list.setStringList("done", done);
               todos.removeAt(index);
               storge.removeAt(index);
-              list.setStringList("todos", storge);
-              list.remove(date);
-              list.remove(time);
+              List<String> events =
+                  todos.map((f) => json.encode(f.toJson())).toList();
+              list.setString("toDoList", json.encode(events));
             });
           } else if (selected == 2) {
             Navigator.of(context)
@@ -600,7 +558,7 @@ class _ToDoListPageState extends State<ToDoListPage> with RouteAware {
                                 child: Column(
                                   children: [
                                     Text(
-                                      '完成するまで:',
+                                      '${item.endDate}まで:',
                                       style: TextStyle(
                                           fontSize: ScreenAdapter.size(15),
                                           color: Color.fromRGBO(16, 16, 16, 1)),
@@ -644,9 +602,7 @@ class _ToDoListPageState extends State<ToDoListPage> with RouteAware {
                                 builder: (context) => CountDown(
                                       date: int.parse(item.date),
                                       time: int.parse(item.time),
-                                      name: item.title +
-                                          "time" +
-                                          index.toString(),
+                                      name: "toDoList",
                                       index: index,
                                     )
                                 //没传值

@@ -83,6 +83,7 @@ class _CalendarPageState extends State<CalendarPage> {
         list.add(MyEvents.fromJson(e));
       });
       if (list != []) {
+        print(key);
         newMap[DateTime.parse(key)] = list;
         list = [];
       }
@@ -165,9 +166,8 @@ class _CalendarPageState extends State<CalendarPage> {
                     } else {
                       setState(() {
                         var date = DateFormat('yyyy-MM-dd')
-                              .format(selectedCalendarDate!);
+                            .format(selectedCalendarDate!);
                         if (mySelectedEvents[DateTime.parse(date)] != null) {
-                          
                           mySelectedEvents[DateTime.parse(date)]?.add(MyEvents(
                               eventTitle: titleController.text,
                               eventDescp: descpController.text));
@@ -238,11 +238,12 @@ class _CalendarPageState extends State<CalendarPage> {
               //eventLoader: _listOfDayEvents,
               eventLoader: _listOfDayEvents,
               calendarBuilders: CalendarBuilders(
-        markerBuilder: (context, date, events) {
-          if (events.isNotEmpty) {
-            return _buildEventsMarker(date, events);
-          }
-        },),
+                markerBuilder: (context, date, events) {
+                  if (events.isNotEmpty) {
+                    return _buildEventsMarker(date, events);
+                  }
+                },
+              ),
               headerStyle: HeaderStyle(
                 titleCentered: true,
                 formatButtonVisible: false,
@@ -322,60 +323,58 @@ class _CalendarPageState extends State<CalendarPage> {
           ),
           // ListView(
           //   shrinkWrap: true,
-          //   children: 
-          ..._listOfDayEvents(selectedCalendarDate!)
-                .map((myEvents) => ListTile(
-                      onTap: () {},
-                      leading: const Icon(
-                        Icons.access_alarms_sharp,
-                        color: Colors.black,
-                      ),
-                      title: Padding(
-                        padding: const EdgeInsets.only(bottom: 8.0),
-                        child: Text('タイトル:   ${myEvents.eventTitle}'),
-                      ),
-                      subtitle: Text('メモ:   ${myEvents.eventDescp}'),
-                      trailing: IconButton(
-                          onPressed: () {
-                            var index = _listOfDayEvents(selectedCalendarDate!)
-                                .indexOf(myEvents);
-                            setState(() {
-                              _listOfDayEvents(selectedCalendarDate!)
-                                  .removeAt(index);
-                            });
-                            //还要删除对应的MAp的时间
-                            prefs.setString("events",
-                                json.encode(encodeMap(mySelectedEvents)));
-                          },
-                          icon: Icon(Icons.delete)),
-                    ))
-                //.toList(),
+          //   children:
+          ..._listOfDayEvents(selectedCalendarDate!).map((myEvents) => ListTile(
+                onTap: () {},
+                leading: const Icon(
+                  Icons.access_alarms_sharp,
+                  color: Colors.black,
+                ),
+                title: Padding(
+                  padding: const EdgeInsets.only(bottom: 8.0),
+                  child: Text('タイトル:   ${myEvents.eventTitle}'),
+                ),
+                subtitle: Text('メモ:   ${myEvents.eventDescp}'),
+                trailing: IconButton(
+                    onPressed: () {
+                      var index = _listOfDayEvents(selectedCalendarDate!)
+                          .indexOf(myEvents);
+                      setState(() {
+                        _listOfDayEvents(selectedCalendarDate!).removeAt(index);
+                      });
+                      //还要删除对应的MAp的时间
+                      prefs.setString(
+                          "events", json.encode(encodeMap(mySelectedEvents)));
+                    },
+                    icon: Icon(Icons.delete)),
+              ))
+          //.toList(),
           //)
         ])));
   }
 
   Widget _buildEventsMarker(DateTime date, List events) {
-  return Positioned(
-    right: 5,
-    bottom: 5,
-    child: AnimatedContainer(
-      duration: const Duration(milliseconds: 300),
-      decoration: BoxDecoration(
-        shape: BoxShape.circle,
-        color: Colors.red[300],
-      ),
-      width: 16.0,
-      height: 16.0,
-      child: Center(
-        child: Text(
-          '${events.length}',
-          style: TextStyle().copyWith(
-            color: Colors.white,
-            fontSize: 12.0,
+    return Positioned(
+      right: 5,
+      bottom: 5,
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 300),
+        decoration: BoxDecoration(
+          shape: BoxShape.circle,
+          color: Colors.red[300],
+        ),
+        width: 16.0,
+        height: 16.0,
+        child: Center(
+          child: Text(
+            '${events.length}',
+            style: TextStyle().copyWith(
+              color: Colors.white,
+              fontSize: 12.0,
+            ),
           ),
         ),
       ),
-    ),
-  );
-}
+    );
+  }
 }
