@@ -118,7 +118,7 @@ class _ToDoListPageState extends State<ToDoListPage> with RouteAware {
     setState(() {
       //完成するまでの日付更新
       todos.forEach((e) {
-        e.date = startDate.difference(endDate).inDays.toString();
+        e.date = ((startDate.difference(endDate).inDays)+1).toString();
       });
     });
   }
@@ -204,7 +204,7 @@ class _ToDoListPageState extends State<ToDoListPage> with RouteAware {
                   var startDate =
                       new DateTime(dateTime.year, dateTime.month, dateTime.day);
                   var endDate = new DateTime.now();
-                  days = startDate.difference(endDate).inDays;
+                  days = ((startDate.difference(endDate).inDays)+1);
                   enddate =
                       "${dateTime.year}-${dateTime.month}-${dateTime.day}";
                   dateController.text = days.toString() + "日";
