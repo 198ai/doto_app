@@ -499,7 +499,6 @@ class _ToDoListPageState extends State<ToDoListPage> with RouteAware {
           if (selected == 0) {
             setState(() {
               todos.removeAt(index);
-              storge.removeAt(index);
               List<String> events =
                   todos.map((f) => json.encode(f.toJson())).toList();
               list.setString("toDoList", json.encode(events));
@@ -512,7 +511,6 @@ class _ToDoListPageState extends State<ToDoListPage> with RouteAware {
               done.add(todos[index].title);
               list.setStringList("done", done);
               todos.removeAt(index);
-              storge.removeAt(index);
               List<String> events =
                   todos.map((f) => json.encode(f.toJson())).toList();
               list.setString("toDoList", json.encode(events));

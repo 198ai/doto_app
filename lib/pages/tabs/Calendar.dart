@@ -83,7 +83,6 @@ class _CalendarPageState extends State<CalendarPage> {
         list.add(MyEvents.fromJson(e));
       });
       if (list != []) {
-        print(key);
         newMap[DateTime.parse(key)] = list;
         list = [];
       }
