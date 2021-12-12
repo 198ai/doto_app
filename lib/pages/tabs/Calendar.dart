@@ -1,5 +1,6 @@
 import 'dart:collection';
 
+import 'package:doto_app/main.dart';
 import 'package:doto_app/services/ScreenAdapter.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -8,6 +9,7 @@ import 'package:intl/intl.dart';
 import 'package:doto_app/pages/tabs/Calendar.dart';
 import 'package:table_calendar/table_calendar.dart';
 import 'dart:convert';
+import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 
 class CalendarPage extends StatefulWidget {
   CalendarPage({Key? key}) : super(key: key);
@@ -207,6 +209,7 @@ class _CalendarPageState extends State<CalendarPage> {
               icon: Icon(Icons.add),
               onPressed: () {
                 _showAddEventDialog();
+                scheduleAlarm();
               }),
         ]),
         body: SingleChildScrollView(
@@ -376,4 +379,31 @@ class _CalendarPageState extends State<CalendarPage> {
       ),
     );
   }
+}
+
+void scheduleAlarm() async {
+  var scheduledNotificationDateTime = DateTime.now().add(Duration(seconds: 10));
+  var androidPlatformChannelSpecifics = AndroidNotificationDetails(
+    'alarm_notif',
+    'alarm_notif',
+    'Channel for Alarm notification',
+    icon: 'ic_launcher',
+    sound: RawResourceAndroidNotificationSound('a_long_cold_sting'),
+    largeIcon: DrawableResourceAndroidBitmap('ic_launcher'),
+  );
+
+  var iOSPlatformChannelSpecifics = IOSNotificationDetails(
+      sound: 'a_long_cold_sting.wav',
+      presentAlert: true,
+      presentBadge: true,
+      presentSound: true);
+  var platformChannelSpecifics = NotificationDetails(
+      androidPlatformChannelSpecifics, iOSPlatformChannelSpecifics);
+
+  await flutterLocalNotificationsPlugin.schedule(
+      0,
+      'Office',
+      'Good Morning! Time for office',
+      scheduledNotificationDateTime,
+      platformChannelSpecifics);
 }
