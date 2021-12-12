@@ -53,16 +53,16 @@ class _MyAppState extends State<MyApp> {
     _events = {};
     super.initState();
     Future(() async {
-      prefs = await SharedPreferences.getInstance();
-      mySelectedEvents = decodeMap(json.decode(prefs.getString("events") ?? "{}"));
-      //アラーム初期設定
-      mySelectedEvents.forEach((key, value) {
-        value.forEach((element) {
-          if (element.alarm != "") {
-            scheduleAlarm(DateTime.parse(element.alarm), element.eventTitle);
-          }
-       });
-      });
+    //   prefs = await SharedPreferences.getInstance();
+    //   mySelectedEvents = decodeMap(json.decode(prefs.getString("events") ?? "{}"));
+    //   //アラーム初期設定
+    //   mySelectedEvents.forEach((key, value) {
+    //     value.forEach((element) {
+    //       if (element.alarm != "") {
+    //         scheduleAlarm(DateTime.parse(element.alarm), element.eventTitle);
+    //       }
+    //    });
+    //   });
     });
   }
   Map<DateTime, List<MyEvents>> decodeMap(Map<String, dynamic> map) {
