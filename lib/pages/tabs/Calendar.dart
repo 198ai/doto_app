@@ -112,7 +112,7 @@ class _CalendarPageState extends State<CalendarPage> {
                     },
                     child: Text(
                       '確認',
-                      style: TextStyle(fontSize: 13),
+                      style: TextStyle(fontSize: ScreenAdapter.size(13)),
                     )),
               ],
             ),
@@ -304,7 +304,7 @@ class _CalendarPageState extends State<CalendarPage> {
                 Radius.circular(10),
               ),
               //カレンダー外側の枠
-              side: BorderSide(color: Colors.white, width: 2.0),
+              side: BorderSide(color: Colors.white, width: ScreenAdapter.width(2)),
             ),
             child: TableCalendar(
               locale: 'ja_JP',
@@ -317,8 +317,8 @@ class _CalendarPageState extends State<CalendarPage> {
               calendarFormat: _calendarFormat,
               weekendDays: [DateTime.sunday, 6],
               startingDayOfWeek: StartingDayOfWeek.monday,
-              daysOfWeekHeight: 40.0,
-              rowHeight: 60.0,
+              daysOfWeekHeight: ScreenAdapter.height(40),
+              rowHeight: ScreenAdapter.height(60),
               //eventLoader: _listOfDayEvents,
               eventLoader: _listOfDayEvents,
               calendarBuilders: CalendarBuilders(
@@ -331,7 +331,7 @@ class _CalendarPageState extends State<CalendarPage> {
               headerStyle: HeaderStyle(
                 titleCentered: true,
                 formatButtonVisible: false,
-                titleTextStyle: TextStyle(color: Colors.black, fontSize: 20.0),
+                titleTextStyle: TextStyle(color: Colors.black, fontSize: ScreenAdapter.size(20)),
                 decoration: BoxDecoration(
                     color: Colors.white,
                     borderRadius: BorderRadius.only(
@@ -349,12 +349,12 @@ class _CalendarPageState extends State<CalendarPage> {
                 leftChevronIcon: Icon(
                   Icons.chevron_left,
                   color: Colors.black,
-                  size: 28,
+                  size: ScreenAdapter.size(28),
                 ),
                 rightChevronIcon: Icon(
                   Icons.chevron_right,
                   color: Colors.black,
-                  size: 28,
+                  size: ScreenAdapter.size(28),
                 ),
               ),
               // Calendar Days Styling
@@ -457,14 +457,14 @@ class _CalendarPageState extends State<CalendarPage> {
           shape: BoxShape.circle,
           color: Colors.red[300],
         ),
-        width: 16.0,
-        height: 16.0,
+        width: ScreenAdapter.width(16),
+        height: ScreenAdapter.height(16),
         child: Center(
           child: Text(
             '${events.length}',
             style: TextStyle().copyWith(
               color: Colors.white,
-              fontSize: 12.0,
+              fontSize: ScreenAdapter.size(12),
             ),
           ),
         ),
