@@ -39,6 +39,7 @@ dependencies:
   charts_flutter: ^0.10.0
   intl: ^0.17.0
   dio: ^3.0.10
+  date_format: ^2.0.4
   flutter_local_notifications: ^1.4.4+2
 dev_dependencies:
   flutter_test:

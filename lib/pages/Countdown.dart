@@ -65,7 +65,63 @@ class _CountdownState extends State<CountDown> {
         todos.add(TodoModel.fromJson(json.decode(e)));
       });
     });
+
+    String charts = '''
+  {
+"data": {
+        "date":"2021-12-26",
+        "contents":[{"events":"看书","times":1},{"events":"扔垃圾","times":1}] 
+          },
+"data": {
+        "date":"2021-12-26",
+        "contents":[{"events":"看书","times":1},{"events":"扔垃圾","times":1}] 
+          },
+"data": {
+        "date":"2021-12-26",
+        "contents":[{"events":"看书","times":1},{"events":"扔垃圾","times":1}] 
+          }
+
   }
+    ''';
+  }
+
+//更新的时间，update记录更新的时间
+//API里面：
+//1.任务名称
+//2.当日完成总时间
+//3.更新日期
+//4.
+
+  /**
+   * 
+   * 1.
+   * ["data":{
+   * "update":"2021/12/26",
+   * {"events":"看书",
+      "times":1},
+       {"events":"玩游戏",
+      "times":5},
+       {"events":"吃饭",
+      "times":2},
+       {"events":"睡觉",
+      "times":6},
+      {"events":"打扫卫生",
+      "times":14},
+      {"events":"看书",
+      "times":50},
+       {"events":"玩游戏",
+      "times":24},
+       {"events":"吃饭",
+      "times":30},
+       {"events":"睡觉",
+      "times":26},
+      {"events":"打扫卫生",
+      "times":14}
+   }
+      
+    ]
+   * 
+   */
 
   void startTimer() {
     //获取当期时间
@@ -102,7 +158,7 @@ class _CountdownState extends State<CountDown> {
 
   //変更された時間を再保存
   void saveTime(int time) async {
-    todos[widget.index].time =time.toString();
+    todos[widget.index].time = time.toString();
     SharedPreferences list = await SharedPreferences.getInstance();
     List<String> events = todos.map((f) => json.encode(f.toJson())).toList();
     list.setString("toDoList", json.encode(events));

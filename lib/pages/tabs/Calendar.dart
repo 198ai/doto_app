@@ -34,7 +34,7 @@ class _CalendarPageState extends State<CalendarPage> {
   late Map<DateTime, List<MyEvents>> mySelectedEvents;
 
   bool visible = false; //アラーム表示するか
-  late Map setData;
+  late Map setChartJsonData;
   List setdate = [];
   late Map<DateTime, List<MyEvents>> _events; //ローカルに保存用
   late SharedPreferences prefs;
