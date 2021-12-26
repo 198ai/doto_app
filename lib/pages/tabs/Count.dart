@@ -52,7 +52,7 @@ enum setdate { date, month, week }
 class _CountPage extends State<CountPage> {
   String hasdate = ""; //日付表示
   String hasdate2 = "";
-
+  bool visible = false;
   var selectdate = setdate.date;
 
   final List<PopulationData> data = [
@@ -129,8 +129,9 @@ class _CountPage extends State<CountPage> {
 
   List<Contents> dashboardResult = [];
   List<ChartJsonData> chartJsonData = [];
-  List perTimes = [];
   List data2 = [];
+  int times = 0;
+  int totalTimes = 0;
   @override
   void initState() {
     super.initState();
@@ -145,35 +146,78 @@ class _CountPage extends State<CountPage> {
     String jsonString = ''' 
            [ {
 "date":"2021-12-26",
- "contents":[{"events":"看书","times":50},{"events":"扔垃圾","times":50}] 
+ "contents":[{"events":"読書","times":2888888888888800},{"events":"ごみ捨て","times":1000}] 
              },
   {"date":"2021-12-27",
-              "contents":[{"events":"买菜","times":20},{"events":"吃饭","times":45}] 
+              "contents":[{"events":"買い物","times":80},{"events":"ご飯食べる","times":150}] 
              },
   {"date":"2021-12-28",
-              "contents":[{"events":"睡觉","times":10},{"events":"上厕所","times":1}] 
+              "contents":[{"events":"ねる","times":500},{"events":"トイレ","times":105}] 
              }]''';
     data2 = json.decode(jsonString);
     data2.forEach((e) {
       chartJsonData.add(ChartJsonData.fromJson(e));
     });
     chartJsonData.forEach((element) {
-      element.contents.forEach((element) {
-        perTimes.add(element.times);
-        dashboardResult.add(element);
+      element.contents.forEach((e) {
+        totalTimes = totalTimes + e.times;
       });
     });
-    // data2.forEach((e) {
-    //   dashboardResult.add(PieChart.fromJson(e));
-    // });
-    // print(dashboardResult);
+    gettimes();
+    dataChange();
   }
 
-  dataChange() {
-   // Int times;
+  gettimes({bool change = false}) {
+    if (times !=0) {
+      times = 0;
+    }
     chartJsonData.forEach((element) {
-      element.contents.forEach((element) {});
+      element.contents.forEach((e) {
+        if (hasdate == element.date) {
+          times = times == 0 ? e.times : times + e.times;
+        }
+      });
     });
+  }
+
+  String constructTime(int seconds) {
+    int hour = seconds ~/ 3600;
+    int minute = seconds % 3600 ~/ 60;
+    int second = seconds % 60;
+    return formatTime(hour) +
+        "時間" +
+        formatTime(minute) +
+        "分" +
+        formatTime(second) +
+        "秒";
+  }
+
+  //数字格式化，将 0~9 的时间转换为 00~09
+  String formatTime(int timeNum) {
+    return timeNum < 10 ? "0" + timeNum.toString() : timeNum.toString();
+  }
+
+  dataChange({bool change = false}) {
+    if (change) {
+      dashboardResult = [];
+    }
+    int percent = 0;
+    chartJsonData.forEach((element) {
+      //百パーセントに変え
+      element.contents.forEach((e) {
+        if (hasdate == element.date) {
+          percent = ((e.times / times) * 100).round();
+          print(times);
+          print(hasdate);
+          dashboardResult.add(
+              Contents(times: e.times, events: e.events, percent: percent));
+        }
+      });
+    });
+    dashboardResult.isEmpty ? visible = false : visible = true;
+    print("object");
+    print("123${dashboardResult.isEmpty}");
+    print(visible);
   }
 
   _getData() {
@@ -183,7 +227,7 @@ class _CountPage extends State<CountPage> {
           data: dashboardResult,
           labelAccessorFn: (Contents row, _) => '${row.times}分',
           domainFn: (Contents grades, _) => grades.events,
-          measureFn: (Contents grades, _) => grades.times)
+          measureFn: (Contents grades, _) => grades.percent)
     ];
     return series;
   }
@@ -301,55 +345,57 @@ class _CountPage extends State<CountPage> {
                   height: 80,
                   child: Card(
                       child: Container(
-                    margin: EdgeInsets.only(top: 10),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                      children: [
-                        Column(children: [
-                          Text(
-                            "累計時間",
-                            style: TextStyle(
-                                fontSize: 18.0,
-                                // fontStyle: FontStyle.italic,
-                                color: Colors.pink,
-                                fontWeight: FontWeight.bold),
-                          ),
-                          SizedBox(
-                            height: 5,
-                          ),
-                          Text("889.5時間"),
-                        ]),
-                        Column(children: [
-                          Text(
-                            "日平均時間",
-                            style: TextStyle(
-                                fontSize: 18.0,
-                                // fontStyle: FontStyle.italic,
-                                color: Colors.pink,
-                                fontWeight: FontWeight.bold),
-                          ),
-                          SizedBox(
-                            height: 5,
-                          ),
-                          Text("2.5時間"),
-                        ]),
-                        Column(children: [
-                          Text(
-                            "予定より",
-                            style: TextStyle(
-                                fontSize: 18.0,
-                                // fontStyle: FontStyle.italic,
-                                color: Colors.pink,
-                                fontWeight: FontWeight.bold),
-                          ),
-                          SizedBox(
-                            height: 5,
-                          ),
-                          Text("2.15時間早い"),
-                        ])
-                      ],
-                    ),
-                  )),
+                          margin: EdgeInsets.only(top: 10),
+                          child: SingleChildScrollView(
+                            scrollDirection: Axis.horizontal,
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                              children: [
+                                Column(children: [
+                                  Text(
+                                    "累計時間",
+                                    style: TextStyle(
+                                        fontSize: 18.0,
+                                        // fontStyle: FontStyle.italic,
+                                        color: Colors.pink,
+                                        fontWeight: FontWeight.bold),
+                                  ),
+                                  SizedBox(
+                                    height: 5,
+                                  ),
+                                  Text("${constructTime(totalTimes)}"),
+                                ]),
+                                Column(children: [
+                                  Text(
+                                    "日平均時間",
+                                    style: TextStyle(
+                                        fontSize: 18.0,
+                                        // fontStyle: FontStyle.italic,
+                                        color: Colors.pink,
+                                        fontWeight: FontWeight.bold),
+                                  ),
+                                  SizedBox(
+                                    height: 5,
+                                  ),
+                                  Text("2.5時間"),
+                                ]),
+                                Column(children: [
+                                  Text(
+                                    "予定より",
+                                    style: TextStyle(
+                                        fontSize: 18.0,
+                                        // fontStyle: FontStyle.italic,
+                                        color: Colors.pink,
+                                        fontWeight: FontWeight.bold),
+                                  ),
+                                  SizedBox(
+                                    height: 5,
+                                  ),
+                                  Text("2.15時間早い"),
+                                ])
+                              ],
+                            ),
+                          ))),
                 ),
                 Container(
                     child: Column(
@@ -363,6 +409,10 @@ class _CountPage extends State<CountPage> {
                             splashColor: Colors.transparent,
                             onPressed: () {
                               changedate(selectdate, "back");
+                              //times = 0;
+                              dashboardResult = [];
+                              gettimes();
+                              dataChange();
                             },
                             icon: Icon(Icons.arrow_back_ios_rounded)),
                         Text(selectdate == setdate.date
@@ -373,6 +423,10 @@ class _CountPage extends State<CountPage> {
                             splashColor: Colors.transparent,
                             onPressed: () {
                               changedate(selectdate, "forward");
+                              //times = 0;
+                              dashboardResult = [];
+                              gettimes();
+                              dataChange();
                             },
                             icon: Icon(Icons.arrow_forward_ios_rounded)),
                       ],
@@ -454,82 +508,94 @@ class _CountPage extends State<CountPage> {
                     )
                   ],
                 )),
-                Container(
-                  height: 400,
-                  padding: EdgeInsets.all(20),
-                  child: Card(
-                    child: Padding(
-                      padding: const EdgeInsets.all(8.0),
-                      child: Column(
-                        children: <Widget>[
-                          Text(
-                            "円グラフ",
-                            style: TextStyle(fontWeight: FontWeight.bold),
-                          ),
-                          SizedBox(
-                            height: 20,
-                          ),
-                          Expanded(
-                            child: new charts.PieChart(
-                              _getData(),
-                              animate: true,
-                              defaultInteractions: true,
-                              defaultRenderer: new charts.ArcRendererConfig(
-                                //arcWidth: 40,
-                                arcRendererDecorators: [
-                                  new charts.ArcLabelDecorator(
-                                    labelPosition: charts.ArcLabelPosition.auto,
-                                    //labelPadding : 1
-                                  )
-                                ],
+                Visibility(
+                    visible: visible,
+                    child: Container(
+                      height: 400,
+                      padding: EdgeInsets.all(20),
+                      child: Card(
+                        child: Padding(
+                          padding: EdgeInsets.all(8.0),
+                          child: Column(
+                            children: <Widget>[
+                              Text(
+                                "円グラフ",
+                                style: TextStyle(fontWeight: FontWeight.bold),
                               ),
-                              selectionModels: [
-                                new charts.SelectionModelConfig(
-                                    type: charts.SelectionModelType.info,
-                                    changedListener: _onSelectionChanged,
-                                    updatedListener: _onSelectionUpdated),
-                                new charts.SelectionModelConfig(
-                                    type: charts.SelectionModelType.action,
-                                    changedListener: _onSelectionChanged,
-                                    updatedListener: _onSelectionUpdated),
-                              ],
-                              behaviors: [
-                                new charts.DatumLegend(
-                                  // Positions for "start" and "end" will be left and right respectively
-                                  // for widgets with a build context that has directionality ltr.
-                                  // For rtl, "start" and "end" will be right and left respectively.
-                                  // Since this example has directionality of ltr, the legend is
-                                  // positioned on the right side of the chart.
-                                  position: charts.BehaviorPosition.bottom,
-                                  // By default, if the position of the chart is on the left or right of
-                                  // the chart, [horizontalFirst] is set to false. This means that the
-                                  // legend entries will grow as new rows first instead of a new column.
-                                  horizontalFirst: true,
-                                  desiredMaxRows: 5,
-                                  desiredMaxColumns: 3,
-                                  //cellPadding:EdgeInsets.all(10),
-                                  // Set [showMeasures] to true to display measures in series legend.
-                                  showMeasures: true,
-                                  entryTextStyle: charts.TextStyleSpec(
-                                      color: charts
-                                          .MaterialPalette.red.shadeDefault,
-                                      fontFamily: 'Georgia',
-                                      fontSize: 13),
+                              SizedBox(
+                                height: 20,
+                              ),
+                              Expanded(
+                                child: new charts.PieChart(
+                                  _getData(),
+                                  animate: true,
+                                  defaultInteractions: true,
+                                  defaultRenderer: new charts.ArcRendererConfig(
+                                    //arcWidth: 40,
+                                    arcRendererDecorators: [
+                                      new charts.ArcLabelDecorator(
+                                        labelPosition:
+                                            charts.ArcLabelPosition.auto,
+                                        //labelPadding : 1
+                                      )
+                                    ],
+                                  ),
+                                  selectionModels: [
+                                    new charts.SelectionModelConfig(
+                                        type: charts.SelectionModelType.info,
+                                        changedListener: _onSelectionChanged,
+                                        updatedListener: _onSelectionUpdated),
+                                    new charts.SelectionModelConfig(
+                                        type: charts.SelectionModelType.action,
+                                        changedListener: _onSelectionChanged,
+                                        updatedListener: _onSelectionUpdated),
+                                  ],
+                                  behaviors: [
+                                    new charts.DatumLegend(
+                                      // Positions for "start" and "end" will be left and right respectively
+                                      // for widgets with a build context that has directionality ltr.
+                                      // For rtl, "start" and "end" will be right and left respectively.
+                                      // Since this example has directionality of ltr, the legend is
+                                      // positioned on the right side of the chart.
+                                      position: charts.BehaviorPosition.bottom,
+                                      // By default, if the position of the chart is on the left or right of
+                                      // the chart, [horizontalFirst] is set to false. This means that the
+                                      // legend entries will grow as new rows first instead of a new column.
+                                      horizontalFirst: true,
+                                      desiredMaxRows: 5,
+                                      desiredMaxColumns: 3,
+                                      //cellPadding:EdgeInsets.all(10),
+                                      // Set [showMeasures] to true to display measures in series legend.
+                                      showMeasures: true,
+                                      entryTextStyle: charts.TextStyleSpec(
+                                          color: charts
+                                              .MaterialPalette.red.shadeDefault,
+                                          fontFamily: 'Georgia',
+                                          fontSize: 13),
+                                    ),
+                                    // Configure the measure value to be shown by default in the legend.
+                                    // legendDefaultMeasure:
+                                    //     charts.LegendDefaultMeasure.firstValue,
+                                    // Optionally provide a measure formatter to format the measure value.
+                                    // If none is specified the value is formatted as a decimal.
+                                    // measureFormatter: (num value) {
+                                    //   return value == null ? '-' : '${value}k';
+                                    // },
+                                  ],
                                 ),
-                                // Configure the measure value to be shown by default in the legend.
-                                // legendDefaultMeasure:
-                                //     charts.LegendDefaultMeasure.firstValue,
-                                // Optionally provide a measure formatter to format the measure value.
-                                // If none is specified the value is formatted as a decimal.
-                                // measureFormatter: (num value) {
-                                //   return value == null ? '-' : '${value}k';
-                                // },
-                              ],
-                            ),
+                              ),
+                            ],
                           ),
-                        ],
+                        ),
                       ),
-                    ),
+                    )),
+                Visibility(
+                  visible: !visible,
+                  child: Container(
+                    alignment: Alignment.center,
+                    margin: EdgeInsets.only(top: 50),
+                    child: Text("この日には何もやっていないよ",
+                        style: TextStyle(fontSize: 16.0)),
                   ),
                 ),
               ],

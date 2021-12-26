@@ -40,10 +40,11 @@ class Contents {
   Contents({
     required this.events,
     required this.times,
+    required this.percent,
   });
   late final String events;
   late final int times;
-  
+  late  int percent;
   Contents.fromJson(Map<String, dynamic> json){
     events = json['events'];
     times = json['times'];
