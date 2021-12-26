@@ -170,7 +170,7 @@ class _CountPage extends State<CountPage> {
   }
 
   dataChange() {
-    Int times;
+   // Int times;
     chartJsonData.forEach((element) {
       element.contents.forEach((element) {});
     });
