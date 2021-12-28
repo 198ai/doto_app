@@ -195,8 +195,8 @@ class _CountPage extends State<CountPage> {
         });
       });
     } else {
-      var dateAdjustment =DateTime.parse(hasdate).subtract(Duration(days: 1));
-      var dateAdjustment2 =DateTime.parse(hasdate2).add(Duration(days: 1));
+      var dateAdjustment = DateTime.parse(hasdate).subtract(Duration(days: 1));
+      var dateAdjustment2 = DateTime.parse(hasdate2).add(Duration(days: 1));
       chartJsonData.forEach((element) {
         element.contents.forEach((e) {
           if (dateAdjustment.isBefore(DateTime.parse(element.date)) &&
@@ -244,8 +244,9 @@ class _CountPage extends State<CountPage> {
         });
       } else {
         element.contents.forEach((e) {
-          var dateAdjustment =DateTime.parse(hasdate).subtract(Duration(days: 1));
-          var dateAdjustment2 =DateTime.parse(hasdate2).add(Duration(days: 1));
+          var dateAdjustment =
+              DateTime.parse(hasdate).subtract(Duration(days: 1));
+          var dateAdjustment2 = DateTime.parse(hasdate2).add(Duration(days: 1));
           if (dateAdjustment.isBefore(DateTime.parse(element.date)) &&
               dateAdjustment2.isAfter(DateTime.parse(element.date))) {
             percent = ((e.times / times) * 100).round();
@@ -253,7 +254,6 @@ class _CountPage extends State<CountPage> {
                 Contents(times: e.times, events: e.events, percent: percent));
           }
         });
-        print(dashboardResult);
       }
     });
     dashboardResult.isEmpty ? visible = false : visible = true;
@@ -478,9 +478,21 @@ class _CountPage extends State<CountPage> {
                             autofocus: true,
                             highlightColor: Colors.pink,
                             onPressed: () {
-                              selectdate = setdate.date;
-                              hasdate2 = "";
-                              setState(() {});
+                              setState(() {
+                                selectdate = setdate.date;
+                                hasdate2 = "";
+                                var usedate = new DateTime.now();
+                                hasdate = formatDate(usedate, [
+                                  'yyyy',
+                                  "-",
+                                  'mm',
+                                  "-",
+                                  'dd',
+                                ]).toString();
+                                dashboardResult = [];
+                                gettimes();
+                                dataChange();
+                              });
                             },
                             child: Text("日")),
                         OutlineButton(
@@ -509,6 +521,9 @@ class _CountPage extends State<CountPage> {
                                 "-",
                                 'dd',
                               ]).toString();
+                              dashboardResult = [];
+                              gettimes();
+                              dataChange();
                               setState(() {});
                             },
                             child: Text("月")),
@@ -517,9 +532,7 @@ class _CountPage extends State<CountPage> {
                             highlightColor: Colors.pink,
                             onPressed: () {
                               selectdate = setdate.week;
-                              var usedate = hasdate == ""
-                                  ? new DateTime.now()
-                                  : DateTime.parse(hasdate);
+                              var usedate = new DateTime.now();
                               var _firstDayOfTheweek = usedate.subtract(
                                   new Duration(days: usedate.weekday - 1));
                               var changeddate = new DateTime(usedate.year,
@@ -541,6 +554,9 @@ class _CountPage extends State<CountPage> {
                                 "-",
                                 'dd',
                               ]).toString();
+                              dashboardResult = [];
+                              gettimes();
+                              dataChange();
                               setState(() {});
                             },
                             child: Text("週")),
@@ -575,7 +591,7 @@ class _CountPage extends State<CountPage> {
                                     arcRendererDecorators: [
                                       new charts.ArcLabelDecorator(
                                         labelPosition:
-                                            charts.ArcLabelPosition.auto,
+                                            charts.ArcLabelPosition.outside,
                                         //labelPadding : 1
                                       )
                                     ],
