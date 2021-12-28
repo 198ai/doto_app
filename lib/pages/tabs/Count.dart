@@ -245,10 +245,7 @@ class _CountPage extends State<CountPage> {
     return timeNum < 10 ? "0" + timeNum.toString() : timeNum.toString();
   }
 
-  dataChange({bool change = false}) {
-    if (change) {
-      dashboardResult = [];
-    }
+  dataChange() {
     int percent = 0;
     chartJsonData.forEach((element) {
       if (hasdate2 == "") {
@@ -267,6 +264,7 @@ class _CountPage extends State<CountPage> {
           var dateAdjustment2 = DateTime.parse(hasdate2).add(Duration(days: 1));
           if (dateAdjustment.isBefore(DateTime.parse(element.date)) &&
               dateAdjustment2.isAfter(DateTime.parse(element.date))) {
+            selectedTotalTimes = selectedTotalTimes + e.times;
             percent = ((e.times / times) * 100).round();
             dashboardResult.add(
                 Contents(times: e.times, events: e.events, percent: percent));
@@ -359,10 +357,6 @@ class _CountPage extends State<CountPage> {
                           ))),
                 ),
                 Container(
-                    child: Column(
-                  children: [],
-                )),
-                Container(
                     height: 550,
                     child: Card(
                       child: Padding(
@@ -379,6 +373,7 @@ class _CountPage extends State<CountPage> {
                                       changedate(selectdate, "back");
                                       //times = 0;
                                       dashboardResult = [];
+                                      selectedTotalTimes = 0;
                                       gettimes();
                                       dataChange();
                                     },
@@ -393,6 +388,7 @@ class _CountPage extends State<CountPage> {
                                       changedate(selectdate, "forward");
                                       //times = 0;
                                       dashboardResult = [];
+                                      selectedTotalTimes = 0;
                                       gettimes();
                                       dataChange();
                                     },
@@ -429,9 +425,9 @@ class _CountPage extends State<CountPage> {
                                 OutlineButton(
                                     textColor: onSelected2,
                                     onPressed: () {
-                                       onSelected2 = Colors.pink;
-                                       onSelected = Colors.black87;
-                                       onSelected3 = Colors.black87;
+                                      onSelected2 = Colors.pink;
+                                      onSelected = Colors.black87;
+                                      onSelected3 = Colors.black87;
                                       selectdate = setdate.month;
                                       var usedate = hasdate == ""
                                           ? new DateTime.now()
