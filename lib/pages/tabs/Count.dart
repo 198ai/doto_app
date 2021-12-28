@@ -146,13 +146,31 @@ class _CountPage extends State<CountPage> {
     String jsonString = ''' 
            [ {
 "date":"2021-12-26",
- "contents":[{"events":"読書","times":2888888888888800},{"events":"ごみ捨て","times":1000}] 
+ "contents":[{"events":"読書","times":280},{"events":"ごみ捨て","times":1000}] 
              },
   {"date":"2021-12-27",
-              "contents":[{"events":"買い物","times":80},{"events":"ご飯食べる","times":150}] 
+              "contents":[{"events":"買い物","times":80},{"events":"ご飯食べる","times":150},{"events":"野菜","times":1050},{"events":"遊び","times":150}] 
              },
   {"date":"2021-12-28",
-              "contents":[{"events":"ねる","times":500},{"events":"トイレ","times":105}] 
+              "contents":[{"events":"ねる","times":500},{"events":"トイレ","times":105},{"events":"お野菜","times":105}] 
+             },
+             {"date":"2021-11-28",
+              "contents":[{"events":"11月","times":500},{"events":"トイレ","times":105},{"events":"お野菜","times":105}] 
+             },
+             {"date":"2021-10-28",
+              "contents":[{"events":"10月","times":500},{"events":"トイレ","times":105},{"events":"お野菜","times":105}] 
+             },
+             {"date":"2021-10-01",
+              "contents":[{"events":"10月01","times":500},{"events":"测试3","times":105},{"events":"努力测试3","times":105}] 
+             },
+              {"date":"2021-10-25",
+              "contents":[{"events":"10月25","times":500},{"events":"测试","times":105},{"events":"努力测试","times":105}] 
+             },
+             {"date":"2021-10-31",
+              "contents":[{"events":"10月31","times":500},{"events":"测试1","times":105},{"events":"努力测试1","times":105}] 
+             },
+             {"date":"2021-11-01",
+              "contents":[{"events":"11月1","times":500},{"events":"测试11","times":105},{"events":"努力测试11","times":105}] 
              }]''';
     data2 = json.decode(jsonString);
     data2.forEach((e) {
@@ -167,17 +185,27 @@ class _CountPage extends State<CountPage> {
     dataChange();
   }
 
-  gettimes({bool change = false}) {
-    if (times !=0) {
-      times = 0;
-    }
-    chartJsonData.forEach((element) {
-      element.contents.forEach((e) {
-        if (hasdate == element.date) {
-          times = times == 0 ? e.times : times + e.times;
-        }
+  gettimes() {
+    if (hasdate2 == "") {
+      chartJsonData.forEach((element) {
+        element.contents.forEach((e) {
+          if (hasdate == element.date) {
+            times = times == 0 ? e.times : times + e.times;
+          }
+        });
       });
-    });
+    } else {
+      var dateAdjustment =DateTime.parse(hasdate).subtract(Duration(days: 1));
+      var dateAdjustment2 =DateTime.parse(hasdate2).add(Duration(days: 1));
+      chartJsonData.forEach((element) {
+        element.contents.forEach((e) {
+          if (dateAdjustment.isBefore(DateTime.parse(element.date)) &&
+              dateAdjustment2.isAfter(DateTime.parse(element.date))) {
+            times = times == 0 ? e.times : times + e.times;
+          }
+        });
+      });
+    }
   }
 
   String constructTime(int seconds) {
@@ -204,20 +232,31 @@ class _CountPage extends State<CountPage> {
     int percent = 0;
     chartJsonData.forEach((element) {
       //百パーセントに変え
-      element.contents.forEach((e) {
-        if (hasdate == element.date) {
-          percent = ((e.times / times) * 100).round();
-          print(times);
-          print(hasdate);
-          dashboardResult.add(
-              Contents(times: e.times, events: e.events, percent: percent));
-        }
-      });
+      //如果hasdata2是零，那么执行
+
+      if (hasdate2 == "") {
+        element.contents.forEach((e) {
+          if (hasdate == element.date) {
+            percent = ((e.times / times) * 100).round();
+            dashboardResult.add(
+                Contents(times: e.times, events: e.events, percent: percent));
+          }
+        });
+      } else {
+        element.contents.forEach((e) {
+          var dateAdjustment =DateTime.parse(hasdate).subtract(Duration(days: 1));
+          var dateAdjustment2 =DateTime.parse(hasdate2).add(Duration(days: 1));
+          if (dateAdjustment.isBefore(DateTime.parse(element.date)) &&
+              dateAdjustment2.isAfter(DateTime.parse(element.date))) {
+            percent = ((e.times / times) * 100).round();
+            dashboardResult.add(
+                Contents(times: e.times, events: e.events, percent: percent));
+          }
+        });
+        print(dashboardResult);
+      }
     });
     dashboardResult.isEmpty ? visible = false : visible = true;
-    print("object");
-    print("123${dashboardResult.isEmpty}");
-    print(visible);
   }
 
   _getData() {
@@ -440,6 +479,8 @@ class _CountPage extends State<CountPage> {
                             highlightColor: Colors.pink,
                             onPressed: () {
                               selectdate = setdate.date;
+                              hasdate2 = "";
+                              setState(() {});
                             },
                             child: Text("日")),
                         OutlineButton(
@@ -486,7 +527,6 @@ class _CountPage extends State<CountPage> {
 
                               var changeddate2 = new DateTime(changeddate.year,
                                   changeddate.month, changeddate.day + 06);
-                              print(_firstDayOfTheweek.day);
                               hasdate = formatDate(changeddate, [
                                 'yyyy',
                                 "-",
@@ -625,7 +665,6 @@ class _CountPage extends State<CountPage> {
         case setdate.month:
           //2021-12-01~2022-01-01
           var changeddate = new DateTime(usedate.year, usedate.month - 1, 01);
-          print(changeddate);
           var changeddate2 =
               new DateTime(changeddate.year, changeddate.month + 1, 01);
           hasdate = formatDate(changeddate, [
@@ -653,7 +692,6 @@ class _CountPage extends State<CountPage> {
 
           var changeddate2 = new DateTime(
               changeddate.year, changeddate.month, changeddate.day + 6);
-          print(_firstDayOfTheweek.day);
           hasdate = formatDate(changeddate, [
             'yyyy',
             "-",
@@ -674,7 +712,6 @@ class _CountPage extends State<CountPage> {
       switch (getdate) {
         case setdate.date:
           var changeddate = usedate.add(Duration(days: 1));
-          print(changeddate);
           hasdate = formatDate(changeddate, [
             'yyyy',
             "-",
@@ -710,7 +747,6 @@ class _CountPage extends State<CountPage> {
 
           var changeddate2 = new DateTime(
               changeddate.year, changeddate.month, changeddate.day + 6);
-          print(_firstDayOfTheweek.day);
           hasdate = formatDate(changeddate, [
             'yyyy',
             "-",
@@ -731,7 +767,6 @@ class _CountPage extends State<CountPage> {
   }
 
   _onSelectionChanged(charts.SelectionModel model) {
-    print('In _onSelectionChanged');
     final selectedDatum = model.selectedDatum;
     // print(selectedDatum.length);
     if (selectedDatum.first.datum) {
