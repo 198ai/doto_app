@@ -148,7 +148,7 @@ class _CountPage extends State<CountPage> {
     String jsonString = ''' 
            [ {
 "date":"2021-12-26",
- "contents":[{"events":"読書","times":280},{"events":"ごみ捨て","times":1000000000},{"events":"ごみ捨て","times":1000}] 
+ "contents":[{"events":"読書","times":280},{"events":"ごみ捨て","times":1000000},{"events":"ごみ捨て","times":1000}] 
              },
   {"date":"2021-12-27",
               "contents":[{"events":"買い物","times":80},{"events":"ご飯食べる","times":150},{"events":"野菜","times":1050},{"events":"遊び","times":150}] 
@@ -210,16 +210,30 @@ class _CountPage extends State<CountPage> {
     }
   }
 
-  String constructTime(int seconds) {
+  String constructTime(int seconds, {bool time = false}) {
     int hour = seconds ~/ 3600;
     int minute = seconds % 3600 ~/ 60;
     int second = seconds % 60;
-    return formatTime(hour) +
-        "時間" +
-        formatTime(minute) +
-        "分" +
-        formatTime(second) +
-        "秒";
+    if (hour == 0) {
+      if (time) {
+        return formatTime(minute) + ":" + formatTime(second);
+      }
+      return formatTime(minute) + "分" + formatTime(second) + "秒";
+    } else {
+      if (time) {
+        return formatTime(hour) +
+            ":" +
+            formatTime(minute) +
+            ":" +
+            formatTime(second);
+      }
+      return formatTime(hour) +
+          "時間" +
+          formatTime(minute) +
+          "分" +
+          formatTime(second) +
+          "秒";
+    }
   }
 
   //数字格式化，将 0~9 的时间转换为 00~09
@@ -233,9 +247,6 @@ class _CountPage extends State<CountPage> {
     }
     int percent = 0;
     chartJsonData.forEach((element) {
-      //百パーセントに変え
-      //如果hasdata2是零，那么执行
-
       if (hasdate2 == "") {
         element.contents.forEach((e) {
           if (hasdate == element.date) {
@@ -289,56 +300,55 @@ class _CountPage extends State<CountPage> {
               children: [
                 Container(
                   height: 80,
+                  width: 600,
                   child: Card(
                       child: Container(
+                          alignment: Alignment.center,
                           margin: EdgeInsets.only(top: 10),
                           child: SingleChildScrollView(
                             scrollDirection: Axis.horizontal,
                             child: Row(
                               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                               children: [
-                                Column(children: [
-                                  Text(
-                                    "累計時間",
-                                    style: TextStyle(
-                                        fontSize: 18.0,
-                                        // fontStyle: FontStyle.italic,
-                                        color: Colors.pink,
-                                        fontWeight: FontWeight.bold),
-                                  ),
-                                  SizedBox(
-                                    height: 5,
-                                  ),
-                                  Text("${constructTime(totalTimes)}"),
-                                ]),
-                                Column(children: [
-                                  Text(
-                                    "日平均時間",
-                                    style: TextStyle(
-                                        fontSize: 18.0,
-                                        // fontStyle: FontStyle.italic,
-                                        color: Colors.pink,
-                                        fontWeight: FontWeight.bold),
-                                  ),
-                                  SizedBox(
-                                    height: 5,
-                                  ),
-                                  Text("2.5時間"),
-                                ]),
-                                Column(children: [
-                                  Text(
-                                    "予定より",
-                                    style: TextStyle(
-                                        fontSize: 18.0,
-                                        // fontStyle: FontStyle.italic,
-                                        color: Colors.pink,
-                                        fontWeight: FontWeight.bold),
-                                  ),
-                                  SizedBox(
-                                    height: 5,
-                                  ),
-                                  Text("2.15時間早い"),
-                                ])
+                                Text(
+                                  "累計総時間:",
+                                  style: TextStyle(
+                                      fontSize: 18.0,
+                                      // fontStyle: FontStyle.italic,
+                                      color: Colors.pink,
+                                      fontWeight: FontWeight.bold),
+                                ),
+                                SizedBox(width: 20),
+                                Text("${constructTime(totalTimes)}"),
+
+                                //   Column(children: [
+                                //     Text(
+                                //       "平均",
+                                //       style: TextStyle(
+                                //           fontSize: 18.0,
+                                //           // fontStyle: FontStyle.italic,
+                                //           color: Colors.pink,
+                                //           fontWeight: FontWeight.bold),
+                                //     ),
+                                //     SizedBox(
+                                //       height: 5,
+                                //     ),
+                                //     Text("2.5時間"),
+                                //   ]),
+                                //   Column(children: [
+                                //     Text(
+                                //       "本日",
+                                //       style: TextStyle(
+                                //           fontSize: 18.0,
+                                //           // fontStyle: FontStyle.italic,
+                                //           color: Colors.pink,
+                                //           fontWeight: FontWeight.bold),
+                                //     ),
+                                //     SizedBox(
+                                //       height: 5,
+                                //     ),
+                                //     Text("2.15時間早い"),
+                                //   ])
                               ],
                             ),
                           ))),
@@ -348,8 +358,7 @@ class _CountPage extends State<CountPage> {
                   children: [],
                 )),
                 Container(
-                    height: 600,
-                    padding: EdgeInsets.all(20),
+                    height: 550,
                     child: Card(
                       child: Padding(
                         padding: EdgeInsets.all(8.0),
@@ -488,9 +497,14 @@ class _CountPage extends State<CountPage> {
                             Visibility(
                                 visible: visible,
                                 child: Container(
-                                  height:400,
+                                  height: 400,
                                   width: 400,
                                   child: SfCircularChart(
+                                    title: ChartTitle(
+                                        text:
+                                            '総時間:${constructTime(totalTimes)}',
+                                        textStyle: TextStyle(fontSize: 13)),
+                                    margin: EdgeInsets.only(top: 10),
                                     legend: Legend(
                                         position: LegendPosition.bottom,
                                         isVisible: true,
@@ -498,6 +512,10 @@ class _CountPage extends State<CountPage> {
                                             LegendItemOverflowMode.wrap),
                                     tooltipBehavior:
                                         TooltipBehavior(enable: true),
+                                    onTooltipRender: (TooltipArgs args,) {
+                                      String newarg=args.text.toString();
+                                      args.text = newarg.substring(0,newarg.indexOf(":"));
+                                    },
                                     series: <CircularSeries>[
                                       PieSeries<Contents, String>(
                                           dataSource: dashboardResult,
@@ -506,9 +524,9 @@ class _CountPage extends State<CountPage> {
                                           yValueMapper: (Contents data, _) =>
                                               data.times,
                                           dataLabelMapper: (Contents data, _) =>
-                                              "${data.times}分",
+                                              "${constructTime(data.times)}",
                                           dataLabelSettings: DataLabelSettings(
-                                            isVisible:true,
+                                            isVisible: true,
                                             showCumulativeValues: false,
                                           ),
                                           enableTooltip: true,
