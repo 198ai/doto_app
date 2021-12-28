@@ -134,6 +134,7 @@ class _CountPage extends State<CountPage> {
   List data2 = [];
   int times = 0;
   int totalTimes = 0;
+  int selectedTotalTimes = 0;
   @override
   void initState() {
     super.initState();
@@ -251,6 +252,7 @@ class _CountPage extends State<CountPage> {
         element.contents.forEach((e) {
           if (hasdate == element.date) {
             percent = ((e.times / times) * 100).round();
+            selectedTotalTimes = selectedTotalTimes + e.times;
             dashboardResult.add(
                 Contents(times: e.times, events: e.events, percent: percent));
           }
@@ -502,7 +504,7 @@ class _CountPage extends State<CountPage> {
                                   child: SfCircularChart(
                                     title: ChartTitle(
                                         text:
-                                            '総時間:${constructTime(totalTimes)}',
+                                            '総時間:${constructTime(selectedTotalTimes)}',
                                         textStyle: TextStyle(fontSize: 13)),
                                     margin: EdgeInsets.only(top: 10),
                                     legend: Legend(
@@ -512,9 +514,12 @@ class _CountPage extends State<CountPage> {
                                             LegendItemOverflowMode.wrap),
                                     tooltipBehavior:
                                         TooltipBehavior(enable: true),
-                                    onTooltipRender: (TooltipArgs args,) {
-                                      String newarg=args.text.toString();
-                                      args.text = newarg.substring(0,newarg.indexOf(":"));
+                                    onTooltipRender: (
+                                      TooltipArgs args,
+                                    ) {
+                                      String newarg = args.text.toString();
+                                      args.text = newarg.substring(
+                                          0, newarg.indexOf(":"));
                                     },
                                     series: <CircularSeries>[
                                       PieSeries<Contents, String>(
