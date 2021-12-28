@@ -135,6 +135,9 @@ class _CountPage extends State<CountPage> {
   int times = 0;
   int totalTimes = 0;
   int selectedTotalTimes = 0;
+  Color onSelected = Colors.black87;
+  Color onSelected2 = Colors.black87;
+  Color onSelected3 = Colors.black87;
   @override
   void initState() {
     super.initState();
@@ -401,10 +404,11 @@ class _CountPage extends State<CountPage> {
                               mainAxisAlignment: MainAxisAlignment.center,
                               children: [
                                 OutlineButton(
-                                    hoverColor: Colors.white,
-                                    autofocus: true,
-                                    highlightColor: Colors.pink,
+                                    textColor: onSelected,
                                     onPressed: () {
+                                      onSelected = Colors.pink;
+                                      onSelected2 = Colors.black87;
+                                      onSelected3 = Colors.black87;
                                       setState(() {
                                         selectdate = setdate.date;
                                         hasdate2 = "";
@@ -423,9 +427,11 @@ class _CountPage extends State<CountPage> {
                                     },
                                     child: Text("日")),
                                 OutlineButton(
-                                    hoverColor: Colors.white,
-                                    highlightColor: Colors.pink,
+                                    textColor: onSelected2,
                                     onPressed: () {
+                                       onSelected2 = Colors.pink;
+                                       onSelected = Colors.black87;
+                                       onSelected3 = Colors.black87;
                                       selectdate = setdate.month;
                                       var usedate = hasdate == ""
                                           ? new DateTime.now()
@@ -457,9 +463,11 @@ class _CountPage extends State<CountPage> {
                                     },
                                     child: Text("月")),
                                 OutlineButton(
-                                    hoverColor: Colors.white,
-                                    highlightColor: Colors.pink,
+                                    textColor: onSelected3,
                                     onPressed: () {
+                                      onSelected3 = Colors.pink;
+                                      onSelected2 = Colors.black87;
+                                      onSelected = Colors.black87;
                                       selectdate = setdate.week;
                                       var usedate = new DateTime.now();
                                       var _firstDayOfTheweek = usedate.subtract(
