@@ -438,131 +438,7 @@ class _CountPage extends State<CountPage> {
                 ),
                 Container(
                     child: Column(
-                  children: [
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                      children: [
-                        Text("総時間表示"),
-                        IconButton(
-                            highlightColor: Colors.transparent,
-                            splashColor: Colors.transparent,
-                            onPressed: () {
-                              changedate(selectdate, "back");
-                              //times = 0;
-                              dashboardResult = [];
-                              gettimes();
-                              dataChange();
-                            },
-                            icon: Icon(Icons.arrow_back_ios_rounded)),
-                        Text(selectdate == setdate.date
-                            ? hasdate
-                            : hasdate + ' ~ ' + hasdate2),
-                        IconButton(
-                            highlightColor: Colors.transparent,
-                            splashColor: Colors.transparent,
-                            onPressed: () {
-                              changedate(selectdate, "forward");
-                              //times = 0;
-                              dashboardResult = [];
-                              gettimes();
-                              dataChange();
-                            },
-                            icon: Icon(Icons.arrow_forward_ios_rounded)),
-                      ],
-                    ),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        OutlineButton(
-                            hoverColor: Colors.white,
-                            autofocus: true,
-                            highlightColor: Colors.pink,
-                            onPressed: () {
-                              setState(() {
-                                selectdate = setdate.date;
-                                hasdate2 = "";
-                                var usedate = new DateTime.now();
-                                hasdate = formatDate(usedate, [
-                                  'yyyy',
-                                  "-",
-                                  'mm',
-                                  "-",
-                                  'dd',
-                                ]).toString();
-                                dashboardResult = [];
-                                gettimes();
-                                dataChange();
-                              });
-                            },
-                            child: Text("日")),
-                        OutlineButton(
-                            hoverColor: Colors.white,
-                            highlightColor: Colors.pink,
-                            onPressed: () {
-                              selectdate = setdate.month;
-                              var usedate = hasdate == ""
-                                  ? new DateTime.now()
-                                  : DateTime.parse(hasdate);
-                              var changeddate =
-                                  new DateTime(usedate.year, usedate.month, 01);
-                              var changeddate2 = new DateTime(
-                                  changeddate.year, changeddate.month + 1, 01);
-                              hasdate = formatDate(changeddate, [
-                                'yyyy',
-                                "-",
-                                'mm',
-                                "-",
-                                'dd',
-                              ]).toString();
-                              hasdate2 = formatDate(changeddate2, [
-                                'yyyy',
-                                "-",
-                                'mm',
-                                "-",
-                                'dd',
-                              ]).toString();
-                              dashboardResult = [];
-                              gettimes();
-                              dataChange();
-                              setState(() {});
-                            },
-                            child: Text("月")),
-                        OutlineButton(
-                            hoverColor: Colors.white,
-                            highlightColor: Colors.pink,
-                            onPressed: () {
-                              selectdate = setdate.week;
-                              var usedate = new DateTime.now();
-                              var _firstDayOfTheweek = usedate.subtract(
-                                  new Duration(days: usedate.weekday - 1));
-                              var changeddate = new DateTime(usedate.year,
-                                  usedate.month, _firstDayOfTheweek.day);
-
-                              var changeddate2 = new DateTime(changeddate.year,
-                                  changeddate.month, changeddate.day + 06);
-                              hasdate = formatDate(changeddate, [
-                                'yyyy',
-                                "-",
-                                'mm',
-                                "-",
-                                'dd',
-                              ]).toString();
-                              hasdate2 = formatDate(changeddate2, [
-                                'yyyy',
-                                "-",
-                                'mm',
-                                "-",
-                                'dd',
-                              ]).toString();
-                              dashboardResult = [];
-                              gettimes();
-                              dataChange();
-                              setState(() {});
-                            },
-                            child: Text("週")),
-                      ],
-                    )
-                  ],
+                  children: [],
                 )),
                 Visibility(
                     visible: visible,
@@ -574,12 +450,136 @@ class _CountPage extends State<CountPage> {
                           padding: EdgeInsets.all(8.0),
                           child: Column(
                             children: <Widget>[
-                              Text(
-                                "円グラフ",
-                                style: TextStyle(fontWeight: FontWeight.bold),
+                              Row(
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceEvenly,
+                                children: [
+                                  IconButton(
+                                      highlightColor: Colors.transparent,
+                                      splashColor: Colors.transparent,
+                                      onPressed: () {
+                                        changedate(selectdate, "back");
+                                        //times = 0;
+                                        dashboardResult = [];
+                                        gettimes();
+                                        dataChange();
+                                      },
+                                      icon: Icon(Icons.arrow_back_ios_rounded)),
+                                  Text(selectdate == setdate.date
+                                      ? hasdate
+                                      : hasdate + ' ~ ' + hasdate2),
+                                  IconButton(
+                                      highlightColor: Colors.transparent,
+                                      splashColor: Colors.transparent,
+                                      onPressed: () {
+                                        changedate(selectdate, "forward");
+                                        //times = 0;
+                                        dashboardResult = [];
+                                        gettimes();
+                                        dataChange();
+                                      },
+                                      icon: Icon(
+                                          Icons.arrow_forward_ios_rounded)),
+                                ],
                               ),
-                              SizedBox(
-                                height: 20,
+                              Row(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  OutlineButton(
+                                      hoverColor: Colors.white,
+                                      autofocus: true,
+                                      highlightColor: Colors.pink,
+                                      onPressed: () {
+                                        setState(() {
+                                          selectdate = setdate.date;
+                                          hasdate2 = "";
+                                          var usedate = new DateTime.now();
+                                          hasdate = formatDate(usedate, [
+                                            'yyyy',
+                                            "-",
+                                            'mm',
+                                            "-",
+                                            'dd',
+                                          ]).toString();
+                                          dashboardResult = [];
+                                          gettimes();
+                                          dataChange();
+                                        });
+                                      },
+                                      child: Text("日")),
+                                  OutlineButton(
+                                      hoverColor: Colors.white,
+                                      highlightColor: Colors.pink,
+                                      onPressed: () {
+                                        selectdate = setdate.month;
+                                        var usedate = hasdate == ""
+                                            ? new DateTime.now()
+                                            : DateTime.parse(hasdate);
+                                        var changeddate = new DateTime(
+                                            usedate.year, usedate.month, 01);
+                                        var changeddate2 = new DateTime(
+                                            changeddate.year,
+                                            changeddate.month + 1,
+                                            01);
+                                        hasdate = formatDate(changeddate, [
+                                          'yyyy',
+                                          "-",
+                                          'mm',
+                                          "-",
+                                          'dd',
+                                        ]).toString();
+                                        hasdate2 = formatDate(changeddate2, [
+                                          'yyyy',
+                                          "-",
+                                          'mm',
+                                          "-",
+                                          'dd',
+                                        ]).toString();
+                                        dashboardResult = [];
+                                        gettimes();
+                                        dataChange();
+                                        setState(() {});
+                                      },
+                                      child: Text("月")),
+                                  OutlineButton(
+                                      hoverColor: Colors.white,
+                                      highlightColor: Colors.pink,
+                                      onPressed: () {
+                                        selectdate = setdate.week;
+                                        var usedate = new DateTime.now();
+                                        var _firstDayOfTheweek =
+                                            usedate.subtract(new Duration(
+                                                days: usedate.weekday - 1));
+                                        var changeddate = new DateTime(
+                                            usedate.year,
+                                            usedate.month,
+                                            _firstDayOfTheweek.day);
+
+                                        var changeddate2 = new DateTime(
+                                            changeddate.year,
+                                            changeddate.month,
+                                            changeddate.day + 06);
+                                        hasdate = formatDate(changeddate, [
+                                          'yyyy',
+                                          "-",
+                                          'mm',
+                                          "-",
+                                          'dd',
+                                        ]).toString();
+                                        hasdate2 = formatDate(changeddate2, [
+                                          'yyyy',
+                                          "-",
+                                          'mm',
+                                          "-",
+                                          'dd',
+                                        ]).toString();
+                                        dashboardResult = [];
+                                        gettimes();
+                                        dataChange();
+                                        setState(() {});
+                                      },
+                                      child: Text("週")),
+                                ],
                               ),
                               Expanded(
                                 child: new charts.PieChart(
