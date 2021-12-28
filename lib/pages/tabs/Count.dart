@@ -6,6 +6,8 @@ import 'package:doto_app/services/ScreenAdapter.dart';
 import 'package:flutter/material.dart';
 import 'package:charts_flutter/flutter.dart' as charts;
 import 'package:intl/intl.dart';
+import 'package:syncfusion_flutter_charts/charts.dart';
+import 'package:syncfusion_flutter_charts/sparkcharts.dart';
 
 class CountPage extends StatefulWidget {
   CountPage({
@@ -146,7 +148,7 @@ class _CountPage extends State<CountPage> {
     String jsonString = ''' 
            [ {
 "date":"2021-12-26",
- "contents":[{"events":"読書","times":280},{"events":"ごみ捨て","times":1000}] 
+ "contents":[{"events":"読書","times":280},{"events":"ごみ捨て","times":1000000000},{"events":"ごみ捨て","times":1000}] 
              },
   {"date":"2021-12-27",
               "contents":[{"events":"買い物","times":80},{"events":"ご飯食べる","times":150},{"events":"野菜","times":1050},{"events":"遊び","times":150}] 
@@ -271,46 +273,6 @@ class _CountPage extends State<CountPage> {
     return series;
   }
 
-  _getSeriesData() {
-    List<charts.Series<PopulationData, String>> series = [
-      charts.Series(
-          id: "Population",
-          data: data,
-          domainFn: (PopulationData series, _) => series.year.toString(),
-          measureFn: (PopulationData series, _) => series.population,
-          colorFn: (PopulationData series, _) => series.barColor)
-    ];
-    return series;
-  }
-
-  final data1 = [
-    new SalesData(1, 1500000),
-    new SalesData(2, 1735000),
-    new SalesData(3, 1678000),
-    new SalesData(4, 1890000),
-    new SalesData(5, 1907000),
-    new SalesData(6, 2300000),
-    new SalesData(7, 2360000),
-    new SalesData(8, 1980000),
-    new SalesData(9, 2654000),
-    new SalesData(10, 2789070),
-    new SalesData(11, 2789070),
-    new SalesData(12, 2789070),
-  ];
-
-  _getSeries() {
-    List<charts.Series<SalesData, int>> series = [
-      charts.Series(
-          id: "Sales",
-          data: data1,
-          domainFn: (SalesData series, _) => series.month,
-          measureFn: (SalesData series, _) => series.time,
-          colorFn: (SalesData series, _) =>
-              charts.MaterialPalette.blue.shadeDefault)
-    ];
-    return series;
-  }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -325,61 +287,6 @@ class _CountPage extends State<CountPage> {
           child: Center(
             child: Column(
               children: [
-                // Container(
-                //   height: 400,
-                //   padding: EdgeInsets.all(20),
-                //   child: Card(
-                //     child: Padding(
-                //       padding: const EdgeInsets.all(8.0),
-                //       child: Column(
-                //         children: <Widget>[
-                //           Text(
-                //             "タイトル",
-                //             style: TextStyle(fontWeight: FontWeight.bold),
-                //           ),
-                //           SizedBox(
-                //             height: 20,
-                //           ),
-                //           Expanded(
-                //             child: charts.BarChart(
-                //               _getSeriesData(),
-                //               animate: true,
-                //               domainAxis: charts.OrdinalAxisSpec(
-                //                   renderSpec: charts.SmallTickRendererSpec(
-                //                       labelRotation: 60)),
-                //             ),
-                //           ),
-                //         ],
-                //       ),
-                //     ),
-                //   ),
-                // ),
-                // Container(
-                //   height: 400,
-                //   padding: EdgeInsets.all(20),
-                //   child: Card(
-                //     child: Padding(
-                //       padding: const EdgeInsets.all(8.0),
-                //       child: Column(
-                //         children: <Widget>[
-                //           Text(
-                //             "タイトル",
-                //             style: TextStyle(fontWeight: FontWeight.bold),
-                //           ),
-                //           SizedBox(
-                //             height: 20,
-                //           ),
-                //           Expanded(
-                //             child: new charts.LineChart(
-                //               _getSeries(),
-                //               animate: true,
-                //             ),
-                //           )
-                //         ],
-                //       ),
-                //     ),
-                //   ),
-                // ),
                 Container(
                   height: 80,
                   child: Card(
@@ -440,133 +347,58 @@ class _CountPage extends State<CountPage> {
                     child: Column(
                   children: [],
                 )),
-                Visibility(
-                    visible: visible,
-                    child: Container(
-                      height: 400,
-                      padding: EdgeInsets.all(20),
-                      child: Card(
-                        child: Padding(
-                          padding: EdgeInsets.all(8.0),
-                          child: Column(
-                            children: <Widget>[
-                              Row(
-                                mainAxisAlignment:
-                                    MainAxisAlignment.spaceEvenly,
-                                children: [
-                                  IconButton(
-                                      highlightColor: Colors.transparent,
-                                      splashColor: Colors.transparent,
-                                      onPressed: () {
-                                        changedate(selectdate, "back");
-                                        //times = 0;
-                                        dashboardResult = [];
-                                        gettimes();
-                                        dataChange();
-                                      },
-                                      icon: Icon(Icons.arrow_back_ios_rounded)),
-                                  Text(selectdate == setdate.date
-                                      ? hasdate
-                                      : hasdate + ' ~ ' + hasdate2),
-                                  IconButton(
-                                      highlightColor: Colors.transparent,
-                                      splashColor: Colors.transparent,
-                                      onPressed: () {
-                                        changedate(selectdate, "forward");
-                                        //times = 0;
-                                        dashboardResult = [];
-                                        gettimes();
-                                        dataChange();
-                                      },
-                                      icon: Icon(
-                                          Icons.arrow_forward_ios_rounded)),
-                                ],
-                              ),
-                              Row(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: [
-                                  OutlineButton(
-                                      hoverColor: Colors.white,
-                                      autofocus: true,
-                                      highlightColor: Colors.pink,
-                                      onPressed: () {
-                                        setState(() {
-                                          selectdate = setdate.date;
-                                          hasdate2 = "";
-                                          var usedate = new DateTime.now();
-                                          hasdate = formatDate(usedate, [
-                                            'yyyy',
-                                            "-",
-                                            'mm',
-                                            "-",
-                                            'dd',
-                                          ]).toString();
-                                          dashboardResult = [];
-                                          gettimes();
-                                          dataChange();
-                                        });
-                                      },
-                                      child: Text("日")),
-                                  OutlineButton(
-                                      hoverColor: Colors.white,
-                                      highlightColor: Colors.pink,
-                                      onPressed: () {
-                                        selectdate = setdate.month;
-                                        var usedate = hasdate == ""
-                                            ? new DateTime.now()
-                                            : DateTime.parse(hasdate);
-                                        var changeddate = new DateTime(
-                                            usedate.year, usedate.month, 01);
-                                        var changeddate2 = new DateTime(
-                                            changeddate.year,
-                                            changeddate.month + 1,
-                                            01);
-                                        hasdate = formatDate(changeddate, [
-                                          'yyyy',
-                                          "-",
-                                          'mm',
-                                          "-",
-                                          'dd',
-                                        ]).toString();
-                                        hasdate2 = formatDate(changeddate2, [
-                                          'yyyy',
-                                          "-",
-                                          'mm',
-                                          "-",
-                                          'dd',
-                                        ]).toString();
-                                        dashboardResult = [];
-                                        gettimes();
-                                        dataChange();
-                                        setState(() {});
-                                      },
-                                      child: Text("月")),
-                                  OutlineButton(
-                                      hoverColor: Colors.white,
-                                      highlightColor: Colors.pink,
-                                      onPressed: () {
-                                        selectdate = setdate.week;
+                Container(
+                    height: 600,
+                    padding: EdgeInsets.all(20),
+                    child: Card(
+                      child: Padding(
+                        padding: EdgeInsets.all(8.0),
+                        child: Column(
+                          children: <Widget>[
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                              children: [
+                                IconButton(
+                                    highlightColor: Colors.transparent,
+                                    splashColor: Colors.transparent,
+                                    onPressed: () {
+                                      changedate(selectdate, "back");
+                                      //times = 0;
+                                      dashboardResult = [];
+                                      gettimes();
+                                      dataChange();
+                                    },
+                                    icon: Icon(Icons.arrow_back_ios_rounded)),
+                                Text(selectdate == setdate.date
+                                    ? hasdate
+                                    : hasdate + ' ~ ' + hasdate2),
+                                IconButton(
+                                    highlightColor: Colors.transparent,
+                                    splashColor: Colors.transparent,
+                                    onPressed: () {
+                                      changedate(selectdate, "forward");
+                                      //times = 0;
+                                      dashboardResult = [];
+                                      gettimes();
+                                      dataChange();
+                                    },
+                                    icon:
+                                        Icon(Icons.arrow_forward_ios_rounded)),
+                              ],
+                            ),
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                OutlineButton(
+                                    hoverColor: Colors.white,
+                                    autofocus: true,
+                                    highlightColor: Colors.pink,
+                                    onPressed: () {
+                                      setState(() {
+                                        selectdate = setdate.date;
+                                        hasdate2 = "";
                                         var usedate = new DateTime.now();
-                                        var _firstDayOfTheweek =
-                                            usedate.subtract(new Duration(
-                                                days: usedate.weekday - 1));
-                                        var changeddate = new DateTime(
-                                            usedate.year,
-                                            usedate.month,
-                                            _firstDayOfTheweek.day);
-
-                                        var changeddate2 = new DateTime(
-                                            changeddate.year,
-                                            changeddate.month,
-                                            changeddate.day + 06);
-                                        hasdate = formatDate(changeddate, [
-                                          'yyyy',
-                                          "-",
-                                          'mm',
-                                          "-",
-                                          'dd',
-                                        ]).toString();
-                                        hasdate2 = formatDate(changeddate2, [
+                                        hasdate = formatDate(usedate, [
                                           'yyyy',
                                           "-",
                                           'mm',
@@ -576,84 +408,127 @@ class _CountPage extends State<CountPage> {
                                         dashboardResult = [];
                                         gettimes();
                                         dataChange();
-                                        setState(() {});
-                                      },
-                                      child: Text("週")),
-                                ],
-                              ),
-                              Expanded(
-                                child: new charts.PieChart(
-                                  _getData(),
-                                  animate: true,
-                                  defaultInteractions: true,
-                                  defaultRenderer: new charts.ArcRendererConfig(
-                                    //arcWidth: 40,
-                                    arcRendererDecorators: [
-                                      new charts.ArcLabelDecorator(
-                                        labelPosition:
-                                            charts.ArcLabelPosition.outside,
-                                        //labelPadding : 1
-                                      )
+                                      });
+                                    },
+                                    child: Text("日")),
+                                OutlineButton(
+                                    hoverColor: Colors.white,
+                                    highlightColor: Colors.pink,
+                                    onPressed: () {
+                                      selectdate = setdate.month;
+                                      var usedate = hasdate == ""
+                                          ? new DateTime.now()
+                                          : DateTime.parse(hasdate);
+                                      var changeddate = new DateTime(
+                                          usedate.year, usedate.month, 01);
+                                      var changeddate2 = new DateTime(
+                                          changeddate.year,
+                                          changeddate.month + 1,
+                                          01);
+                                      hasdate = formatDate(changeddate, [
+                                        'yyyy',
+                                        "-",
+                                        'mm',
+                                        "-",
+                                        'dd',
+                                      ]).toString();
+                                      hasdate2 = formatDate(changeddate2, [
+                                        'yyyy',
+                                        "-",
+                                        'mm',
+                                        "-",
+                                        'dd',
+                                      ]).toString();
+                                      dashboardResult = [];
+                                      gettimes();
+                                      dataChange();
+                                      setState(() {});
+                                    },
+                                    child: Text("月")),
+                                OutlineButton(
+                                    hoverColor: Colors.white,
+                                    highlightColor: Colors.pink,
+                                    onPressed: () {
+                                      selectdate = setdate.week;
+                                      var usedate = new DateTime.now();
+                                      var _firstDayOfTheweek = usedate.subtract(
+                                          new Duration(
+                                              days: usedate.weekday - 1));
+                                      var changeddate = new DateTime(
+                                          usedate.year,
+                                          usedate.month,
+                                          _firstDayOfTheweek.day);
+
+                                      var changeddate2 = new DateTime(
+                                          changeddate.year,
+                                          changeddate.month,
+                                          changeddate.day + 06);
+                                      hasdate = formatDate(changeddate, [
+                                        'yyyy',
+                                        "-",
+                                        'mm',
+                                        "-",
+                                        'dd',
+                                      ]).toString();
+                                      hasdate2 = formatDate(changeddate2, [
+                                        'yyyy',
+                                        "-",
+                                        'mm',
+                                        "-",
+                                        'dd',
+                                      ]).toString();
+                                      dashboardResult = [];
+                                      gettimes();
+                                      dataChange();
+                                      setState(() {});
+                                    },
+                                    child: Text("週")),
+                              ],
+                            ),
+                            Visibility(
+                                visible: visible,
+                                child: Container(
+                                  height:400,
+                                  width: 400,
+                                  child: SfCircularChart(
+                                    legend: Legend(
+                                        position: LegendPosition.bottom,
+                                        isVisible: true,
+                                        overflowMode:
+                                            LegendItemOverflowMode.wrap),
+                                    tooltipBehavior:
+                                        TooltipBehavior(enable: true),
+                                    series: <CircularSeries>[
+                                      PieSeries<Contents, String>(
+                                          dataSource: dashboardResult,
+                                          xValueMapper: (Contents data, _) =>
+                                              data.events,
+                                          yValueMapper: (Contents data, _) =>
+                                              data.times,
+                                          dataLabelMapper: (Contents data, _) =>
+                                              "${data.times}分",
+                                          dataLabelSettings: DataLabelSettings(
+                                            isVisible:true,
+                                            showCumulativeValues: false,
+                                          ),
+                                          enableTooltip: true,
+                                          legendIconType: LegendIconType.circle)
                                     ],
                                   ),
-                                  selectionModels: [
-                                    new charts.SelectionModelConfig(
-                                        type: charts.SelectionModelType.info,
-                                        changedListener: _onSelectionChanged,
-                                        updatedListener: _onSelectionUpdated),
-                                    new charts.SelectionModelConfig(
-                                        type: charts.SelectionModelType.action,
-                                        changedListener: _onSelectionChanged,
-                                        updatedListener: _onSelectionUpdated),
-                                  ],
-                                  behaviors: [
-                                    new charts.DatumLegend(
-                                      // Positions for "start" and "end" will be left and right respectively
-                                      // for widgets with a build context that has directionality ltr.
-                                      // For rtl, "start" and "end" will be right and left respectively.
-                                      // Since this example has directionality of ltr, the legend is
-                                      // positioned on the right side of the chart.
-                                      position: charts.BehaviorPosition.bottom,
-                                      // By default, if the position of the chart is on the left or right of
-                                      // the chart, [horizontalFirst] is set to false. This means that the
-                                      // legend entries will grow as new rows first instead of a new column.
-                                      horizontalFirst: true,
-                                      desiredMaxRows: 5,
-                                      desiredMaxColumns: 3,
-                                      //cellPadding:EdgeInsets.all(10),
-                                      // Set [showMeasures] to true to display measures in series legend.
-                                      showMeasures: true,
-                                      entryTextStyle: charts.TextStyleSpec(
-                                          color: charts
-                                              .MaterialPalette.red.shadeDefault,
-                                          fontFamily: 'Georgia',
-                                          fontSize: 13),
-                                    ),
-                                    // Configure the measure value to be shown by default in the legend.
-                                    // legendDefaultMeasure:
-                                    //     charts.LegendDefaultMeasure.firstValue,
-                                    // Optionally provide a measure formatter to format the measure value.
-                                    // If none is specified the value is formatted as a decimal.
-                                    // measureFormatter: (num value) {
-                                    //   return value == null ? '-' : '${value}k';
-                                    // },
-                                  ],
-                                ),
+                                )),
+                            Visibility(
+                              visible: !visible,
+                              child: Container(
+                                alignment: Alignment.center,
+                                margin: EdgeInsets.only(top: 50),
+                                child: Text("この日には何もやっていないよ",
+                                    style: TextStyle(fontSize: 16.0)),
                               ),
-                            ],
-                          ),
+                            ),
+                          ],
                         ),
                       ),
                     )),
-                Visibility(
-                  visible: !visible,
-                  child: Container(
-                    alignment: Alignment.center,
-                    margin: EdgeInsets.only(top: 50),
-                    child: Text("この日には何もやっていないよ",
-                        style: TextStyle(fontSize: 16.0)),
-                  ),
-                ),
               ],
             ),
           ),
