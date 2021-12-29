@@ -160,14 +160,12 @@ class _CountdownState extends State<CountDown> {
           for (var e in element.contents) {
             //今日重複やったタスク
             if (eventsNames.contains(todos[widget.index].title)) {
-              if(e.events==todos[widget.index].title){
+              if (e.events == todos[widget.index].title) {
                 var newTimes = differTimes + e.times;
                 e.times = newTimes;
-                print("一致${e.events}");
               }
             } else if (!eventsNames.contains(todos[widget.index].title)) {
               //今日はじめてやったタスク
-              print("不一致${e.events}");
               eventsNames.add(todos[widget.index].title);
               newdata = true;
               localcontents = Contents(
@@ -175,13 +173,13 @@ class _CountdownState extends State<CountDown> {
             }
           }
           if (newdata) {
-            print("添加");
             element.contents.add(localcontents);
             newdata = false;
           }
         }
       });
     } else {
+      eventsNames.add(todos[widget.index].title);
       contents
           .add(Contents(events: todos[widget.index].title, times: differTimes));
       data = ChartJsonData(date: formatToday, contents: contents);
@@ -193,7 +191,7 @@ class _CountdownState extends State<CountDown> {
     List<String> countData =
         getCountDate.map((f) => json.encode(f.toJson())).toList();
     list.setString("counts", json.encode(countData));
-    print(countData);
+    //list.remove("counts");
   }
 
   @override
