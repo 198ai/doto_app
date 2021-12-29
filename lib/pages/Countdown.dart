@@ -1,6 +1,8 @@
 import 'dart:async';
 import 'dart:convert';
 
+import 'package:date_format/date_format.dart';
+import 'package:doto_app/model/chartJsonData.dart';
 import 'package:doto_app/model/tasklist.dart';
 import 'package:doto_app/pages/tabs/Tabs.dart';
 import 'package:doto_app/pages/tabs/ToDoList.dart';
@@ -34,6 +36,11 @@ class _CountdownState extends State<CountDown> {
   bool running = false;
   List<TodoModel> todos = [];
   List storge = []; //ローカルから取り出した値をここに
+  List<ChartJsonData> getCountDate = [];
+  List countDate = [];
+  late ChartJsonData data;
+  List<Contents> contents = [];
+  List<String> eventsNames = [];
   //时间格式化，根据总秒数转换为对应的 hh:mm:ss 格式
   String constructTime(int seconds) {
     int hour = seconds ~/ 3600;
@@ -55,73 +62,29 @@ class _CountdownState extends State<CountDown> {
   void initState() {
     super.initState();
     startTimer();
+    data = ChartJsonData(date: "", contents: contents);
+
     Future(() async {
       SharedPreferences list = await SharedPreferences.getInstance();
       list.getString("toDoList") == null
           ? storge = []
           : storge = json.decode(list.getString("toDoList") ?? "{}");
-      print(storge);
       storge.forEach((e) {
         todos.add(TodoModel.fromJson(json.decode(e)));
       });
+      list.getString("counts") == null
+          ? countDate = []
+          : countDate = json.decode(list.getString("counts"));
+      countDate.forEach((e) {
+        getCountDate.add(ChartJsonData.fromJson(json.decode(e)));
+      });
+      getCountDate.forEach((element) {
+        element.contents.forEach((e) {
+          eventsNames.add(e.events);
+        });
+      });
     });
-
-    String charts = '''
-  {
-"data": {
-        "date":"2021-12-26",
-        "contents":[{"events":"看书","times":1},{"events":"扔垃圾","times":1}] 
-          },
-"data": {
-        "date":"2021-12-26",
-        "contents":[{"events":"看书","times":1},{"events":"扔垃圾","times":1}] 
-          },
-"data": {
-        "date":"2021-12-26",
-        "contents":[{"events":"看书","times":1},{"events":"扔垃圾","times":1}] 
-          }
-
   }
-    ''';
-  }
-
-//更新的时间，update记录更新的时间
-//API里面：
-//1.任务名称
-//2.当日完成总时间
-//3.更新日期
-//4.
-
-  /**
-   * 
-   * 1.
-   * ["data":{
-   * "update":"2021/12/26",
-   * {"events":"看书",
-      "times":1},
-       {"events":"玩游戏",
-      "times":5},
-       {"events":"吃饭",
-      "times":2},
-       {"events":"睡觉",
-      "times":6},
-      {"events":"打扫卫生",
-      "times":14},
-      {"events":"看书",
-      "times":50},
-       {"events":"玩游戏",
-      "times":24},
-       {"events":"吃饭",
-      "times":30},
-       {"events":"睡觉",
-      "times":26},
-      {"events":"打扫卫生",
-      "times":14}
-   }
-      
-    ]
-   * 
-   */
 
   void startTimer() {
     //获取当期时间
@@ -145,7 +108,6 @@ class _CountdownState extends State<CountDown> {
   }
 
   void stopTimer() async {
-    SharedPreferences list = await SharedPreferences.getInstance();
     if (running && seconds != 0) {
       time = seconds;
       cancelTimer();
@@ -158,10 +120,12 @@ class _CountdownState extends State<CountDown> {
 
   //変更された時間を再保存
   void saveTime(int time) async {
+    int differTimes = int.parse(todos[widget.index].time) - time;
     todos[widget.index].time = time.toString();
     SharedPreferences list = await SharedPreferences.getInstance();
     List<String> events = todos.map((f) => json.encode(f.toJson())).toList();
     list.setString("toDoList", json.encode(events));
+    makeCountData(differTimes);
   }
 
   void cancelTimer() {
@@ -170,6 +134,66 @@ class _CountdownState extends State<CountDown> {
       _timer.cancel();
       _timer = null;
     }
+  }
+
+  //統計画面のデータ設定
+  makeCountData(int differTimes) async {
+    List<ChartJsonData> changeData = [];
+    SharedPreferences list = await SharedPreferences.getInstance();
+    Contents localcontents = Contents(events: "", times: 0);
+    bool newdata = false;
+    //日付取得
+    var today = DateTime.now();
+    var formatToday = formatDate(today, [
+      'yyyy',
+      "-",
+      'mm',
+      "-",
+      'dd',
+    ]).toString();
+    //記録時間取得
+    //イベント名前取得
+    if (getCountDate.isNotEmpty) {
+      getCountDate.forEach((element) {
+        //今日の記録タスクがある場合
+        if (element.date == formatToday) {
+          for (var e in element.contents) {
+            //今日重複やったタスク
+            if (eventsNames.contains(todos[widget.index].title)) {
+              if(e.events==todos[widget.index].title){
+                var newTimes = differTimes + e.times;
+                e.times = newTimes;
+                print("一致${e.events}");
+              }
+            } else if (!eventsNames.contains(todos[widget.index].title)) {
+              //今日はじめてやったタスク
+              print("不一致${e.events}");
+              eventsNames.add(todos[widget.index].title);
+              newdata = true;
+              localcontents = Contents(
+                  events: todos[widget.index].title, times: differTimes);
+            }
+          }
+          if (newdata) {
+            print("添加");
+            element.contents.add(localcontents);
+            newdata = false;
+          }
+        }
+      });
+    } else {
+      contents
+          .add(Contents(events: todos[widget.index].title, times: differTimes));
+      data = ChartJsonData(date: formatToday, contents: contents);
+      getCountDate.add(data);
+      List<String> countData =
+          getCountDate.map((f) => json.encode(f.toJson())).toList();
+      list.setString("counts", json.encode(countData));
+    }
+    List<String> countData =
+        getCountDate.map((f) => json.encode(f.toJson())).toList();
+    list.setString("counts", json.encode(countData));
+    print(countData);
   }
 
   @override

@@ -6,6 +6,7 @@ import 'package:doto_app/services/ScreenAdapter.dart';
 import 'package:flutter/material.dart';
 import 'package:charts_flutter/flutter.dart' as charts;
 import 'package:intl/intl.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:syncfusion_flutter_charts/charts.dart';
 import 'package:syncfusion_flutter_charts/sparkcharts.dart';
 
@@ -141,6 +142,7 @@ class _CountPage extends State<CountPage> {
   @override
   void initState() {
     super.initState();
+    String jsonString2 = "";
     hasdate = formatDate(DateTime.now(), [
       'yyyy',
       "-",
@@ -148,47 +150,57 @@ class _CountPage extends State<CountPage> {
       "-",
       'dd',
     ]).toString();
-    //饼状图用分钟数来表示每天的数据记录
-    String jsonString = ''' 
-           [ {
-"date":"2021-12-26",
- "contents":[{"events":"読書","times":280},{"events":"ごみ捨て","times":1000000},{"events":"ごみ捨て","times":1000}] 
-             },
-  {"date":"2021-12-27",
-              "contents":[{"events":"買い物","times":80},{"events":"ご飯食べる","times":150},{"events":"野菜","times":1050},{"events":"遊び","times":150}] 
-             },
-  {"date":"2021-12-28",
-              "contents":[{"events":"ねる","times":500},{"events":"トイレ","times":105},{"events":"お野菜","times":105}] 
-             },
-             {"date":"2021-11-28",
-              "contents":[{"events":"11月","times":500},{"events":"トイレ","times":105},{"events":"お野菜","times":105}] 
-             },
-             {"date":"2021-10-28",
-              "contents":[{"events":"10月","times":500},{"events":"トイレ","times":105},{"events":"お野菜","times":105}] 
-             },
-             {"date":"2021-10-01",
-              "contents":[{"events":"10月01","times":500},{"events":"测试3","times":105},{"events":"努力测试3","times":105}] 
-             },
-              {"date":"2021-10-25",
-              "contents":[{"events":"10月25","times":500},{"events":"测试","times":105},{"events":"努力测试","times":105}] 
-             },
-             {"date":"2021-10-31",
-              "contents":[{"events":"10月31","times":500},{"events":"测试1","times":105},{"events":"努力测试1","times":105}] 
-             },
-             {"date":"2021-11-01",
-              "contents":[{"events":"11月1","times":500},{"events":"测试11","times":105},{"events":"努力测试11","times":105}] 
-             }]''';
-    data2 = json.decode(jsonString);
-    data2.forEach((e) {
-      chartJsonData.add(ChartJsonData.fromJson(e));
-    });
-    chartJsonData.forEach((element) {
-      element.contents.forEach((e) {
-        totalTimes = totalTimes + e.times;
+    Future(() async {
+      SharedPreferences list = await SharedPreferences.getInstance();
+      list.getString("counts") == null
+          ? jsonString2 = ""
+          : jsonString2 = list.getString("counts");
+      data2 = json.decode(jsonString2);
+      data2.forEach((e) {
+        chartJsonData.add(ChartJsonData.fromJson(json.decode(e)));
+      });
+      chartJsonData.forEach((element) {
+        element.contents.forEach((e) {
+          totalTimes = totalTimes + e.times;
+        });
+      });
+      gettimes();
+      dataChange();
+      setState(() {
+        
       });
     });
-    gettimes();
-    dataChange();
+   
+    //饼状图用分钟数来表示每天的数据记录
+    String jsonString = '''
+           [ {
+"date":"2021-12-26",
+ "contents":[{"events":"読書","times":280},{"events":"ごみ捨て","times":1000000},{"events":"ごみ捨て","times":1000}]
+             },
+  {"date":"2021-12-27",
+              "contents":[{"events":"買い物","times":80},{"events":"ご飯食べる","times":150},{"events":"野菜","times":1050},{"events":"遊び","times":150}]
+             },
+  {"date":"2021-12-28",
+              "contents":[{"events":"ねる","times":500},{"events":"トイレ","times":105},{"events":"お野菜","times":105}]
+             },
+             {"date":"2021-11-28",
+              "contents":[{"events":"11月","times":500},{"events":"トイレ","times":105},{"events":"お野菜","times":105}]
+             },
+             {"date":"2021-10-28",
+              "contents":[{"events":"10月","times":500},{"events":"トイレ","times":105},{"events":"お野菜","times":105}]
+             },
+             {"date":"2021-10-01",
+              "contents":[{"events":"10月01","times":500},{"events":"测试3","times":105},{"events":"努力测试3","times":105}]
+             },
+              {"date":"2021-10-25",
+              "contents":[{"events":"10月25","times":500},{"events":"测试","times":105},{"events":"努力测试","times":105}]
+             },
+             {"date":"2021-10-31",
+              "contents":[{"events":"10月31","times":500},{"events":"测试1","times":105},{"events":"努力测试1","times":105}]
+             },
+             {"date":"2021-11-01",
+              "contents":[{"events":"11月1","times":500},{"events":"测试11","times":105},{"events":"努力测试11","times":105}]
+             }]''';
   }
 
   gettimes() {
@@ -253,8 +265,7 @@ class _CountPage extends State<CountPage> {
           if (hasdate == element.date) {
             percent = ((e.times / times) * 100).round();
             selectedTotalTimes = selectedTotalTimes + e.times;
-            dashboardResult.add(
-                Contents(times: e.times, events: e.events, percent: percent));
+            dashboardResult.add(Contents(times: e.times, events: e.events));
           }
         });
       } else {
@@ -266,8 +277,7 @@ class _CountPage extends State<CountPage> {
               dateAdjustment2.isAfter(DateTime.parse(element.date))) {
             selectedTotalTimes = selectedTotalTimes + e.times;
             percent = ((e.times / times) * 100).round();
-            dashboardResult.add(
-                Contents(times: e.times, events: e.events, percent: percent));
+            dashboardResult.add(Contents(times: e.times, events: e.events));
           }
         });
       }
@@ -282,7 +292,7 @@ class _CountPage extends State<CountPage> {
           data: dashboardResult,
           labelAccessorFn: (Contents row, _) => '${row.times}分',
           domainFn: (Contents grades, _) => grades.events,
-          measureFn: (Contents grades, _) => grades.percent)
+          measureFn: (Contents grades, _) => grades.times)
     ];
     return series;
   }
@@ -405,21 +415,22 @@ class _CountPage extends State<CountPage> {
                                       onSelected = Colors.pink;
                                       onSelected2 = Colors.black87;
                                       onSelected3 = Colors.black87;
-                                      setState(() {
-                                        selectdate = setdate.date;
-                                        hasdate2 = "";
-                                        var usedate = new DateTime.now();
-                                        hasdate = formatDate(usedate, [
-                                          'yyyy',
-                                          "-",
-                                          'mm',
-                                          "-",
-                                          'dd',
-                                        ]).toString();
-                                        dashboardResult = [];
-                                        gettimes();
-                                        dataChange();
-                                      });
+
+                                      selectdate = setdate.date;
+                                      hasdate2 = "";
+                                      var usedate = new DateTime.now();
+                                      hasdate = formatDate(usedate, [
+                                        'yyyy',
+                                        "-",
+                                        'mm',
+                                        "-",
+                                        'dd',
+                                      ]).toString();
+                                      dashboardResult = [];
+                                      selectedTotalTimes = 0;
+                                      gettimes();
+                                      dataChange();
+                                      setState(() {});
                                     },
                                     child: Text("日")),
                                 OutlineButton(
@@ -453,6 +464,7 @@ class _CountPage extends State<CountPage> {
                                         'dd',
                                       ]).toString();
                                       dashboardResult = [];
+                                      selectedTotalTimes = 0;
                                       gettimes();
                                       dataChange();
                                       setState(() {});
@@ -493,6 +505,7 @@ class _CountPage extends State<CountPage> {
                                         'dd',
                                       ]).toString();
                                       dashboardResult = [];
+                                      selectedTotalTimes = 0;
                                       gettimes();
                                       dataChange();
                                       setState(() {});
