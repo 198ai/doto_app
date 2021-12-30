@@ -95,8 +95,6 @@ class _CountdownState extends State<CountDown> {
           element.contents.forEach((e) {
             eventsNames.add(e.events);
           });
-        } else {
-          eventsNames = [];
         }
       });
     });
@@ -161,7 +159,6 @@ class _CountdownState extends State<CountDown> {
 
   //統計画面のデータ設定
   makeCountData(int differTimes) async {
-    List<ChartJsonData> changeData = [];
     SharedPreferences list = await SharedPreferences.getInstance();
     Contents localcontents = Contents(events: "", times: 0);
     bool newdata = false;
