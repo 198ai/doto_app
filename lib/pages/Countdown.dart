@@ -44,6 +44,7 @@ class _CountdownState extends State<CountDown> {
   late ChartJsonData data;
   List<Contents> contents = [];
   List<String> eventsNames = [];
+  late var formatToday;
   //时间格式化，根据总秒数转换为对应的 hh:mm:ss 格式
   String constructTime(int seconds) {
     int hour = seconds ~/ 3600;
@@ -66,7 +67,15 @@ class _CountdownState extends State<CountDown> {
     super.initState();
     startTimer();
     data = ChartJsonData(date: "", contents: contents);
-
+    //日付取得
+    var today = DateTime.now();
+    formatToday = formatDate(today, [
+      'yyyy',
+      "-",
+      'mm',
+      "-",
+      'dd',
+    ]).toString();
     Future(() async {
       SharedPreferences list = await SharedPreferences.getInstance();
       list.getString("toDoList") == null
@@ -82,11 +91,14 @@ class _CountdownState extends State<CountDown> {
         getCountDate.add(ChartJsonData.fromJson(json.decode(e)));
       });
       getCountDate.forEach((element) {
-        element.contents.forEach((e) {
-          eventsNames.add(e.events);
-        });
+        if (element.date == formatToday) {
+          element.contents.forEach((e) {
+            eventsNames.add(e.events);
+          });
+        } else {
+          eventsNames = [];
+        }
       });
-      print(countDate);
     });
   }
 
@@ -124,7 +136,6 @@ class _CountdownState extends State<CountDown> {
       cancelTimer();
       saveTime(time);
       _timer = null;
-      _timer.cancel();
     } else {
       startTimer();
     }
@@ -154,25 +165,14 @@ class _CountdownState extends State<CountDown> {
     SharedPreferences list = await SharedPreferences.getInstance();
     Contents localcontents = Contents(events: "", times: 0);
     bool newdata = false;
-    //日付取得
-    var today = DateTime.now();
-    var formatToday = formatDate(today, [
-      'yyyy',
-      "-",
-      'mm',
-      "-",
-      'dd',
-    ]).toString();
     //記録時間取得
     //イベント名前取得
-    if (getCountDate.isNotEmpty) {
+    if (getCountDate.isNotEmpty && eventsNames.isNotEmpty) {
       getCountDate.forEach((element) {
         //今日の記録タスクがある場合
         if (element.date == formatToday) {
-          print("old Date");
           for (var e in element.contents) {
             //今日重複やったタスク
-            print("old Data");
             if (eventsNames.contains(todos[widget.index].title)) {
               if (e.events == todos[widget.index].title) {
                 var newTimes = differTimes + e.times;
@@ -187,12 +187,10 @@ class _CountdownState extends State<CountDown> {
             }
           }
           if (newdata) {
-            print("new Data");
             element.contents.add(localcontents);
             newdata = false;
           }
         }
-        print("new Date");
       });
     } else {
       eventsNames.add(todos[widget.index].title);
@@ -279,8 +277,10 @@ class _CountdownState extends State<CountDown> {
                   TextButton(
                     onPressed: () {
                       alarm.stop();
-                      Navigator.of(context).push(MaterialPageRoute(
-                          builder: (context) => ToDoListPage()));
+                      Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                              builder: (context) => Tabs(tabSelected: 0)));
                     },
                     child: const Text('確認'),
                   ),
