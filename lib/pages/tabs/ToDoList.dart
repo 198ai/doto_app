@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:convert';
+import 'package:doto_app/model/ringtonePlayer.dart';
 import 'package:doto_app/pages/Countdown.dart';
 import 'package:doto_app/pages/HasDone.dart';
 import 'package:doto_app/pages/tabs/Calendar.dart';
@@ -62,7 +63,6 @@ class _ToDoListPageState extends State<ToDoListPage> with RouteAware {
       retult.getString("toDoList") == null
           ? storge = []
           : storge = json.decode(retult.getString("toDoList") ?? "{}");
-      print(storge);
       storge.forEach((e) {
         todos.add(TodoModel.fromJson(json.decode(e)));
       });
@@ -94,7 +94,6 @@ class _ToDoListPageState extends State<ToDoListPage> with RouteAware {
       retult.getString("toDoList") == null
           ? storge = []
           : storge = json.decode(retult.getString("toDoList") ?? "{}");
-      print(storge);
       storge.forEach((e) {
         //画面リロード
         todos.add(TodoModel.fromJson(json.decode(e)));

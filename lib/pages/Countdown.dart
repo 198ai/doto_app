@@ -3,9 +3,11 @@ import 'dart:convert';
 
 import 'package:date_format/date_format.dart';
 import 'package:doto_app/model/chartJsonData.dart';
+import 'package:doto_app/model/ringtonePlayer.dart';
 import 'package:doto_app/model/tasklist.dart';
 import 'package:doto_app/pages/tabs/Tabs.dart';
 import 'package:doto_app/pages/tabs/ToDoList.dart';
+import 'package:flutter_ringtone_player/flutter_ringtone_player.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -30,6 +32,7 @@ class _CountdownState extends State<CountDown> {
   int time;
   int date;
   String name;
+  Alarm alarm = new Alarm();
   _CountdownState(this.date, this.time, this.name) : super();
   var _timer;
   int seconds = 0;
@@ -83,6 +86,7 @@ class _CountdownState extends State<CountDown> {
           eventsNames.add(e.events);
         });
       });
+      print(countDate);
     });
   }
 
@@ -90,21 +94,28 @@ class _CountdownState extends State<CountDown> {
     //获取当期时间
     running = true;
     var now = DateTime.now();
-    var twoHours = now.add(Duration(seconds: time)).difference(now);
-    seconds = twoHours.inSeconds;
-    //设置 1 秒回调一次
-    const period = const Duration(seconds: 1);
-    _timer = Timer.periodic(period, (timer) {
-      //更新界面
-      setState(() {
-        //秒数减一，因为一秒回调一次
-        seconds--;
+    if (time != 0) {
+      var twoHours = now.add(Duration(seconds: time)).difference(now);
+      seconds = twoHours.inSeconds;
+
+      //设置 1 秒回调一次
+      const period = const Duration(seconds: 1);
+      _timer = Timer.periodic(period, (timer) {
+        //更新界面
+        setState(() {
+          //秒数减一，因为一秒回调一次
+          seconds--;
+        });
+
+        if (seconds == 0) {
+          //倒计时秒数为0，取消定时器
+          cancelTimer();
+          time = seconds;
+          saveTime(time);
+          _showADialog();
+        }
       });
-      if (seconds == 0) {
-        //倒计时秒数为0，取消定时器
-        cancelTimer();
-      }
-    });
+    }
   }
 
   void stopTimer() async {
@@ -113,6 +124,7 @@ class _CountdownState extends State<CountDown> {
       cancelTimer();
       saveTime(time);
       _timer = null;
+      _timer.cancel();
     } else {
       startTimer();
     }
@@ -157,8 +169,10 @@ class _CountdownState extends State<CountDown> {
       getCountDate.forEach((element) {
         //今日の記録タスクがある場合
         if (element.date == formatToday) {
+          print("old Date");
           for (var e in element.contents) {
             //今日重複やったタスク
+            print("old Data");
             if (eventsNames.contains(todos[widget.index].title)) {
               if (e.events == todos[widget.index].title) {
                 var newTimes = differTimes + e.times;
@@ -173,10 +187,12 @@ class _CountdownState extends State<CountDown> {
             }
           }
           if (newdata) {
+            print("new Data");
             element.contents.add(localcontents);
             newdata = false;
           }
         }
+        print("new Date");
       });
     } else {
       eventsNames.add(todos[widget.index].title);
@@ -192,6 +208,7 @@ class _CountdownState extends State<CountDown> {
         getCountDate.map((f) => json.encode(f.toJson())).toList();
     list.setString("counts", json.encode(countData));
     //list.remove("counts");
+    print(countData);
   }
 
   @override
@@ -208,6 +225,8 @@ class _CountdownState extends State<CountDown> {
             icon: new Icon(Icons.arrow_back_ios),
             onPressed: () => {
               stopTimer(),
+              cancelTimer(),
+              alarm.stop(),
               Navigator.push(context,
                   MaterialPageRoute(builder: (context) => Tabs(tabSelected: 0)))
             },
@@ -236,5 +255,37 @@ class _CountdownState extends State<CountDown> {
             ],
           )
         ]));
+  }
+
+  _showADialog() {
+    alarm.start();
+    Future.delayed(Duration(milliseconds: 6000), () {
+      alarm.stop();
+    });
+    showDialog(
+        context: context,
+        builder: (context) => StatefulBuilder(
+                //在这里为了区分，在构建builder的时候将setState方法命名为了setBottomSheetState。
+                builder: (context1, showDialogState) {
+              return AlertDialog(
+                content: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text('お疲れ様でした！'),
+                  ],
+                ),
+                actions: [
+                  TextButton(
+                    onPressed: () {
+                      alarm.stop();
+                      Navigator.of(context).push(MaterialPageRoute(
+                          builder: (context) => ToDoListPage()));
+                    },
+                    child: const Text('確認'),
+                  ),
+                ],
+              );
+            }));
   }
 }

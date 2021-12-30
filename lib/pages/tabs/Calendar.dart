@@ -473,7 +473,8 @@ class _CalendarPageState extends State<CalendarPage> {
     );
   }
 }
-
+//https://www.youtube.com/watch?v=bRy5dmts3X8
+//参考サイド
 void scheduleAlarm(
     DateTime scheduledNotificationDateTime, String alarmInfo) async {
   var androidPlatformChannelSpecifics = AndroidNotificationDetails(
