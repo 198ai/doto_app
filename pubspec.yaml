@@ -40,6 +40,7 @@ dependencies:
   dio: ^3.0.10
   date_format: ^2.0.4
   flutter_local_notifications: ^1.4.4+2
+  rxdart: ^0.24.1 
   flutter_ringtone_player: ^3.0.0
   syncfusion_flutter_charts: ^19.4.38
 dev_dependencies:

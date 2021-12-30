@@ -120,7 +120,6 @@ class _CalendarPageState extends State<CalendarPage> {
               height: MediaQuery.of(context).copyWith().size.height / 3,
               child: CupertinoDatePicker(
                 use24hFormat: true,
-                initialDateTime: DateTime.now(),
                 mode: CupertinoDatePickerMode.dateAndTime, //这里改模式
                 onDateTimeChanged: (dateTime) {
                   dateController.text =
