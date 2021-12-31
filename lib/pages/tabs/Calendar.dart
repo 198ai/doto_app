@@ -485,11 +485,11 @@ class _CalendarPageState extends State<CalendarPage> {
                       //アラームの削除
                       await flutterLocalNotificationsPlugin.cancel(alramId);
                       //还要删除对应的MAp的时间
-                      // prefs.setString(
-                      //     "events", json.encode(encodeMap(mySelectedEvents)));
+                      prefs.setString(
+                          "events", json.encode(encodeMap(mySelectedEvents)));
                       List<String> events =
                           myAlarm.map((f) => json.encode(f.toJson())).toList();
-                      // prefs.setString("myAlarm", json.encode(events));
+                      prefs.setString("myAlarm", json.encode(events));
                       print(events);
                     },
                     icon: Icon(Icons.delete)),
