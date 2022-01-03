@@ -196,12 +196,13 @@ class _CalendarPageState extends State<CalendarPage> {
                 title: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Text('リマインド'),
+                    Text('メモ'),
                     TextButton(
                       onPressed: () async {
                         showDialogState(() {
                           visible = true;
                         });
+                        
                         await _showDatePicker();
                       },
                       child: Text('アラーム設定'),
