@@ -70,7 +70,8 @@ class _CalendarPageState extends State<CalendarPage> {
       print("初始化$alarmId");
       // prefs.remove("myAlarm");
       // prefs.remove("events");
-      //print(storge);
+      print(storge);
+      //print(prefs.getString("events").toString());
     });
   }
 
@@ -202,7 +203,7 @@ class _CalendarPageState extends State<CalendarPage> {
                         showDialogState(() {
                           visible = true;
                         });
-                        
+
                         await _showDatePicker();
                       },
                       child: Text('アラーム設定'),

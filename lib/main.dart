@@ -88,7 +88,7 @@ class _MyAppState extends State<MyApp> {
             //home: Tabs(),
             navigatorObservers: [MyApp.routeObserver], //添加路由观察者
             debugShowCheckedModeBanner: false,
-            initialRoute: '/',
+            initialRoute: '/login',
             onGenerateRoute: onGenerateRoute));
   }
 }

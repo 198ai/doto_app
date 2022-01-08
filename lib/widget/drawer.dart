@@ -10,25 +10,24 @@ class drawerEX extends StatelessWidget {
         children: <Widget>[
           Row(
             children: <Widget>[
-              Expanded(
-                child: InkWell(
-                  onTap: () {
+              Container(
+                alignment:Alignment.center,
+                height: 200,
+                child:Container(
+                  padding:EdgeInsets.only(left:30) ,
+                child: TextButton(
+                  child:Text("未登録/サインイン"),
+                  style:  ButtonStyle(
+                  //定义文本的样式 这里设置的颜色是不起作用的
+                  textStyle: MaterialStateProperty.all(
+                      TextStyle(fontSize: 28, color: Colors.red)),
+                      foregroundColor: MaterialStateProperty.all(Colors.deepPurple),), 
+                  onPressed: () {
                     Navigator.pushNamed(context, '/login');
                   },
-                  child: UserAccountsDrawerHeader(
-                    accountName: Text("未登録/サインイン"),
-                    accountEmail: Text("メールアドレス"),
-                    currentAccountPicture: CircleAvatar(
-                        backgroundImage: NetworkImage(
-                            "https://www.itying.com/images/flutter/3.png")),
-                    decoration: BoxDecoration(
-                        image: DecorationImage(
-                      image: NetworkImage(
-                          "https://www.itying.com/images/flutter/2.png"),
-                      fit: BoxFit.cover,
-                    )),
-                  ),
                 ),
+                )
+               
               ),
 
               // Expanded(

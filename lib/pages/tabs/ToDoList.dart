@@ -104,6 +104,7 @@ class _ToDoListPageState extends State<ToDoListPage> with RouteAware {
       setState(() {
         _listView();
       });
+      print(storge);
     });
   }
 
@@ -117,7 +118,7 @@ class _ToDoListPageState extends State<ToDoListPage> with RouteAware {
     setState(() {
       //完成するまでの日付更新
       todos.forEach((e) {
-        e.date = ((startDate.difference(endDate).inDays)+1).toString();
+        e.date = ((startDate.difference(endDate).inDays) + 1).toString();
       });
     });
   }
@@ -203,7 +204,7 @@ class _ToDoListPageState extends State<ToDoListPage> with RouteAware {
                   var startDate =
                       new DateTime(dateTime.year, dateTime.month, dateTime.day);
                   var endDate = new DateTime.now();
-                  days = ((startDate.difference(endDate).inDays)+1);
+                  days = ((startDate.difference(endDate).inDays) + 1);
                   enddate =
                       "${dateTime.year}-${dateTime.month}-${dateTime.day}";
                   dateController.text = days.toString() + "日";
@@ -305,7 +306,11 @@ class _ToDoListPageState extends State<ToDoListPage> with RouteAware {
                                 child: Column(
                               children: [
                                 Padding(
-                                  padding: EdgeInsets.fromLTRB(ScreenAdapter.width(30),ScreenAdapter.height(30),ScreenAdapter.width(30), ScreenAdapter.height(30)),
+                                  padding: EdgeInsets.fromLTRB(
+                                      ScreenAdapter.width(30),
+                                      ScreenAdapter.height(30),
+                                      ScreenAdapter.width(30),
+                                      ScreenAdapter.height(30)),
                                   child: Column(
                                     children: [
                                       Text("新たな挑戦を始めるね！"),
@@ -314,7 +319,11 @@ class _ToDoListPageState extends State<ToDoListPage> with RouteAware {
                                   ),
                                 ),
                                 Padding(
-                                  padding: EdgeInsets.fromLTRB(ScreenAdapter.width(30),ScreenAdapter.height(0),ScreenAdapter.width(30), ScreenAdapter.height(0)),
+                                  padding: EdgeInsets.fromLTRB(
+                                      ScreenAdapter.width(30),
+                                      ScreenAdapter.height(0),
+                                      ScreenAdapter.width(30),
+                                      ScreenAdapter.height(0)),
                                   child: TextField(
                                     style: TextStyle(color: Colors.black87),
                                     controller: textController,
@@ -332,7 +341,11 @@ class _ToDoListPageState extends State<ToDoListPage> with RouteAware {
                                   ),
                                 ),
                                 Padding(
-                                    padding: EdgeInsets.fromLTRB(ScreenAdapter.width(30),ScreenAdapter.height(0),ScreenAdapter.width(30), ScreenAdapter.height(0)),
+                                    padding: EdgeInsets.fromLTRB(
+                                        ScreenAdapter.width(30),
+                                        ScreenAdapter.height(0),
+                                        ScreenAdapter.width(30),
+                                        ScreenAdapter.height(0)),
                                     child: TextField(
                                         decoration: new InputDecoration(
                                           icon: Icon(Icons.access_time),
@@ -343,7 +356,11 @@ class _ToDoListPageState extends State<ToDoListPage> with RouteAware {
                                           await _showTimePicker();
                                         })),
                                 Padding(
-                                    padding: EdgeInsets.fromLTRB(ScreenAdapter.width(30),ScreenAdapter.height(0),ScreenAdapter.width(30), ScreenAdapter.height(0)),
+                                    padding: EdgeInsets.fromLTRB(
+                                        ScreenAdapter.width(30),
+                                        ScreenAdapter.height(0),
+                                        ScreenAdapter.width(30),
+                                        ScreenAdapter.height(0)),
                                     child: TextField(
                                         decoration: new InputDecoration(
                                           icon: Icon(
@@ -356,7 +373,11 @@ class _ToDoListPageState extends State<ToDoListPage> with RouteAware {
                                         })),
                                 Container(
                                   height: btnHeight,
-                                  margin: EdgeInsets.fromLTRB(ScreenAdapter.width(30),ScreenAdapter.height(0),ScreenAdapter.width(30), ScreenAdapter.height(0)),
+                                  margin: EdgeInsets.fromLTRB(
+                                      ScreenAdapter.width(30),
+                                      ScreenAdapter.height(0),
+                                      ScreenAdapter.width(30),
+                                      ScreenAdapter.height(0)),
                                   child: Column(
                                     children: [
                                       Row(
@@ -373,7 +394,8 @@ class _ToDoListPageState extends State<ToDoListPage> with RouteAware {
                                             child: Text(
                                               "サボる",
                                               style: TextStyle(
-                                                  fontSize: ScreenAdapter.size(15),
+                                                  fontSize:
+                                                      ScreenAdapter.size(15),
                                                   color: Colors.blue),
                                             ),
                                           ),
@@ -410,7 +432,8 @@ class _ToDoListPageState extends State<ToDoListPage> with RouteAware {
                                               child: Text(
                                                 "チャレンジする",
                                                 style: TextStyle(
-                                                    fontSize: ScreenAdapter.size(15),
+                                                    fontSize:
+                                                        ScreenAdapter.size(15),
                                                     color: Colors.blue),
                                               )),
                                         ],
@@ -539,7 +562,8 @@ class _ToDoListPageState extends State<ToDoListPage> with RouteAware {
                             children: [
                               Container(
                                 width: ScreenAdapter.width(100),
-                                margin: EdgeInsets.only(right: ScreenAdapter.width(20)),
+                                margin: EdgeInsets.only(
+                                    right: ScreenAdapter.width(20)),
                                 child: Text(
                                   '${item.title}',
                                   maxLines: 4,
@@ -551,7 +575,8 @@ class _ToDoListPageState extends State<ToDoListPage> with RouteAware {
                                 ),
                               ),
                               Container(
-                                margin: EdgeInsets.only(right:  ScreenAdapter.width(10)),
+                                margin: EdgeInsets.only(
+                                    right: ScreenAdapter.width(10)),
                                 child: Column(
                                   children: [
                                     Text(
@@ -580,7 +605,7 @@ class _ToDoListPageState extends State<ToDoListPage> with RouteAware {
                             ]),
                       ),
                       Container(
-                        margin: EdgeInsets.only(left:  ScreenAdapter.width(10)),
+                        margin: EdgeInsets.only(left: ScreenAdapter.width(10)),
                         child: TextButton(
                           style: ButtonStyle(
                             padding: MaterialStateProperty.all(EdgeInsets.zero),
