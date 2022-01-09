@@ -11,13 +11,13 @@ import '../widget/JdButton.dart';
 import 'package:dio/dio.dart';
 import 'package:shake_animation_widget/shake_animation_widget.dart';
 
-class LoginPage extends StatefulWidget {
-  LoginPage({Key? key}) : super(key: key);
+class SignUpPage extends StatefulWidget {
+  SignUpPage({Key? key}) : super(key: key);
 
-  _LoginPageState createState() => _LoginPageState();
+  _SignUpPageState createState() => _SignUpPageState();
 }
 
-class _LoginPageState extends State<LoginPage> {
+class _SignUpPageState extends State<SignUpPage> {
   bool _isShow = false;
   late SharedPreferences prefs;
   //用户名输入框的焦点控制
@@ -60,7 +60,7 @@ class _LoginPageState extends State<LoginPage> {
       },
       child: Scaffold(
         appBar: AppBar(
-          title: Text("ログイン"),
+          title: Text("アカント新規"),
         ),
         //登录页面的主体
         body: buildLoginWidget(),
@@ -106,48 +106,14 @@ class _LoginPageState extends State<LoginPage> {
             width: double.infinity,
             height: 40,
             child: ElevatedButton(
-              child: Text("登録"),
+              child: Text("新規登録"),
               onPressed: () async {
                 if (await checkLoginFunction()) {
                   Navigator.pushNamed(context, '/');
                 }
               },
             ),
-          ),
-          Row(
-            mainAxisAlignment:MainAxisAlignment.spaceEvenly ,
-            children:[
-              
-             TextButton(
-               style: ButtonStyle(
-                        //定义文本的样式 这里设置的颜色是不起作用的
-                        textStyle: MaterialStateProperty.all(
-                            TextStyle(fontSize: 13, fontWeight:FontWeight.bold )),
-                        foregroundColor:
-                            MaterialStateProperty.all(Colors.black),
-                      ),
-              child: Text("パスワードを忘れた"),
-              onPressed: () async {
-                if (await checkLoginFunction()) {
-                  Navigator.pushNamed(context, '/');
-                }
-              },
-            ),
-           TextButton(
-              child: Text("アカウント新規へ"),
-              style: ButtonStyle(
-                        //定义文本的样式 这里设置的颜色是不起作用的
-                        textStyle: MaterialStateProperty.all(
-                            TextStyle(fontSize: 13, fontWeight:FontWeight.bold )),
-                        foregroundColor:
-                            MaterialStateProperty.all(Colors.black),
-                      ),
-              onPressed: () async {
-                  Navigator.pushNamed(context, '/signup');
-              },
-            ),
-         
-            ]),
+          )
         ],
       ),
     );
@@ -175,7 +141,7 @@ class _LoginPageState extends State<LoginPage> {
               }
             },
             //隐藏输入的文本
-            obscureText: !_isShow,
+            obscureText: _isShow,
             //最大可输入1行
             maxLines: 1,
             //边框样式设置
@@ -224,6 +190,8 @@ class _LoginPageState extends State<LoginPage> {
                 FocusScope.of(context).requestFocus(_emailFocusNode);
               }
             },
+            //隐藏输入的文本
+            obscureText: true,
             //最大可输入1行
             maxLines: 1,
             //边框样式设置
@@ -368,7 +336,7 @@ class _LoginPageState extends State<LoginPage> {
     };
     try {
       Response response =
-          await Dio().post("http://10.0.2.2:8000/api/v1/login", data: params);
+          await Dio().post("http://10.0.2.2:8000/api/v1/signup", data: params);
       if (response.statusCode != null) {
         if (response.statusCode == 201) {
           UserData userdate = UserData.fromJson(response.data);
@@ -394,20 +362,18 @@ class _LoginPageState extends State<LoginPage> {
         });
       }
     } on DioError catch (e) {
-      if (e.response!.statusCode == 302 || e.response!.statusCode == 401) {
+      if (e.response!.statusCode == 302 || e.response!.statusCode == 422) {
         setState(() {
           show = true;
-          mes = "ユーザ名かパスワードは間違っています";
+          mes = "ユーザ名かパスワードは既に使われています";
         });
+
+        print("ユーザ名かパスワードは既に使われています");
       } else if (e.response!.statusCode == 500) {
-        setState(() {
-          show = true;
-          mes = 'サーバーと繋がっていません';
-        });
       } else {
         setState(() {
           show = true;
-          mes = '未知なエラーが発生しました';
+          mes = 'サーバーと繋がっていません';
         });
       }
       throw (e);

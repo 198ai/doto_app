@@ -16,15 +16,18 @@ class _drawerEX extends State<drawerEX> {
   late UserData userdata;
   late String userName;
   late String userEmail;
+  bool login = false;
   late SharedPreferences prefs;
   @override
   void initState() {
+    super.initState();
     Future(() async {
       SharedPreferences retult = await SharedPreferences.getInstance();
-      if (retult.getString("userdata") != "") {
+      if (retult.getString("userdata") != null) {
+        login = true;
         userdata = UserData.fromJson(json.decode(retult.getString("userdata")));
-      }else {
-      userdata = UserData(name:"", email: "", accessToken: "");
+      } else {
+        userdata = UserData(name: "", email: "", accessToken: "");
       }
       userName = userdata.name == "" ? "" : userdata.name;
       userEmail = userdata.email == "" ? "" : userdata.email;
@@ -36,7 +39,7 @@ class _drawerEX extends State<drawerEX> {
     if (retult.getString("userdata") != null) {
       userdata = UserData.fromJson(json.decode(retult.getString("userdata")));
     } else {
-      userdata = UserData(name:"", email: "", accessToken: "");
+      userdata = UserData(name: "", email: "", accessToken: "");
     }
     userName = userdata.name == "" ? "" : userdata.name;
     userEmail = userdata.email == "" ? "" : userdata.email;
@@ -123,17 +126,19 @@ class _drawerEX extends State<drawerEX> {
                       builder: (BuildContext context, AsyncSnapshot snapshot) {
                         return TextButton(
                             onPressed: () {
-                              //Navigator.pushNamed(context, '/login');
+                              if(!login){
+                                Navigator.pushNamed(context, '/login');
+                              }
                             },
                             child: UserAccountsDrawerHeader(
                                 accountName: Text(
-                                  userName == "" ? "ユーザ未登録" : "ユーザ名: $userName",
+                                  !login ? "ユーザ未登録" : "ユーザ名: $userName",
                                   style: TextStyle(
                                       color: Colors.black87,
                                       fontWeight: FontWeight.bold),
                                 ),
                                 accountEmail: Text(
-                                    userEmail == ""
+                                    !login
                                         ? "メールアドレス未登録"
                                         : "メールアドレス: $userEmail",
                                     style: TextStyle(
@@ -203,8 +208,7 @@ class _drawerEX extends State<drawerEX> {
                                 onPressed: () async {
                                   await logOut();
                                   setState(() {
-                                    userName = "";
-                                    userEmail = "";
+                                    login = false;
                                   });
                                   prefs = await SharedPreferences.getInstance();
                                   prefs.remove("userdata");
