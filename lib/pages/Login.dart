@@ -18,12 +18,7 @@ class LoginPage extends StatefulWidget {
 }
 
 class _LoginPageState extends State<LoginPage> {
-  login() async {
-    print("00");
-
-    print(await Dio().get("http://10.0.2.2:8000/api/v1/set"));
-  }
-
+  bool _isShow = false;
   late SharedPreferences prefs;
   //用户名输入框的焦点控制
   FocusNode _userNameFocusNode = new FocusNode();
@@ -51,8 +46,8 @@ class _LoginPageState extends State<LoginPage> {
     // TODO: implement initState
     super.initState();
     setState(() {
-    mes = "";
-    show = false;
+      mes = "";
+      show = false;
     });
   }
 
@@ -91,14 +86,18 @@ class _LoginPageState extends State<LoginPage> {
             height: 20,
           ),
           buildUserPasswordWidget(),
-
+          Visibility(
+              visible: !show,
+              child: SizedBox(
+                height: 40,
+              )),
           Visibility(
             child: Container(
               margin: EdgeInsets.only(bottom: 15),
               child: Text(
-              mes,
-              style: TextStyle(color: Colors.red, fontSize: 15),
-            ),
+                mes,
+                style: TextStyle(color: Colors.red, fontSize: 15),
+              ),
             ),
             visible: show,
           ),
@@ -108,8 +107,10 @@ class _LoginPageState extends State<LoginPage> {
             height: 40,
             child: ElevatedButton(
               child: Text("新規登録"),
-              onPressed: () {
-                checkLoginFunction();
+              onPressed: () async {
+                if (await checkLoginFunction()) {
+                  Navigator.pushNamed(context, '/');
+                }
               },
             ),
           )
@@ -140,7 +141,7 @@ class _LoginPageState extends State<LoginPage> {
               }
             },
             //隐藏输入的文本
-            obscureText: true,
+            obscureText: _isShow,
             //最大可输入1行
             maxLines: 1,
             //边框样式设置
@@ -150,6 +151,16 @@ class _LoginPageState extends State<LoginPage> {
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.all(Radius.circular(10)),
               ),
+              suffix: GestureDetector(
+                  onTap: () {
+                    setState(() {
+                      _isShow = !_isShow;
+                    });
+                  },
+                  child: Icon(
+                    _isShow ? Icons.visibility_off : Icons.remove_red_eye_sharp,
+                    color: Colors.grey,
+                  )),
             ),
           ),
         );
@@ -244,11 +255,15 @@ class _LoginPageState extends State<LoginPage> {
     );
   }
 
-  void checkLoginFunction() {
+  Future<bool> checkLoginFunction() async {
     hindKeyBoarder();
     if (checkUserName() & checkUserPassword() & checkemailPassword()) {
-      loginFunction();
+      await loginFunction();
     }
+    if (successed) {
+      return true;
+    }
+    return false;
   }
 
   bool checkUserName() {
@@ -303,6 +318,7 @@ class _LoginPageState extends State<LoginPage> {
   }
 
   String mes = "";
+  bool successed = false;
   void hindKeyBoarder() {
     //输入框失去焦点
     _userNameFocusNode.unfocus();
@@ -312,7 +328,7 @@ class _LoginPageState extends State<LoginPage> {
     SystemChannels.textInput.invokeMethod('TextInput.hide');
   }
 
-  void loginFunction() async {
+  loginFunction() async {
     var params = {
       "name": "${_userNameController.text}",
       "email": "${_emailController.text}",
@@ -324,22 +340,26 @@ class _LoginPageState extends State<LoginPage> {
       if (response.statusCode != null) {
         if (response.statusCode == 201) {
           UserData userdate = UserData.fromJson(response.data);
+          var data = userdate.toJson();
           if (userdate.accessToken != "") {
             prefs = await SharedPreferences.getInstance();
-            prefs.setString("userdata", response.data.toString());
+            prefs.setString(
+              "userdata", json.encode(data)
+            );
+            successed = true;
             print(prefs.getString("userdata"));
           } else {
             setState(() {
-            show = true;
-            mes ='未知なエラーが発生しました';
-          });
+              show = true;
+              mes = '未知なエラーが発生しました';
+            });
           }
         }
       } else {
-         setState(() {
-            show = true;
-            mes ='未知なエラーが発生しました';
-          });
+        setState(() {
+          show = true;
+          mes = '未知なエラーが発生しました';
+        });
       }
     } on DioError catch (e) {
       if (e.response!.statusCode == 302 || e.response!.statusCode == 422) {
@@ -349,11 +369,12 @@ class _LoginPageState extends State<LoginPage> {
         });
 
         print("ユーザ名かパスワードは既に使われています");
+      } else if (e.response!.statusCode == 500) {
       } else {
-         setState(() {
-            show = true;
-            mes ='未知なエラーが発生しました';
-          });
+        setState(() {
+          show = true;
+          mes = 'サーバーと繋がっていません';
+        });
       }
       throw (e);
     }
