@@ -70,7 +70,8 @@ class _SignUpPageState extends State<SignUpPage> {
 
 //登录页面的主体
   Widget buildLoginWidget() {
-    return Container(
+    return SingleChildScrollView(
+        child: Container(
       margin: EdgeInsets.all(30.0),
       //线性布局
       child: Column(
@@ -116,7 +117,7 @@ class _SignUpPageState extends State<SignUpPage> {
           )
         ],
       ),
-    );
+    ));
   }
 
   StreamBuilder<String> buildUserPasswordWidget() {
@@ -158,7 +159,9 @@ class _SignUpPageState extends State<SignUpPage> {
                     });
                   },
                   child: Icon(
-                    !_isShow ? Icons.visibility_off : Icons.remove_red_eye_sharp,
+                    !_isShow
+                        ? Icons.visibility_off
+                        : Icons.remove_red_eye_sharp,
                     color: Colors.grey,
                   )),
             ),
@@ -343,9 +346,7 @@ class _SignUpPageState extends State<SignUpPage> {
           var data = userdate.toJson();
           if (userdate.accessToken != "") {
             prefs = await SharedPreferences.getInstance();
-            prefs.setString(
-              "userdata", json.encode(data)
-            );
+            prefs.setString("userdata", json.encode(data));
             successed = true;
             print(prefs.getString("userdata"));
           } else {
