@@ -1,7 +1,6 @@
 import 'dart:async';
 import 'dart:convert';
 import 'package:doto_app/model/ringtonePlayer.dart';
-import 'package:doto_app/model/userData.dart';
 import 'package:doto_app/pages/Countdown.dart';
 import 'package:doto_app/pages/HasDone.dart';
 import 'package:doto_app/pages/tabs/Calendar.dart';
@@ -39,7 +38,6 @@ class _ToDoListPageState extends State<ToDoListPage> with RouteAware {
   final textController = TextEditingController();
   final timeController = TextEditingController();
   final dateController = TextEditingController();
-  late UserData userdata;
   void _printLatestValue() {
     print('Second text field: ${textController.text}');
   }
@@ -68,9 +66,6 @@ class _ToDoListPageState extends State<ToDoListPage> with RouteAware {
       storge.forEach((e) {
         todos.add(TodoModel.fromJson(json.decode(e)));
       });
-      if (retult.getString("userdata") != null) {
-        userdata = UserData.fromJson(json.decode(retult.getString("userdata")));
-      }
       setState(() {
         _listView();
       });
@@ -111,13 +106,6 @@ class _ToDoListPageState extends State<ToDoListPage> with RouteAware {
       });
       print(storge);
     });
-  }
-
-  user() async {
-    SharedPreferences retult = await SharedPreferences.getInstance();
-    if (retult.getString("userdata") != null) {
-      userdata = UserData.fromJson(json.decode(retult.getString("userdata")));
-    }
   }
 
   //日付変更検査
@@ -464,14 +452,7 @@ class _ToDoListPageState extends State<ToDoListPage> with RouteAware {
           ]),
           preferredSize: Size.fromHeight(ScreenAdapter.height(61)),
         ),
-
-        //drawer: drawerEX(userdata:userdata),
-        drawer: FutureBuilder(
-          future: user(),
-          builder: (BuildContext context, AsyncSnapshot snapshot) {
-            return drawerEX(userdata: userdata);
-          },
-        ),
+        drawer: drawerEX(),
         body: new Column(children: <Widget>[
           SizedBox(height: ScreenAdapter.height(8)),
           Expanded(child: _listView()),
