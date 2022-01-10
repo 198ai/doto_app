@@ -20,6 +20,7 @@ class LoginPage extends StatefulWidget {
 class _LoginPageState extends State<LoginPage> {
   bool _isShow = false;
   late SharedPreferences prefs;
+  late UserData userdate;
   //用户名输入框的焦点控制
   FocusNode _userNameFocusNode = new FocusNode();
   FocusNode _passwordFocusNode = new FocusNode();
@@ -368,7 +369,7 @@ class _LoginPageState extends State<LoginPage> {
           await Dio().post("http://10.0.2.2:8000/api/v1/login", data: params);
       if (response.statusCode != null) {
         if (response.statusCode == 201) {
-          UserData userdate = UserData.fromJson(response.data);
+          userdate = UserData.fromJson(response.data);
           var data = userdate.toJson();
           if (userdate.accessToken != "") {
             prefs = await SharedPreferences.getInstance();
