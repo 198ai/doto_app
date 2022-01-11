@@ -102,9 +102,9 @@ class Splash2 extends StatelessWidget {
       seconds: 3,
       navigateAfterSeconds: new Tabs(),
       title: new Text('海人',textScaleFactor: 2,),
-      // image: Image.asset("images/ic_launcher.png"),
+      image: Image.asset("images/ic_launcher.png"),
         loadingText: Text("Loading"),
-      photoSize: 100.0,
+      photoSize: 40.0,
       loaderColor: Colors.green,
     );
   }
