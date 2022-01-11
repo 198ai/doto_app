@@ -20,8 +20,8 @@ class ChartJsonData {
     required this.date,
     required this.contents,
   });
-  late final String date;
-  late final List<Contents> contents;
+  late String date;
+  late List<Contents> contents;
   
   ChartJsonData.fromJson(Map<String, dynamic> json){
     date = json['date'];
@@ -29,10 +29,10 @@ class ChartJsonData {
   }
 
   Map<String, dynamic> toJson() {
-    final _data = <String, dynamic>{};
-    _data['date'] = date;
-    _data['contents'] = contents.map((e)=>e.toJson()).toList();
-    return _data;
+    var data = <String, dynamic>{};
+    data['date'] = date;
+    data['contents'] = contents.map((e)=>e.toJson()).toList();
+    return data;
   }
 }
 
@@ -40,20 +40,18 @@ class Contents {
   Contents({
     required this.events,
     required this.times,
-    required this.percent,
   });
-  late final String events;
-  late final int times;
-  late  int percent;
+  late String events;
+  late int times;
   Contents.fromJson(Map<String, dynamic> json){
     events = json['events'];
     times = json['times'];
   }
 
   Map<String, dynamic> toJson() {
-    final _data = <String, dynamic>{};
-    _data['events'] = events;
-    _data['times'] = times;
-    return _data;
+    var data = <String, dynamic>{};
+    data['events'] = events;
+    data['times'] = times;
+    return data;
   }
 }

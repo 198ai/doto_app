@@ -6,7 +6,7 @@ import '../../services/ScreenAdapter.dart';
 class TodoModel {
   int id;
   String title;
-  bool complete;
+  int complete;
   String time;
   String date;
   String endDate;

@@ -33,7 +33,6 @@ dependencies:
   provider: ^4.3.2+4
   vibration: ^1.7.3
   table_calendar: ^3.0.3
-  syncfusion_flutter_datepicker: ^19.3.45
   syncfusion_flutter_calendar: ^19.3.48
   http: ^0.12.0+1
   #charts_flutter: ^0.10.0
@@ -41,6 +40,11 @@ dependencies:
   dio: ^3.0.10
   date_format: ^2.0.4
   flutter_local_notifications: ^1.4.4+2
+   # 抖动动画  向上弹出动画
+  shake_animation_widget: ^2.1.2
+  rxdart: ^0.24.1 
+  flutter_ringtone_player: ^3.0.0
+  syncfusion_flutter_charts: ^19.4.38
 dev_dependencies:
   flutter_test:
     sdk: flutter

@@ -1,5 +1,8 @@
 import 'dart:async';
 import 'dart:convert';
+import 'package:dio/dio.dart';
+import 'package:doto_app/model/ringtonePlayer.dart';
+import 'package:doto_app/model/userData.dart';
 import 'package:doto_app/pages/Countdown.dart';
 import 'package:doto_app/pages/HasDone.dart';
 import 'package:doto_app/pages/tabs/Calendar.dart';
@@ -37,12 +40,41 @@ class _ToDoListPageState extends State<ToDoListPage> with RouteAware {
   final textController = TextEditingController();
   final timeController = TextEditingController();
   final dateController = TextEditingController();
+  late UserData userdata;
+  late String userName;
+  late String userEmail;
   void _printLatestValue() {
     print('Second text field: ${textController.text}');
   }
 
   void _printTimeValue() {
     print('Second text field: ${timeController.text}');
+  }
+
+  Future gettodolist() async {
+    ///本地存储的数据先更新给API，同步数据
+    ///然后更新本地数据
+    SharedPreferences retult = await SharedPreferences.getInstance();
+    Dio dio = new Dio();
+    List jsonData;
+    TodoModel data;
+    dio.options.headers['content-Type'] = 'application/json';
+    print("Bearer ${userdata.accessToken}");
+
+    ///请求header的配置
+    dio.options.headers['authorization'] = "Bearer ${userdata.accessToken}";
+
+    Response response = await dio.get("http://10.0.2.2:8000/api/v1/todolist");
+
+    jsonData = response.data;
+    //data = TodoModel.fromJson(response.data);
+    jsonData.forEach((element) {
+      print(element);
+      todos.add(TodoModel.fromJson(element));
+      //从API中拿到数据后
+      //本地存储
+      //然后添加
+    });
   }
 
   @override
@@ -59,10 +91,9 @@ class _ToDoListPageState extends State<ToDoListPage> with RouteAware {
     todos = [];
     Future(() async {
       SharedPreferences retult = await SharedPreferences.getInstance();
-      retult.getString("toDoList") == null
-          ? storge = []
-          : storge = json.decode(retult.getString("toDoList") ?? "{}");
-      print(storge);
+      if (retult.getString("toDoList") != null) {
+        storge.addAll(json.decode(retult.getString("toDoList") ?? "{}"));
+      }
       storge.forEach((e) {
         todos.add(TodoModel.fromJson(json.decode(e)));
       });
@@ -91,10 +122,13 @@ class _ToDoListPageState extends State<ToDoListPage> with RouteAware {
     //ローカルストレージから、値をLISTに渡す、初期化する
     Future(() async {
       SharedPreferences retult = await SharedPreferences.getInstance();
-      retult.getString("toDoList") == null
-          ? storge = []
-          : storge = json.decode(retult.getString("toDoList") ?? "{}");
-      print(storge);
+      retult = await SharedPreferences.getInstance();
+      retult.getString("userdata")==null?userdata=UserData(name: "", email: "", accessToken: ""):
+      userdata = UserData.fromJson(json.decode(retult.getString("userdata")));
+      //await gettodolist();
+      if (retult.getString("toDoList") != null) {
+        storge.addAll(json.decode(retult.getString("toDoList") ?? "{}"));
+      }
       storge.forEach((e) {
         //画面リロード
         todos.add(TodoModel.fromJson(json.decode(e)));
@@ -102,6 +136,13 @@ class _ToDoListPageState extends State<ToDoListPage> with RouteAware {
           await dateChange(e.endDate);
         });
       });
+      if (retult.getString("userdata") != null) {
+        userdata = UserData.fromJson(json.decode(retult.getString("userdata")));
+      } else {
+        userdata = UserData(name: "", email: "", accessToken: "");
+      }
+      userName = userdata.name == "" ? "" : userdata.name;
+      userEmail = userdata.email == "" ? "" : userdata.email;
       setState(() {
         _listView();
       });
@@ -118,7 +159,7 @@ class _ToDoListPageState extends State<ToDoListPage> with RouteAware {
     setState(() {
       //完成するまでの日付更新
       todos.forEach((e) {
-        e.date = ((startDate.difference(endDate).inDays)+1).toString();
+        e.date = ((startDate.difference(endDate).inDays) + 1).toString();
       });
     });
   }
@@ -141,7 +182,7 @@ class _ToDoListPageState extends State<ToDoListPage> with RouteAware {
       title: editText,
       date: getdate,
       time: gettime,
-      complete: false,
+      complete: 0,
       endDate: getendDate,
     );
     //画面をリロードして、新たな項目を表示する
@@ -165,6 +206,28 @@ class _ToDoListPageState extends State<ToDoListPage> with RouteAware {
 
     //隐藏键盘
     SystemChannels.textInput.invokeMethod('TextInput.hide');
+  }
+
+  addtodolist(String editText, String getdate, String gettime,
+      String getendDate) async {
+    Dio dio = new Dio();
+    dio.options.headers['content-Type'] = 'application/json';
+    print("Bearer ${userdata.accessToken}");
+    var params = {
+      "title": editText,
+      "complete": 0,
+      "time": gettime,
+      "date": getdate,
+      "endDate": getendDate,
+      "status": 0
+    };
+
+    ///请求header的配置
+    dio.options.headers['authorization'] = "Bearer ${userdata.accessToken}";
+
+    Response response =
+        await dio.post("http://10.0.2.2:8000/api/v1/addtodolist", data: params);
+    print(response);
   }
 
   //時間の選択
@@ -204,7 +267,7 @@ class _ToDoListPageState extends State<ToDoListPage> with RouteAware {
                   var startDate =
                       new DateTime(dateTime.year, dateTime.month, dateTime.day);
                   var endDate = new DateTime.now();
-                  days = ((startDate.difference(endDate).inDays)+1);
+                  days = ((startDate.difference(endDate).inDays) + 1);
                   enddate =
                       "${dateTime.year}-${dateTime.month}-${dateTime.day}";
                   dateController.text = days.toString() + "日";
@@ -306,7 +369,11 @@ class _ToDoListPageState extends State<ToDoListPage> with RouteAware {
                                 child: Column(
                               children: [
                                 Padding(
-                                  padding: EdgeInsets.fromLTRB(ScreenAdapter.width(30),ScreenAdapter.height(30),ScreenAdapter.width(30), ScreenAdapter.height(30)),
+                                  padding: EdgeInsets.fromLTRB(
+                                      ScreenAdapter.width(30),
+                                      ScreenAdapter.height(30),
+                                      ScreenAdapter.width(30),
+                                      ScreenAdapter.height(30)),
                                   child: Column(
                                     children: [
                                       Text("新たな挑戦を始めるね！"),
@@ -315,7 +382,11 @@ class _ToDoListPageState extends State<ToDoListPage> with RouteAware {
                                   ),
                                 ),
                                 Padding(
-                                  padding: EdgeInsets.fromLTRB(ScreenAdapter.width(30),ScreenAdapter.height(0),ScreenAdapter.width(30), ScreenAdapter.height(0)),
+                                  padding: EdgeInsets.fromLTRB(
+                                      ScreenAdapter.width(30),
+                                      ScreenAdapter.height(0),
+                                      ScreenAdapter.width(30),
+                                      ScreenAdapter.height(0)),
                                   child: TextField(
                                     style: TextStyle(color: Colors.black87),
                                     controller: textController,
@@ -333,7 +404,11 @@ class _ToDoListPageState extends State<ToDoListPage> with RouteAware {
                                   ),
                                 ),
                                 Padding(
-                                    padding: EdgeInsets.fromLTRB(ScreenAdapter.width(30),ScreenAdapter.height(0),ScreenAdapter.width(30), ScreenAdapter.height(0)),
+                                    padding: EdgeInsets.fromLTRB(
+                                        ScreenAdapter.width(30),
+                                        ScreenAdapter.height(0),
+                                        ScreenAdapter.width(30),
+                                        ScreenAdapter.height(0)),
                                     child: TextField(
                                         decoration: new InputDecoration(
                                           icon: Icon(Icons.access_time),
@@ -344,7 +419,11 @@ class _ToDoListPageState extends State<ToDoListPage> with RouteAware {
                                           await _showTimePicker();
                                         })),
                                 Padding(
-                                    padding: EdgeInsets.fromLTRB(ScreenAdapter.width(30),ScreenAdapter.height(0),ScreenAdapter.width(30), ScreenAdapter.height(0)),
+                                    padding: EdgeInsets.fromLTRB(
+                                        ScreenAdapter.width(30),
+                                        ScreenAdapter.height(0),
+                                        ScreenAdapter.width(30),
+                                        ScreenAdapter.height(0)),
                                     child: TextField(
                                         decoration: new InputDecoration(
                                           icon: Icon(
@@ -357,7 +436,11 @@ class _ToDoListPageState extends State<ToDoListPage> with RouteAware {
                                         })),
                                 Container(
                                   height: btnHeight,
-                                  margin: EdgeInsets.fromLTRB(ScreenAdapter.width(30),ScreenAdapter.height(0),ScreenAdapter.width(30), ScreenAdapter.height(0)),
+                                  margin: EdgeInsets.fromLTRB(
+                                      ScreenAdapter.width(30),
+                                      ScreenAdapter.height(0),
+                                      ScreenAdapter.width(30),
+                                      ScreenAdapter.height(0)),
                                   child: Column(
                                     children: [
                                       Row(
@@ -374,7 +457,8 @@ class _ToDoListPageState extends State<ToDoListPage> with RouteAware {
                                             child: Text(
                                               "サボる",
                                               style: TextStyle(
-                                                  fontSize: ScreenAdapter.size(15),
+                                                  fontSize:
+                                                      ScreenAdapter.size(15),
                                                   color: Colors.blue),
                                             ),
                                           ),
@@ -399,6 +483,11 @@ class _ToDoListPageState extends State<ToDoListPage> with RouteAware {
                                                     //Navigator.pop(context);
                                                     return;
                                                   } else {
+                                                    addtodolist(
+                                                        textController.text,
+                                                        days.toString(),
+                                                        inSeconds.toString(),
+                                                        enddate.toString());
                                                     _editParentText(
                                                         textController.text,
                                                         days.toString(),
@@ -411,7 +500,8 @@ class _ToDoListPageState extends State<ToDoListPage> with RouteAware {
                                               child: Text(
                                                 "チャレンジする",
                                                 style: TextStyle(
-                                                    fontSize: ScreenAdapter.size(15),
+                                                    fontSize:
+                                                        ScreenAdapter.size(15),
                                                     color: Colors.blue),
                                               )),
                                         ],
@@ -540,7 +630,8 @@ class _ToDoListPageState extends State<ToDoListPage> with RouteAware {
                             children: [
                               Container(
                                 width: ScreenAdapter.width(100),
-                                margin: EdgeInsets.only(right: ScreenAdapter.width(20)),
+                                margin: EdgeInsets.only(
+                                    right: ScreenAdapter.width(20)),
                                 child: Text(
                                   '${item.title}',
                                   maxLines: 4,
@@ -552,7 +643,8 @@ class _ToDoListPageState extends State<ToDoListPage> with RouteAware {
                                 ),
                               ),
                               Container(
-                                margin: EdgeInsets.only(right:  ScreenAdapter.width(10)),
+                                margin: EdgeInsets.only(
+                                    right: ScreenAdapter.width(10)),
                                 child: Column(
                                   children: [
                                     Text(
@@ -581,7 +673,7 @@ class _ToDoListPageState extends State<ToDoListPage> with RouteAware {
                             ]),
                       ),
                       Container(
-                        margin: EdgeInsets.only(left:  ScreenAdapter.width(10)),
+                        margin: EdgeInsets.only(left: ScreenAdapter.width(10)),
                         child: TextButton(
                           style: ButtonStyle(
                             padding: MaterialStateProperty.all(EdgeInsets.zero),

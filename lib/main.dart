@@ -93,30 +93,3 @@ class _MyAppState extends State<MyApp> {
   }
 }
 
-
-void scheduleAlarm(
-    DateTime scheduledNotificationDateTime, String alarmInfo) async {
-  var androidPlatformChannelSpecifics = AndroidNotificationDetails(
-    'alarm_notif',
-    'alarm_notif',
-    'Channel for Alarm notification',
-    icon: 'ic_launcher',
-    sound: RawResourceAndroidNotificationSound('clock'),
-    largeIcon: DrawableResourceAndroidBitmap('ic_launcher'),
-  );
-
-  var iOSPlatformChannelSpecifics = IOSNotificationDetails(
-      sound: 'clock.wav',
-      presentAlert: true,
-      presentBadge: true,
-      presentSound: true);
-  var platformChannelSpecifics = NotificationDetails(
-      androidPlatformChannelSpecifics, iOSPlatformChannelSpecifics);
-
-  await flutterLocalNotificationsPlugin.schedule(
-      0,
-      'リマインド!',
-      alarmInfo + "の時間だよ!",
-      scheduledNotificationDateTime,
-      platformChannelSpecifics);
-}
