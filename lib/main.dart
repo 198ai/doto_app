@@ -99,9 +99,9 @@ class Splash2 extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return SplashScreen(
-      seconds: 3,
+      seconds: 30,
       navigateAfterSeconds: new Tabs(),
-      title: new Text('海人',textScaleFactor: 2,),
+      title: new Text('美らじぇんだ\n~目標達成までちゃ～まじゅん！~',textScaleFactor: 1.8,textAlign: TextAlign.center,),
       image: Image.asset("images/ic_launcher.png"),
         loadingText: Text("Loading"),
       photoSize: 40.0,
