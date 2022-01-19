@@ -60,6 +60,7 @@ class _SignUpPageState extends State<SignUpPage> {
       },
       child: Scaffold(
         appBar: AppBar(
+          backgroundColor: Color(0xFF8ddf67),
           title: Text("アカント新規"),
         ),
         //登录页面的主体

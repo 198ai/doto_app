@@ -194,7 +194,8 @@ class _CalendarPageState extends State<CalendarPage> {
                 //在这里为了区分，在构建builder的时候将setState方法命名为了setBottomSheetState。
                 builder: (context1, showDialogState) {
               return AlertDialog(
-                title: Row(
+                title: 
+                Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     Text('メモ'),
@@ -210,7 +211,10 @@ class _CalendarPageState extends State<CalendarPage> {
                     ),
                   ],
                 ),
-                content: Column(
+                content: 
+                SingleChildScrollView(
+            child: 
+                Column(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   mainAxisSize: MainAxisSize.min,
                   children: [
@@ -227,7 +231,7 @@ class _CalendarPageState extends State<CalendarPage> {
                             controller: dateController, hint: 'アラーム')
                         : Container(),
                   ],
-                ),
+                ),),
                 actions: [
                   TextButton(
                     onPressed: () => Navigator.pop(context),
@@ -317,7 +321,9 @@ class _CalendarPageState extends State<CalendarPage> {
   Widget build(BuildContext context) {
     return Scaffold(
         appBar:
-            AppBar(centerTitle: true, title: Text("カレンダー"), actions: <Widget>[
+            AppBar(
+              backgroundColor: Color(0xFF8ddf67),
+              centerTitle: true, title: Text("カレンダー"), actions: <Widget>[
           IconButton(
               splashColor: Colors.transparent,
               highlightColor: Colors.transparent,
@@ -454,7 +460,8 @@ class _CalendarPageState extends State<CalendarPage> {
                   padding: const EdgeInsets.only(bottom: 8.0),
                   child: Text('タイトル:　${myEvents.eventTitle}'),
                 ),
-                subtitle: Column(
+                subtitle: 
+                Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text('メモ:　${myEvents.eventDescp}'),

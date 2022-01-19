@@ -345,7 +345,9 @@ class _ToDoListPageState extends State<ToDoListPage> with RouteAware {
         resizeToAvoidBottomInset: false,
         appBar: PreferredSize(
           child:
-              AppBar(centerTitle: true, title: Text("アジェンダ"), actions: <Widget>[
+            AppBar(
+            backgroundColor: Color(0xFF8ddf67),
+            centerTitle: true, title: Text("アジェンダ"), actions: <Widget>[
             IconButton(
               splashColor: Colors.transparent,
               highlightColor: Colors.transparent,

@@ -216,6 +216,7 @@ class _CountdownState extends State<CountDown> {
   Widget build(BuildContext context) {
     return Scaffold(
         appBar: AppBar(
+          backgroundColor: Color(0xFF8ddf67),
           leading: new IconButton(
             icon: new Icon(Icons.arrow_back_ios),
             onPressed: () => {
