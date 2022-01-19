@@ -61,6 +61,7 @@ class _LoginPageState extends State<LoginPage> {
       },
       child: Scaffold(
         appBar: AppBar(
+          backgroundColor: Color(0xFF8ddf67),
           title: Text("ログイン"),
         ),
         //登录页面的主体

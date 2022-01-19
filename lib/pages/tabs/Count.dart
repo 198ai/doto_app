@@ -301,6 +301,7 @@ class _CountPage extends State<CountPage> {
   Widget build(BuildContext context) {
     return Scaffold(
         appBar: AppBar(
+          backgroundColor: Color(0xFF8ddf67),
           centerTitle: true,
           //title: Text(_strTitle, style: TextStyle(color: commonStrColor)), //AIForce Equipment App
           title: Text('統計'),
