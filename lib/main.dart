@@ -88,7 +88,7 @@ class _MyAppState extends State<MyApp> {
     return ScreenUtilInit(
         designSize: Size(428, 926),
         builder: () => MaterialApp(
-            home: Splash2(),
+            home: Tabs(),
             navigatorObservers: [MyApp.routeObserver], //添加路由观察者
             debugShowCheckedModeBanner: false,
             initialRoute: '/',
@@ -99,9 +99,9 @@ class Splash2 extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return SplashScreen(
-      seconds: 30,
+      seconds: 3,
       navigateAfterSeconds: new Tabs(),
-      title: new Text('美らじぇんだ\n~目標達成までちゃ～まじゅん！~',textScaleFactor: 1.8,textAlign: TextAlign.center,),
+      title: new Text('美らじぇんだ\n目標達成までちゃ～まじゅん！',textScaleFactor: 1.8,textAlign: TextAlign.center,style:TextStyle(fontSize: 13,fontWeight:FontWeight.bold) ,),
       image: Image.asset("images/ic_launcher.png"),
         loadingText: Text("Loading"),
       photoSize: 40.0,

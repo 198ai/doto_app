@@ -109,6 +109,10 @@ class _LoginPageState extends State<LoginPage> {
             width: double.infinity,
             height: 40,
             child: ElevatedButton(
+              style: ButtonStyle(
+                backgroundColor:
+                    MaterialStateProperty.all(Color(0xFF8ddf67)), //背景颜色
+              ),
               child: Text("登録"),
               onPressed: () async {
                 if (await checkLoginFunction()) {
@@ -365,6 +369,7 @@ class _LoginPageState extends State<LoginPage> {
       "email": "${_emailController.text}",
       "password": "${_passwordController.text}"
     };
+    print(params);
     try {
       Response response =
           await Dio().post("http://10.0.2.2:8000/api/v1/login", data: params);

@@ -109,6 +109,10 @@ class _SignUpPageState extends State<SignUpPage> {
             height: 40,
             child: ElevatedButton(
               child: Text("新規登録"),
+              style: ButtonStyle(
+                backgroundColor:
+                    MaterialStateProperty.all(Color(0xFF8ddf67)), //背景颜色
+              ),
               onPressed: () async {
                 if (await checkLoginFunction()) {
                   Navigator.pushNamed(context, '/');
@@ -143,10 +147,11 @@ class _SignUpPageState extends State<SignUpPage> {
               }
             },
             //隐藏输入的文本
-            obscureText: _isShow,
+            obscureText: !_isShow,
             //最大可输入1行
             maxLines: 1,
             //边框样式设置
+
             decoration: InputDecoration(
               labelText: "パスワード",
               errorText: snapshot.data,
@@ -160,7 +165,7 @@ class _SignUpPageState extends State<SignUpPage> {
                     });
                   },
                   child: Icon(
-                    !_isShow
+                     !_isShow
                         ? Icons.visibility_off
                         : Icons.remove_red_eye_sharp,
                     color: Colors.grey,
@@ -194,8 +199,7 @@ class _SignUpPageState extends State<SignUpPage> {
                 FocusScope.of(context).requestFocus(_emailFocusNode);
               }
             },
-            //隐藏输入的文本
-            obscureText: true,
+
             //最大可输入1行
             maxLines: 1,
             //边框样式设置
@@ -338,9 +342,11 @@ class _SignUpPageState extends State<SignUpPage> {
       "email": "${_emailController.text}",
       "password": "${_passwordController.text}"
     };
+    print(params);
     try {
       Response response =
           await Dio().post("http://10.0.2.2:8000/api/v1/signup", data: params);
+      print(response.statusCode);
       if (response.statusCode != null) {
         if (response.statusCode == 201) {
           UserData userdate = UserData.fromJson(response.data);
