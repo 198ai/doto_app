@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:doto_app/pages/tabs/ToDoList.dart';
+import 'package:doto_app/services/ScreenAdapter.dart';
 import 'package:flutter/material.dart';
 
 class StartPage extends StatefulWidget {
@@ -219,7 +220,7 @@ class _StartPageState extends State<StartPage> {
               Expanded(
                   flex: 1,
                   child: Container(
-                      margin: EdgeInsets.only(top: 50),
+                      margin: EdgeInsets.only(top: ScreenAdapter.height(50),),
                       alignment: Alignment.topCenter,
                       child: time ==0 ?
                       Text(_timeString,

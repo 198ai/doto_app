@@ -7,6 +7,7 @@ import 'package:doto_app/model/ringtonePlayer.dart';
 import 'package:doto_app/model/tasklist.dart';
 import 'package:doto_app/pages/tabs/Tabs.dart';
 import 'package:doto_app/pages/tabs/ToDoList.dart';
+import 'package:doto_app/services/ScreenAdapter.dart';
 import 'package:flutter_ringtone_player/flutter_ringtone_player.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -234,16 +235,16 @@ class _CountdownState extends State<CountDown> {
           Column(
             children: [
               Container(
-                  margin: EdgeInsets.only(top: 150),
+                  margin: EdgeInsets.only(top: ScreenAdapter.height(150)),
                   alignment: Alignment.topCenter,
                   child: Text(constructTime(seconds),
-                      style: TextStyle(fontSize: 80, color: Colors.black87))),
+                      style: TextStyle(fontSize: ScreenAdapter.size(100), color: Colors.black87))),
               Container(
-                margin: EdgeInsets.only(top: 150),
+                margin: EdgeInsets.only(top: ScreenAdapter.height(180)),
                 alignment: Alignment.topCenter,
                 child: TextButton(
                     child: Text("停止",
-                        style: TextStyle(fontSize: 50, color: Colors.black87)),
+                        style: TextStyle(fontSize: ScreenAdapter.size(70), color: Colors.black87)),
                     onPressed: () {
                       stopTimer();
                     }),

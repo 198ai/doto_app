@@ -313,12 +313,12 @@ class _CountPage extends State<CountPage> {
             child: Column(
               children: [
                 Container(
-                  height: 80,
-                  width: 600,
+                  height: ScreenAdapter.height(80),
+                  width: ScreenAdapter.width(600),
                   child: Card(
                       child: Container(
                           alignment: Alignment.center,
-                          margin: EdgeInsets.only(top: 10),
+                          margin: EdgeInsets.only(top:ScreenAdapter.height(10)),
                           child: SingleChildScrollView(
                             scrollDirection: Axis.horizontal,
                             child: Row(
@@ -327,13 +327,18 @@ class _CountPage extends State<CountPage> {
                                 Text(
                                   "累計総時間:",
                                   style: TextStyle(
-                                      fontSize: 18.0,
+                                      fontSize:ScreenAdapter.size(25),
                                       // fontStyle: FontStyle.italic,
                                       color: Colors.pink,
                                       fontWeight: FontWeight.bold),
                                 ),
-                                SizedBox(width: 20),
-                                Text("${constructTime(totalTimes)}"),
+                                SizedBox(width:ScreenAdapter.width(20)),
+                                Text("${constructTime(totalTimes)}",
+                                      style: TextStyle(
+                                      fontSize:ScreenAdapter.size(25),
+                                      // fontStyle: FontStyle.italic,
+                                      color: Colors.black,
+                                      fontWeight: FontWeight.bold),),
 
                                 //   Column(children: [
                                 //     Text(
@@ -368,10 +373,10 @@ class _CountPage extends State<CountPage> {
                           ))),
                 ),
                 Container(
-                    height: 550,
+                    height: ScreenAdapter.height(640),
                     child: Card(
                       child: Padding(
-                        padding: EdgeInsets.all(8.0),
+                        padding: EdgeInsets.all(ScreenAdapter.width(8)),
                         child: Column(
                           children: <Widget>[
                             Row(
@@ -517,14 +522,14 @@ class _CountPage extends State<CountPage> {
                             Visibility(
                                 visible: visible,
                                 child: Container(
-                                  height: 400,
-                                  width: 400,
+                                  height:ScreenAdapter.height(450),
+                                  width: ScreenAdapter.width(400),
                                   child: SfCircularChart(
                                     title: ChartTitle(
                                         text:
                                             '総時間:${constructTime(selectedTotalTimes)}',
-                                        textStyle: TextStyle(fontSize: 13)),
-                                    margin: EdgeInsets.only(top: 10),
+                                        textStyle: TextStyle(fontSize:  ScreenAdapter.size(23))),
+                                    margin: EdgeInsets.only(top: ScreenAdapter.height(10)),
                                     legend: Legend(
                                         position: LegendPosition.bottom,
                                         isVisible: true,
@@ -561,9 +566,9 @@ class _CountPage extends State<CountPage> {
                               visible: !visible,
                               child: Container(
                                 alignment: Alignment.center,
-                                margin: EdgeInsets.only(top: 50),
+                                margin: EdgeInsets.only(top:  ScreenAdapter.height(50)),
                                 child: Text("この日には何もやっていないよ",
-                                    style: TextStyle(fontSize: 16.0)),
+                                    style: TextStyle(fontSize:ScreenAdapter.size(23))),
                               ),
                             ),
                           ],

@@ -113,7 +113,7 @@ class _CalendarPageState extends State<CalendarPage> {
                     },
                     child: Text(
                       'キャンセル',
-                      style: TextStyle(fontSize: 13),
+                      style: TextStyle(fontSize: ScreenAdapter.size(16)),
                     )),
                 // ignore: deprecated_member_use
                 TextButton(
@@ -122,7 +122,7 @@ class _CalendarPageState extends State<CalendarPage> {
                     },
                     child: Text(
                       '確認',
-                      style: TextStyle(fontSize: ScreenAdapter.size(13)),
+                      style: TextStyle(fontSize: ScreenAdapter.size(16)),
                     )),
               ],
             ),
@@ -219,12 +219,12 @@ class _CalendarPageState extends State<CalendarPage> {
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     buildTextField(controller: titleController, hint: 'タイトル'),
-                    const SizedBox(
-                      height: 20.0,
+                    SizedBox(
+                      height: ScreenAdapter.height(23),
                     ),
                     buildTextField(controller: descpController, hint: 'メモ'),
-                    const SizedBox(
-                      height: 20.0,
+                    SizedBox(
+                       height: ScreenAdapter.height(23),
                     ),
                     visible
                         ? buildTextField(
@@ -335,7 +335,7 @@ class _CalendarPageState extends State<CalendarPage> {
         body: SingleChildScrollView(
             child: Column(children: [
           Card(
-            margin: EdgeInsets.all(15.0),
+            margin: EdgeInsets.all(ScreenAdapter.height(20),),
             elevation: 15.0,
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.all(
@@ -449,7 +449,7 @@ class _CalendarPageState extends State<CalendarPage> {
           //   shrinkWrap: true,
           //   children:
           ..._listOfDayEvents(selectedCalendarDate!).map((myEvents) => Padding(
-              padding: const EdgeInsets.all(5),
+              padding:EdgeInsets.all(ScreenAdapter.height(5)),
               child: ListTile(
                 onTap: () {},
                 // leading: const Icon(
@@ -457,7 +457,7 @@ class _CalendarPageState extends State<CalendarPage> {
                 //   color: Colors.black,
                 // ),
                 title: Padding(
-                  padding: const EdgeInsets.only(bottom: 8.0),
+                  padding: EdgeInsets.only(bottom: ScreenAdapter.height(10)),
                   child: Text('タイトル:　${myEvents.eventTitle}'),
                 ),
                 subtitle: 
@@ -510,8 +510,8 @@ class _CalendarPageState extends State<CalendarPage> {
 
   Widget _buildEventsMarker(DateTime date, List events) {
     return Positioned(
-      right: 5,
-      bottom: 5,
+      right:  ScreenAdapter.width(10),
+      bottom: ScreenAdapter.height(10),
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 300),
         decoration: BoxDecoration(
