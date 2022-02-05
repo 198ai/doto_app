@@ -35,7 +35,7 @@ class _CalendarPageState extends State<CalendarPage> {
   CalendarFormat _calendarFormat = CalendarFormat.month;
   late Map<DateTime, List<MyEvents>> mySelectedEvents;
   // List<MyAlarm> myAlarm = [];
-  int id = 1;
+  int alarmId = 1;
   late UserData userdata;
   bool visible = false; //アラーム表示するか
   late Map setChartJsonData;
@@ -60,7 +60,17 @@ class _CalendarPageState extends State<CalendarPage> {
         mySelectedEvents =
             decodeMap(json.decode(prefs.getString("events") ?? "{}"));
       });
-      id = id + 1;
+      // prefs.getString("myAlarm") == null
+      //     ? storge = []
+      //     : storge = json.decode(prefs.getString("myAlarm") ?? "{}");
+      // storge.forEach((e) {
+      //   myAlarm.add(MyAlarm.fromJson(json.decode(e)));
+      // });
+      // if (myAlarm.isNotEmpty) {
+      // alarmId = myAlarm.last.alarmId + 1;
+      //}
+      print(alarmId);
+      alarmId=alarmId+1;
       //prefs.remove("myAlarm");
       //prefs.remove("events");
       // print(prefs.getString("events").toString());
@@ -118,8 +128,8 @@ class _CalendarPageState extends State<CalendarPage> {
     map.forEach((key, value) {
       value.forEach((e) {
         list.add(MyEvents.fromJson(e));
-        if (id < MyEvents.fromJson(e).id) {
-          id = MyEvents.fromJson(e).id;
+        if (alarmId < MyEvents.fromJson(e).alarmId) {
+          alarmId = MyEvents.fromJson(e).alarmId;
         }
       });
       if (list != []) {
@@ -271,6 +281,7 @@ class _CalendarPageState extends State<CalendarPage> {
                     onPressed: () async {
                       var date = DateFormat('yyyy-MM-dd')
                           .format(selectedCalendarDate!);
+                      int localAlarmId = alarmId;
                       //现在最大ID取得
 
                       if (titleController.text.isEmpty &&
@@ -285,30 +296,37 @@ class _CalendarPageState extends State<CalendarPage> {
                         return;
                       } else {
                         setState(() {
+                          //localAlarmId =dateController.text == "" ? 0 : alarmId;
                           if (mySelectedEvents[DateTime.parse(date)] != null) {
                             mySelectedEvents[DateTime.parse(date)]?.add(
                                 MyEvents(
                                     eventTitle: titleController.text,
                                     eventDescp: descpController.text,
                                     alarm: dateController.text,
-                                    id: id));
+                                    alarmId: alarmId));
                           } else {
                             mySelectedEvents[DateTime.parse(date)] = [
                               MyEvents(
                                   eventTitle: titleController.text,
                                   eventDescp: descpController.text,
                                   alarm: dateController.text,
-                                  id: id)
+                                  alarmId: alarmId)
                             ];
                           }
                         });
 
                         //アラームの設定があるか
                         if (dateController.text != "") {
+                          // myAlarm.add(MyAlarm(
+                          //     alarmId: alarmId,
+                          //     alarmTitle: titleController.text,
+                          //     alarmSubTitle: descpController.text,
+                          //     alarmDate: dateController.text,
+                          //     status: 0));
                           scheduleAlarm(DateTime.parse(dateController.text),
-                              titleController.text, id);
+                              titleController.text, alarmId);
                         }
-                        id++;
+                        alarmId++;
                         mySelectedEvents.forEach((key, value) {
                           var date = DateFormat('yyyy-MM-dd').format(key);
                           _events[DateTime.parse(date)] = value;
@@ -496,8 +514,18 @@ class _CalendarPageState extends State<CalendarPage> {
                     onPressed: () async {
                       var index = _listOfDayEvents(selectedCalendarDate!)
                           .indexOf(myEvents);
-                      var alramIndex = 0;
+                      //var alramIndex = 0;
                       var alramId = 0;
+                      if (_listOfDayEvents(selectedCalendarDate!)[index]
+                              .alarm !=
+                          "") {
+                        alramId = _listOfDayEvents(selectedCalendarDate!)[index]
+                            .alarmId;
+                        // alramIndex = myAlarm.indexWhere(
+                        //     (element) => element.alarmId == alramId);
+                        // myAlarm.removeAt(alramIndex);
+                      }
+
                       setState(() {
                         _listOfDayEvents(selectedCalendarDate!).removeAt(index);
                       });
@@ -513,6 +541,9 @@ class _CalendarPageState extends State<CalendarPage> {
                       //还要删除对应的MAp的时间
                       prefs.setString(
                           "events", json.encode(encodeMap(mySelectedEvents)));
+                      // List<String> events =
+                      //     myAlarm.map((f) => json.encode(f.toJson())).toList();
+                      // prefs.setString("myAlarm", json.encode(events));
                     },
                     icon: Icon(Icons.delete)),
               )))
