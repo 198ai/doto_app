@@ -70,7 +70,6 @@ class _CalendarPageState extends State<CalendarPage> {
       // alarmId = myAlarm.last.alarmId + 1;
       //}
       print(alarmId);
-      alarmId=alarmId+1;
       //prefs.remove("myAlarm");
       //prefs.remove("events");
       // print(prefs.getString("events").toString());
@@ -129,7 +128,7 @@ class _CalendarPageState extends State<CalendarPage> {
       value.forEach((e) {
         list.add(MyEvents.fromJson(e));
         if (alarmId < MyEvents.fromJson(e).alarmId) {
-          alarmId = MyEvents.fromJson(e).alarmId;
+          alarmId = MyEvents.fromJson(e).alarmId+1;
         }
       });
       if (list != []) {
