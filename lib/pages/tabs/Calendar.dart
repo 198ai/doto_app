@@ -96,20 +96,18 @@ class _CalendarPageState extends State<CalendarPage> {
     mySelectedEvents.forEach((key, value) {
       Map calendar = {};
       List eventslist = [];
-      calendar["calendar"] = key;
-      value.forEach((element) {
-        eventslist.add(element.toJson());
-      });
-      calendar["events"] = eventslist;
+      calendar["calendar"] = key.toString();
+      calendar["events"] = value.map((v) => v.toJson()).toList();
       calendarlist.add(calendar);
     });
-    print(calendarlist);
+    print(jsonEncode(calendarlist));
     Dio dio = new Dio();
     dio.options.headers['content-Type'] = 'application/json';
     //print("Bearer ${userdata.accessToken}");
     ///请求header的配置
     dio.options.headers['authorization'] = "Bearer ${userdata.accessToken}";
-    Response response = await dio.post("http://10.0.2.2:8000/api/v1/myevents");
+    Response response = await dio.post("http://10.0.2.2:8000/api/v1/myevents",
+        data:jsonEncode(calendarlist));
     print(response);
   }
 
@@ -128,7 +126,7 @@ class _CalendarPageState extends State<CalendarPage> {
       value.forEach((e) {
         list.add(MyEvents.fromJson(e));
         if (alarmId < MyEvents.fromJson(e).alarmId) {
-          alarmId = MyEvents.fromJson(e).alarmId+1;
+          alarmId = MyEvents.fromJson(e).alarmId + 1;
         }
       });
       if (list != []) {
@@ -302,14 +300,16 @@ class _CalendarPageState extends State<CalendarPage> {
                                     eventTitle: titleController.text,
                                     eventDescp: descpController.text,
                                     alarm: dateController.text,
-                                    alarmId: alarmId));
+                                    alarmId: alarmId,
+                                    status:0));
                           } else {
                             mySelectedEvents[DateTime.parse(date)] = [
                               MyEvents(
                                   eventTitle: titleController.text,
                                   eventDescp: descpController.text,
                                   alarm: dateController.text,
-                                  alarmId: alarmId)
+                                  alarmId: alarmId,
+                                  status:0)
                             ];
                           }
                         });
