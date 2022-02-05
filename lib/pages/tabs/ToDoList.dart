@@ -125,19 +125,19 @@ class _ToDoListPageState extends State<ToDoListPage> with RouteAware {
   void didPopNext() async {
     debugPrint("------>アジェンダ画面に戻った");
     super.didPopNext();
-    todos = [];
-    Future(() async {
-      SharedPreferences retult = await SharedPreferences.getInstance();
-      if (retult.getString("toDoList") != null) {
-        //storge.addAll(json.decode(retult.getString("toDoList") ?? "{}"));
-      }
-      storge.forEach((e) {
-        // todos.add(TodoModel.fromJson(json.decode(e)));
-      });
-      setState(() {
-        _listView();
-      });
-    });
+    // todos = [];
+    // Future(() async {
+    //   SharedPreferences retult = await SharedPreferences.getInstance();
+    //   if (retult.getString("toDoList") != null) {
+    //     //storge.addAll(json.decode(retult.getString("toDoList") ?? "{}"));
+    //   }
+    //   storge.forEach((e) {
+    //     // todos.add(TodoModel.fromJson(json.decode(e)));
+    //   });
+    //   setState(() {
+    //     _listView();
+    //   });
+    // });
   }
 
   @override
@@ -754,6 +754,7 @@ class _ToDoListPageState extends State<ToDoListPage> with RouteAware {
                                       time: int.parse(item.time),
                                       name: "toDoList",
                                       index: index,
+                                      id:todos[index].id,
                                     )
                                 //没传值
                                 //builder: (context)=>Detail()

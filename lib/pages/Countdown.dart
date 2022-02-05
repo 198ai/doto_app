@@ -2,9 +2,11 @@ import 'dart:async';
 import 'dart:convert';
 
 import 'package:date_format/date_format.dart';
+import 'package:dio/dio.dart';
 import 'package:doto_app/model/chartJsonData.dart';
 import 'package:doto_app/model/ringtonePlayer.dart';
 import 'package:doto_app/model/tasklist.dart';
+import 'package:doto_app/model/userData.dart';
 import 'package:doto_app/pages/tabs/Tabs.dart';
 import 'package:doto_app/pages/tabs/ToDoList.dart';
 import 'package:doto_app/services/ScreenAdapter.dart';
@@ -17,24 +19,27 @@ class CountDown extends StatefulWidget {
   int date;
   String name;
   int index;
+  int id;
   CountDown({
     Key? key,
     this.date = 0,
     this.time = 0,
     this.name = "",
     this.index = 0,
+    this.id = 0,
   }) : super(key: key);
   @override
   _CountdownState createState() =>
-      _CountdownState(this.date, this.time, this.name);
+      _CountdownState(this.date, this.time, this.name,this.id);
 }
 
 class _CountdownState extends State<CountDown> {
   int time;
   int date;
   String name;
+  int id;
   Alarm alarm = new Alarm();
-  _CountdownState(this.date, this.time, this.name) : super();
+  _CountdownState(this.date, this.time, this.name,this.id) : super();
   var _timer;
   int seconds = 0;
   bool running = false;
@@ -45,6 +50,7 @@ class _CountdownState extends State<CountDown> {
   late ChartJsonData data;
   List<Contents> contents = [];
   List<String> eventsNames = [];
+  late UserData userdata;
   late var formatToday;
   //时间格式化，根据总秒数转换为对应的 hh:mm:ss 格式
   String constructTime(int seconds) {
@@ -79,6 +85,18 @@ class _CountdownState extends State<CountDown> {
     ]).toString();
     Future(() async {
       SharedPreferences list = await SharedPreferences.getInstance();
+      //获取user token
+      list.getString("userdata") == null
+          ? userdata = UserData(name: "", email: "", accessToken: "")
+          : userdata =
+              UserData.fromJson(json.decode(list.getString("userdata")));
+
+      if (list.getString("userdata") != null) {
+        userdata = UserData.fromJson(json.decode(list.getString("userdata")));
+      } else {
+        userdata = UserData(name: "", email: "", accessToken: "");
+      }
+
       list.getString("toDoList") == null
           ? storge = []
           : storge = json.decode(list.getString("toDoList") ?? "{}");
@@ -137,6 +155,36 @@ class _CountdownState extends State<CountDown> {
       _timer = null;
     } else {
       startTimer();
+    }
+  }
+
+  updatetodolist() async {
+    ///本地存储的数据先更新给API，同步数据
+    ///然后更新本地数据
+    Dio dio = new Dio();
+    dio.options.headers['content-Type'] = 'application/json';
+    print("Bearer ${userdata.accessToken}");
+    var params = {
+      "id":id,
+      "complete": 0,
+      "time": time,
+    };
+
+    ///请求header的配置
+    dio.options.headers['authorization'] = "Bearer ${userdata.accessToken}";
+    print('delect:${params}');
+    Response response =
+        await dio.post("http://10.0.2.2:8000/api/v1/updatetime", data: params);
+    if (response.statusCode != null && response.statusCode == 201) {
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+        content: Text('時間更新しました'),
+        duration: Duration(seconds: 1),
+      ));
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+        content: Text('時間の更新は失敗しました'),
+        duration: Duration(seconds: 1),
+      ));
     }
   }
 
@@ -238,15 +286,20 @@ class _CountdownState extends State<CountDown> {
                   margin: EdgeInsets.only(top: ScreenAdapter.height(150)),
                   alignment: Alignment.topCenter,
                   child: Text(constructTime(seconds),
-                      style: TextStyle(fontSize: ScreenAdapter.size(100), color: Colors.black87))),
+                      style: TextStyle(
+                          fontSize: ScreenAdapter.size(100),
+                          color: Colors.black87))),
               Container(
                 margin: EdgeInsets.only(top: ScreenAdapter.height(180)),
                 alignment: Alignment.topCenter,
                 child: TextButton(
                     child: Text("停止",
-                        style: TextStyle(fontSize: ScreenAdapter.size(70), color: Colors.black87)),
-                    onPressed: () {
+                        style: TextStyle(
+                            fontSize: ScreenAdapter.size(70),
+                            color: Colors.black87)),
+                    onPressed: () async {
                       stopTimer();
+                      updatetodolist();
                     }),
               )
             ],
