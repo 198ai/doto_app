@@ -3,13 +3,15 @@ class MyEvents {
   final String eventDescp;
   final String alarm;
   final int alarmId;
-  final int status;
+  late int status;
+  late String updatetime;
   MyEvents(
       {required this.eventTitle,
       required this.eventDescp,
       required this.alarm,
       required this.alarmId,
-      required this.status});
+      required this.status,
+      required this.updatetime});
 
   @override
   String toString() => eventTitle;
@@ -18,13 +20,15 @@ class MyEvents {
       eventDescp: json["eventDescp"],
       alarm: json["alarm"],
       alarmId: json["alarmId"],
-      status: json["status"],);
+      status: json["status"],
+      updatetime: json["updatetime"],);
 
   Map<String, dynamic> toJson() => {
         "eventTitle": eventTitle,
         "eventDescp": eventDescp,
         "alarm": alarm,
         "alarmId": alarmId,
-        "status": status
+        "status": status,
+        "updatetime":updatetime
       };
 }

@@ -4,6 +4,7 @@ import 'package:date_format/date_format.dart';
 import 'package:dio/dio.dart';
 import 'package:doto_app/main.dart';
 import 'package:doto_app/model/alarm.dart';
+import 'package:doto_app/model/eventsToJoson.dart';
 import 'package:doto_app/model/myevents.dart';
 import 'package:doto_app/model/userData.dart';
 import 'package:doto_app/services/ScreenAdapter.dart';
@@ -56,10 +57,11 @@ class _CalendarPageState extends State<CalendarPage> {
     super.initState();
     Future(() async {
       prefs = await SharedPreferences.getInstance();
-      setState(() {
-        mySelectedEvents =
-            decodeMap(json.decode(prefs.getString("events") ?? "{}"));
-      });
+      // setState(() {
+      //   mySelectedEvents =
+      //       decodeMap(json.decode(prefs.getString("events") ?? "{}"));
+      // });
+
       // prefs.getString("myAlarm") == null
       //     ? storge = []
       //     : storge = json.decode(prefs.getString("myAlarm") ?? "{}");
@@ -69,10 +71,10 @@ class _CalendarPageState extends State<CalendarPage> {
       // if (myAlarm.isNotEmpty) {
       // alarmId = myAlarm.last.alarmId + 1;
       //}
-      print(alarmId);
       //prefs.remove("myAlarm");
       //prefs.remove("events");
-      // print(prefs.getString("events").toString());
+
+      //print(prefs.getString("events").toString());
       userData();
     });
   }
@@ -84,31 +86,91 @@ class _CalendarPageState extends State<CalendarPage> {
         : userdata =
             UserData.fromJson(json.decode(retult.getString("userdata")));
     if (userdata.accessToken != "") {
-      sendEvents();
+      //先拿到数据，比较更新时间，如果时间比本地靠后，就执行更新，否则不执行本地更新
+      //本地数据拿出来发给后台对比
+      //然后再查询，返回查询数据，显示出来
+      getEvents();
     }
   }
 
-  Future sendEvents() async {
+  Future deleteMyEvents(MyEvents events, DateTime selectedCalendarDate) async {
+      var date = DateFormat('yyyy-MM-dd').format(selectedCalendarDate);
+      Map calendar = {};
+      List calendarlist = [];
+      List eventslist = [];
+      eventslist.add(events.toJson());
+
+      calendar["calendar"] = date.toString();
+      calendar["events"] = eventslist;
+      calendarlist.add(calendar);
+      print(calendarlist);
+      Dio dio = new Dio();
+      dio.options.headers['content-Type'] = 'application/json';
+      //print("Bearer ${userdata.accessToken}");
+      ///请求header的配置
+      dio.options.headers['authorization'] = "Bearer ${userdata.accessToken}";
+      try{
+        Response response = await dio.post("http://10.0.2.2:8000/api/v1/deletemyevents",data: jsonEncode(calendarlist));
+        print("本地数据" + "${jsonEncode(calendarlist)}");
+        print("返回数据；$response");
+      }catch(onError) {
+      debugPrint("error:${onError.toString()}");
+    }
+     
+      
+  }
+
+  Future sendEvents(Map<DateTime, List<MyEvents>> myEvents) async {
     //更新数据
     //整理数据
     List calendarlist = [];
-    print(mySelectedEvents);
-    mySelectedEvents.forEach((key, value) {
+    // print(mySelectedEvents);
+    myEvents.forEach((key, value) {
       Map calendar = {};
-      List eventslist = [];
       calendar["calendar"] = key.toString();
       calendar["events"] = value.map((v) => v.toJson()).toList();
       calendarlist.add(calendar);
     });
-    print(jsonEncode(calendarlist));
+    //print(jsonEncode(calendarlist));
     Dio dio = new Dio();
     dio.options.headers['content-Type'] = 'application/json';
     //print("Bearer ${userdata.accessToken}");
     ///请求header的配置
     dio.options.headers['authorization'] = "Bearer ${userdata.accessToken}";
     Response response = await dio.post("http://10.0.2.2:8000/api/v1/myevents",
-        data:jsonEncode(calendarlist));
-    print(response);
+        data: jsonEncode(calendarlist));
+    print("本地数据" + "$calendarlist");
+    print("返回数据；$response");
+  }
+
+  Future getEvents() async {
+    //整理数据
+    //print(mySelectedEvents);
+    Dio dio = new Dio();
+    dio.options.headers['content-Type'] = 'application/json';
+    //print("Bearer ${userdata.accessToken}");
+    ///请求header的配置
+    dio.options.headers['authorization'] = "Bearer ${userdata.accessToken}";
+    try {
+      Response response =
+          await dio.get("http://10.0.2.2:8000/api/v1/sendmyevents");
+      List<MyEvents> list = [];
+      DateTime date;
+      Map<DateTime, List<MyEvents>> newMap = {};
+      if (response.statusCode == 201) {
+        response.data.forEach((element) {
+          newMap[DateTime.parse(element["calendar"])] = element["events"]
+              .map((f) => MyEvents.fromJson(f))
+              .toList()
+              .cast<MyEvents>();
+        });
+        setState(() {
+          mySelectedEvents = newMap;
+        });
+      }
+    } catch (onError) {
+      debugPrint("error:${onError.toString()}");
+    }
   }
 
   Map<String, dynamic> encodeMap(Map<DateTime, List<MyEvents>> map) {
@@ -301,7 +363,8 @@ class _CalendarPageState extends State<CalendarPage> {
                                     eventDescp: descpController.text,
                                     alarm: dateController.text,
                                     alarmId: alarmId,
-                                    status:0));
+                                    status: 0,
+                                    updatetime: DateTime.now().toString()));
                           } else {
                             mySelectedEvents[DateTime.parse(date)] = [
                               MyEvents(
@@ -309,7 +372,8 @@ class _CalendarPageState extends State<CalendarPage> {
                                   eventDescp: descpController.text,
                                   alarm: dateController.text,
                                   alarmId: alarmId,
-                                  status:0)
+                                  status: 0,
+                                  updatetime: DateTime.now().toString())
                             ];
                           }
                         });
@@ -330,8 +394,10 @@ class _CalendarPageState extends State<CalendarPage> {
                           var date = DateFormat('yyyy-MM-dd').format(key);
                           _events[DateTime.parse(date)] = value;
                         });
-                        prefs.setString(
-                            "events", json.encode(encodeMap(_events)));
+                        //发送api
+                        await sendEvents(mySelectedEvents);
+                        // prefs.setString(
+                        //     "events", json.encode(encodeMap(_events)));
 
                         //アラーム保存
                         // List<String> events = myAlarm
@@ -524,7 +590,13 @@ class _CalendarPageState extends State<CalendarPage> {
                         //     (element) => element.alarmId == alramId);
                         // myAlarm.removeAt(alramIndex);
                       }
-
+                      //アラームの削除
+                      await flutterLocalNotificationsPlugin.cancel(alramId);
+                      await deleteMyEvents(
+                          _listOfDayEvents(selectedCalendarDate!)[index],
+                          selectedCalendarDate!);
+                      //更改对应状态
+                      //print(_listOfDayEvents(selectedCalendarDate!)[index].status = 1);
                       setState(() {
                         _listOfDayEvents(selectedCalendarDate!).removeAt(index);
                       });
@@ -535,11 +607,11 @@ class _CalendarPageState extends State<CalendarPage> {
                             .format(selectedCalendarDate!);
                         mySelectedEvents.remove(DateTime.parse(date));
                       }
-                      //アラームの削除
-                      await flutterLocalNotificationsPlugin.cancel(alramId);
+
                       //还要删除对应的MAp的时间
-                      prefs.setString(
-                          "events", json.encode(encodeMap(mySelectedEvents)));
+                      // prefs.setString(
+                      //     "events", json.encode(encodeMap(mySelectedEvents)));
+
                       // List<String> events =
                       //     myAlarm.map((f) => json.encode(f.toJson())).toList();
                       // prefs.setString("myAlarm", json.encode(events));

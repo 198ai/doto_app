@@ -173,8 +173,7 @@ class _CountdownState extends State<CountDown> {
     ///请求header的配置
     dio.options.headers['authorization'] = "Bearer ${userdata.accessToken}";
     print('delect:${params}');
-    Response response =
-        await dio.post("http://10.0.2.2:8000/api/v1/updatetime", data: params);
+    Response response = await dio.post("http://10.0.2.2:8000/api/v1/updatetime", data: params);
     if (response.statusCode != null && response.statusCode == 201) {
       ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
         content: Text('時間更新しました'),
