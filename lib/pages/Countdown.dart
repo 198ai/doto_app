@@ -17,29 +17,29 @@ import 'package:shared_preferences/shared_preferences.dart';
 class CountDown extends StatefulWidget {
   int time;
   int date;
-  String name;
+  String title;
   int index;
   int id;
   CountDown({
     Key? key,
     this.date = 0,
     this.time = 0,
-    this.name = "",
+    this.title = "",
     this.index = 0,
     this.id = 0,
   }) : super(key: key);
   @override
   _CountdownState createState() =>
-      _CountdownState(this.date, this.time, this.name,this.id);
+      _CountdownState(this.date, this.time, this.title, this.id);
 }
 
 class _CountdownState extends State<CountDown> {
   int time;
   int date;
-  String name;
+  String title;
   int id;
   Alarm alarm = new Alarm();
-  _CountdownState(this.date, this.time, this.name,this.id) : super();
+  _CountdownState(this.date, this.time, this.title, this.id) : super();
   var _timer;
   int seconds = 0;
   bool running = false;
@@ -73,7 +73,7 @@ class _CountdownState extends State<CountDown> {
   void initState() {
     super.initState();
     startTimer();
-    data = ChartJsonData(date: "", contents: contents);
+    //data = ChartJsonData(date: "", contents: contents);
     //日付取得
     var today = DateTime.now();
     formatToday = formatDate(today, [
@@ -103,19 +103,19 @@ class _CountdownState extends State<CountDown> {
       storge.forEach((e) {
         todos.add(TodoModel.fromJson(json.decode(e)));
       });
-      list.getString("counts") == null
-          ? countDate = []
-          : countDate = json.decode(list.getString("counts"));
-      countDate.forEach((e) {
-        getCountDate.add(ChartJsonData.fromJson(json.decode(e)));
-      });
-      getCountDate.forEach((element) {
-        if (element.date == formatToday) {
-          element.contents.forEach((e) {
-            eventsNames.add(e.events);
-          });
-        }
-      });
+      // list.getString("counts") == null
+      //     ? countDate = []
+      //     : countDate = json.decode(list.getString("counts"));
+      // countDate.forEach((e) {
+      //   getCountDate.add(ChartJsonData.fromJson(json.decode(e)));
+      // });
+      // getCountDate.forEach((element) {
+      //   if (element.date == formatToday) {
+      //     element.contents.forEach((e) {
+      //       eventsNames.add(e.events);
+      //     });
+      //   }
+      // });
     });
   }
 
@@ -158,22 +158,59 @@ class _CountdownState extends State<CountDown> {
     }
   }
 
-  updatetodolist() async {
+//图表API更新
+  Future postgraph(int differtime) async {
     ///本地存储的数据先更新给API，同步数据
     ///然后更新本地数据
     Dio dio = new Dio();
     dio.options.headers['content-Type'] = 'application/json';
     print("Bearer ${userdata.accessToken}");
+    var contents = {
+      "events": widget.title,
+      "times": differtime,
+    };
     var params = {
-      "id":id,
-      "complete": 0,
-      "time": time,
+      "date": widget.date,
+      "contents": contents,
     };
 
     ///请求header的配置
     dio.options.headers['authorization'] = "Bearer ${userdata.accessToken}";
-    print('delect:${params}');
-    Response response = await dio.post("http://10.0.2.2:8000/api/v1/updatetime", data: params);
+    print('グラフの更新:${params}');
+    Response response =
+        await dio.post("http://10.0.2.2:8000/api/v1/postgraph", data: params);
+    if (response.statusCode != null && response.statusCode == 201) {
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+        content: Text('更新成功'),
+        duration: Duration(seconds: 1),
+      ));
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+        content: Text('更新失敗'),
+        duration: Duration(seconds: 1),
+      ));
+    }
+  }
+
+  updatetodolist(int differTimes) async {
+    ///本地存储的数据先更新给API，同步数据
+    ///然后更新本地数据
+    Dio dio = new Dio();
+    dio.options.headers['content-Type'] = 'application/json';
+    var params = {
+      "id": id,
+      "complete": 0,
+      "time": time,
+      "differTimes": differTimes,
+      "date": formatToday
+    };
+
+    ///请求header的配置
+    dio.options.headers['authorization'] = "Bearer ${userdata.accessToken}";
+    print('時間更新:${params}');
+    Response response =
+        await dio.post("http://10.0.2.2:8000/api/v1/updatetime", data: params);
+    print(response.data);
     if (response.statusCode != null && response.statusCode == 201) {
       ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
         content: Text('時間更新しました'),
@@ -181,7 +218,7 @@ class _CountdownState extends State<CountDown> {
       ));
     } else {
       ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-        content: Text('時間の更新は失敗しました'),
+        content: Text('時間の更新に失敗しました'),
         duration: Duration(seconds: 1),
       ));
     }
@@ -191,10 +228,14 @@ class _CountdownState extends State<CountDown> {
   void saveTime(int time) async {
     int differTimes = int.parse(todos[widget.index].time) - time;
     todos[widget.index].time = time.toString();
-    SharedPreferences list = await SharedPreferences.getInstance();
-    List<String> events = todos.map((f) => json.encode(f.toJson())).toList();
-    list.setString("toDoList", json.encode(events));
-    makeCountData(differTimes);
+    // SharedPreferences list = await SharedPreferences.getInstance();
+    // List<String> events = todos.map((f) => json.encode(f.toJson())).toList();
+    // list.setString("toDoList", json.encode(events));
+    //
+
+    updatetodolist(differTimes);
+    //makeCountData(differTimes);
+    //postgraph(differTimes);
   }
 
   void cancelTimer() {
@@ -207,7 +248,7 @@ class _CountdownState extends State<CountDown> {
 
   //統計画面のデータ設定
   makeCountData(int differTimes) async {
-    SharedPreferences list = await SharedPreferences.getInstance();
+    //SharedPreferences list = await SharedPreferences.getInstance();
     Contents localcontents = Contents(events: "", times: 0);
     bool newdata = false;
     //記録時間取得
@@ -245,13 +286,13 @@ class _CountdownState extends State<CountDown> {
       getCountDate.add(data);
       List<String> countData =
           getCountDate.map((f) => json.encode(f.toJson())).toList();
-      list.setString("counts", json.encode(countData));
+      //list.setString("counts", json.encode(countData));
     }
     List<String> countData =
         getCountDate.map((f) => json.encode(f.toJson())).toList();
-    list.setString("counts", json.encode(countData));
+    //list.setString("counts", json.encode(countData));
     //list.remove("counts");
-    print(countData);
+    print("更改后的信息$countData");
   }
 
   @override
@@ -298,7 +339,6 @@ class _CountdownState extends State<CountDown> {
                             color: Colors.black87)),
                     onPressed: () async {
                       stopTimer();
-                      updatetodolist();
                     }),
               )
             ],

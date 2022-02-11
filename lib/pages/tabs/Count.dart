@@ -155,7 +155,10 @@ class _CountPage extends State<CountPage> {
       list.getString("counts") == null
           ? jsonString2 = ""
           : jsonString2 = list.getString("counts");
+
+     
       data2 = json.decode(jsonString2);
+      print(data2);
       data2.forEach((e) {
         chartJsonData.add(ChartJsonData.fromJson(json.decode(e)));
       });
@@ -166,11 +169,9 @@ class _CountPage extends State<CountPage> {
       });
       gettimes();
       dataChange();
-      setState(() {
-        
-      });
+      setState(() {});
     });
-   
+
     //饼状图用分钟数来表示每天的数据记录
     String jsonString = '''
            [ {
@@ -318,7 +319,8 @@ class _CountPage extends State<CountPage> {
                   child: Card(
                       child: Container(
                           alignment: Alignment.center,
-                          margin: EdgeInsets.only(top:ScreenAdapter.height(10)),
+                          margin:
+                              EdgeInsets.only(top: ScreenAdapter.height(10)),
                           child: SingleChildScrollView(
                             scrollDirection: Axis.horizontal,
                             child: Row(
@@ -327,18 +329,20 @@ class _CountPage extends State<CountPage> {
                                 Text(
                                   "累計総時間:",
                                   style: TextStyle(
-                                      fontSize:ScreenAdapter.size(25),
+                                      fontSize: ScreenAdapter.size(25),
                                       // fontStyle: FontStyle.italic,
                                       color: Colors.pink,
                                       fontWeight: FontWeight.bold),
                                 ),
-                                SizedBox(width:ScreenAdapter.width(20)),
-                                Text("${constructTime(totalTimes)}",
-                                      style: TextStyle(
-                                      fontSize:ScreenAdapter.size(25),
+                                SizedBox(width: ScreenAdapter.width(20)),
+                                Text(
+                                  "${constructTime(totalTimes)}",
+                                  style: TextStyle(
+                                      fontSize: ScreenAdapter.size(25),
                                       // fontStyle: FontStyle.italic,
                                       color: Colors.black,
-                                      fontWeight: FontWeight.bold),),
+                                      fontWeight: FontWeight.bold),
+                                ),
 
                                 //   Column(children: [
                                 //     Text(
@@ -522,14 +526,16 @@ class _CountPage extends State<CountPage> {
                             Visibility(
                                 visible: visible,
                                 child: Container(
-                                  height:ScreenAdapter.height(450),
+                                  height: ScreenAdapter.height(450),
                                   width: ScreenAdapter.width(400),
                                   child: SfCircularChart(
                                     title: ChartTitle(
                                         text:
                                             '総時間:${constructTime(selectedTotalTimes)}',
-                                        textStyle: TextStyle(fontSize:  ScreenAdapter.size(23))),
-                                    margin: EdgeInsets.only(top: ScreenAdapter.height(10)),
+                                        textStyle: TextStyle(
+                                            fontSize: ScreenAdapter.size(23))),
+                                    margin: EdgeInsets.only(
+                                        top: ScreenAdapter.height(10)),
                                     legend: Legend(
                                         position: LegendPosition.bottom,
                                         isVisible: true,
@@ -566,9 +572,11 @@ class _CountPage extends State<CountPage> {
                               visible: !visible,
                               child: Container(
                                 alignment: Alignment.center,
-                                margin: EdgeInsets.only(top:  ScreenAdapter.height(50)),
+                                margin: EdgeInsets.only(
+                                    top: ScreenAdapter.height(50)),
                                 child: Text("この日には何もやっていないよ",
-                                    style: TextStyle(fontSize:ScreenAdapter.size(23))),
+                                    style: TextStyle(
+                                        fontSize: ScreenAdapter.size(23))),
                               ),
                             ),
                           ],

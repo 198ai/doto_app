@@ -77,7 +77,6 @@ class _ToDoListPageState extends State<ToDoListPage> with RouteAware {
       //然后添加
       id = todos.last.id;
     });
-    print("起始到这里为止$id");
   }
 
   Future deltodolist(int index) async {
@@ -220,7 +219,7 @@ class _ToDoListPageState extends State<ToDoListPage> with RouteAware {
   _editParentText(String editText, String getdate, String gettime,
       String getendDate) async {
     TodoModel item = TodoModel(
-      id: ++id,
+      id: id++,
       title: editText,
       date: getdate,
       time: gettime,
@@ -259,7 +258,7 @@ class _ToDoListPageState extends State<ToDoListPage> with RouteAware {
       String getendDate) async {
     Dio dio = new Dio();
     dio.options.headers['content-Type'] = 'application/json';
-    print("Bearer ${userdata.accessToken}");
+    print("アジェンダ送信");
     var params = {
       "title": editText,
       "complete": 0,
@@ -275,6 +274,18 @@ class _ToDoListPageState extends State<ToDoListPage> with RouteAware {
 
     Response response =
         await dio.post("http://10.0.2.2:8000/api/v1/addtodolist", data: params);
+    if (response.statusCode == 201) {
+      id = response.data;
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+        content: Text('アジェンダ追加成功'),
+        duration: Duration(seconds: 1),
+      ));
+    }else {
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+        content: Text('アジェンダ追加失敗'),
+        duration: Duration(seconds: 1),
+      ));
+    }
     print(response);
     setState(() {});
     print("添加的最新$id");
@@ -518,7 +529,7 @@ class _ToDoListPageState extends State<ToDoListPage> with RouteAware {
                                               ),
                                               TextButton(
                                                   onPressed: () async {
-                                                    setState(() {
+                                                    //setState((){
                                                       if (textController.text == "" &&
                                                           dateController.text ==
                                                               "" &&
@@ -537,7 +548,7 @@ class _ToDoListPageState extends State<ToDoListPage> with RouteAware {
                                                         //Navigator.pop(context);
                                                         return;
                                                       } else {
-                                                        addtodolist(
+                                                      await addtodolist(
                                                           textController.text,
                                                           days.toString(),
                                                           inSeconds.toString(),
@@ -552,7 +563,7 @@ class _ToDoListPageState extends State<ToDoListPage> with RouteAware {
                                                         Navigator.of(context)
                                                             .pop();
                                                       }
-                                                    });
+                                                    //});
                                                   },
                                                   child: Text(
                                                     "チャレンジする",
@@ -752,9 +763,9 @@ class _ToDoListPageState extends State<ToDoListPage> with RouteAware {
                                 builder: (context) => CountDown(
                                       date: int.parse(item.date),
                                       time: int.parse(item.time),
-                                      name: "toDoList",
+                                      title: todos[index].title,
                                       index: index,
-                                      id:todos[index].id,
+                                      id: todos[index].id,
                                     )
                                 //没传值
                                 //builder: (context)=>Detail()
