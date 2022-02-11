@@ -43,10 +43,10 @@ class _CountdownState extends State<CountDown> {
   var _timer;
   int seconds = 0;
   bool running = false;
-  List<TodoModel> todos = [];
-  List storge = []; //ローカルから取り出した値をここに
-  List<ChartJsonData> getCountDate = [];
-  List countDate = [];
+  //List<TodoModel> todos = [];
+  //List storge = []; //ローカルから取り出した値をここに
+  //List<ChartJsonData> getCountDate = [];
+  //List countDate = [];
   late ChartJsonData data;
   List<Contents> contents = [];
   List<String> eventsNames = [];
@@ -97,12 +97,12 @@ class _CountdownState extends State<CountDown> {
         userdata = UserData(name: "", email: "", accessToken: "");
       }
 
-      list.getString("toDoList") == null
-          ? storge = []
-          : storge = json.decode(list.getString("toDoList") ?? "{}");
-      storge.forEach((e) {
-        todos.add(TodoModel.fromJson(json.decode(e)));
-      });
+      // list.getString("toDoList") == null
+      //     ? storge = []
+      //     : storge = json.decode(list.getString("toDoList") ?? "{}");
+      // storge.forEach((e) {
+      //   todos.add(TodoModel.fromJson(json.decode(e)));
+      // });
       // list.getString("counts") == null
       //     ? countDate = []
       //     : countDate = json.decode(list.getString("counts"));
@@ -135,12 +135,15 @@ class _CountdownState extends State<CountDown> {
           //秒数减一，因为一秒回调一次
           seconds--;
         });
-
         if (seconds == 0) {
           //倒计时秒数为0，取消定时器
           cancelTimer();
+          int differTimes = time - seconds;
           time = seconds;
-          saveTime(time);
+          //saveTime(time);
+         if(differTimes!=0){
+            updatetodolist(differTimes);
+        }
           _showADialog();
         }
       });
@@ -149,9 +152,13 @@ class _CountdownState extends State<CountDown> {
 
   void stopTimer() async {
     if (running && seconds != 0) {
+      int differTimes = time - seconds;
       time = seconds;
       cancelTimer();
-      saveTime(time);
+      //saveTime(time);
+      if(differTimes!=0){
+        updatetodolist(differTimes);
+      }
       _timer = null;
     } else {
       startTimer();
@@ -226,14 +233,14 @@ class _CountdownState extends State<CountDown> {
 
   //変更された時間を再保存
   void saveTime(int time) async {
-    int differTimes = int.parse(todos[widget.index].time) - time;
-    todos[widget.index].time = time.toString();
+    //int differTimes = int.parse(todos[widget.index].time) - time;
+    int differTimes = widget.time - time;
+    //todos[widget.index].time = time.toString();
     // SharedPreferences list = await SharedPreferences.getInstance();
     // List<String> events = todos.map((f) => json.encode(f.toJson())).toList();
     // list.setString("toDoList", json.encode(events));
     //
 
-    updatetodolist(differTimes);
     //makeCountData(differTimes);
     //postgraph(differTimes);
   }
@@ -246,54 +253,54 @@ class _CountdownState extends State<CountDown> {
     }
   }
 
-  //統計画面のデータ設定
-  makeCountData(int differTimes) async {
-    //SharedPreferences list = await SharedPreferences.getInstance();
-    Contents localcontents = Contents(events: "", times: 0);
-    bool newdata = false;
-    //記録時間取得
-    //イベント名前取得
-    if (getCountDate.isNotEmpty && eventsNames.isNotEmpty) {
-      getCountDate.forEach((element) {
-        //今日の記録タスクがある場合
-        if (element.date == formatToday) {
-          for (var e in element.contents) {
-            //今日重複やったタスク
-            if (eventsNames.contains(todos[widget.index].title)) {
-              if (e.events == todos[widget.index].title) {
-                var newTimes = differTimes + e.times;
-                e.times = newTimes;
-              }
-            } else if (!eventsNames.contains(todos[widget.index].title)) {
-              //今日はじめてやったタスク
-              eventsNames.add(todos[widget.index].title);
-              newdata = true;
-              localcontents = Contents(
-                  events: todos[widget.index].title, times: differTimes);
-            }
-          }
-          if (newdata) {
-            element.contents.add(localcontents);
-            newdata = false;
-          }
-        }
-      });
-    } else {
-      eventsNames.add(todos[widget.index].title);
-      contents
-          .add(Contents(events: todos[widget.index].title, times: differTimes));
-      data = ChartJsonData(date: formatToday, contents: contents);
-      getCountDate.add(data);
-      List<String> countData =
-          getCountDate.map((f) => json.encode(f.toJson())).toList();
-      //list.setString("counts", json.encode(countData));
-    }
-    List<String> countData =
-        getCountDate.map((f) => json.encode(f.toJson())).toList();
-    //list.setString("counts", json.encode(countData));
-    //list.remove("counts");
-    print("更改后的信息$countData");
-  }
+  // //統計画面のデータ設定
+  // makeCountData(int differTimes) async {
+  //   //SharedPreferences list = await SharedPreferences.getInstance();
+  //   Contents localcontents = Contents(events: "", times: 0);
+  //   bool newdata = false;
+  //   //記録時間取得
+  //   //イベント名前取得
+  //   if (getCountDate.isNotEmpty && eventsNames.isNotEmpty) {
+  //     getCountDate.forEach((element) {
+  //       //今日の記録タスクがある場合
+  //       if (element.date == formatToday) {
+  //         for (var e in element.contents) {
+  //           //今日重複やったタスク
+  //           if (eventsNames.contains(todos[widget.index].title)) {
+  //             if (e.events == todos[widget.index].title) {
+  //               var newTimes = differTimes + e.times;
+  //               e.times = newTimes;
+  //             }
+  //           } else if (!eventsNames.contains(todos[widget.index].title)) {
+  //             //今日はじめてやったタスク
+  //             eventsNames.add(todos[widget.index].title);
+  //             newdata = true;
+  //             localcontents = Contents(
+  //                 events: todos[widget.index].title, times: differTimes);
+  //           }
+  //         }
+  //         if (newdata) {
+  //           element.contents.add(localcontents);
+  //           newdata = false;
+  //         }
+  //       }
+  //     });
+  //   } else {
+  //     eventsNames.add(todos[widget.index].title);
+  //     contents
+  //         .add(Contents(events: todos[widget.index].title, times: differTimes));
+  //     data = ChartJsonData(date: formatToday, contents: contents);
+  //     getCountDate.add(data);
+  //     List<String> countData =
+  //         getCountDate.map((f) => json.encode(f.toJson())).toList();
+  //     //list.setString("counts", json.encode(countData));
+  //   }
+  //   List<String> countData =
+  //       getCountDate.map((f) => json.encode(f.toJson())).toList();
+  //   //list.setString("counts", json.encode(countData));
+  //   //list.remove("counts");
+  //   print("更改后的信息$countData");
+  // }
 
   @override
   void dispose() {

@@ -60,8 +60,6 @@ class _ToDoListPageState extends State<ToDoListPage> with RouteAware {
     List jsonData;
     TodoModel data;
     dio.options.headers['content-Type'] = 'application/json';
-    print("Bearer ${userdata.accessToken}");
-
     ///请求header的配置
     dio.options.headers['authorization'] = "Bearer ${userdata.accessToken}";
 
@@ -70,7 +68,6 @@ class _ToDoListPageState extends State<ToDoListPage> with RouteAware {
     jsonData = response.data;
     //data = TodoModel.fromJson(response.data);
     jsonData.forEach((element) {
-      print(element);
       todos.add(TodoModel.fromJson(element));
       //从API中拿到数据后
       //本地存储
@@ -84,7 +81,6 @@ class _ToDoListPageState extends State<ToDoListPage> with RouteAware {
     ///然后更新本地数据
     Dio dio = new Dio();
     dio.options.headers['content-Type'] = 'application/json';
-    print("Bearer ${userdata.accessToken}");
     var params = {
       "id": todos[index].id,
       "title": todos[index].title,
@@ -97,7 +93,6 @@ class _ToDoListPageState extends State<ToDoListPage> with RouteAware {
 
     ///请求header的配置
     dio.options.headers['authorization'] = "Bearer ${userdata.accessToken}";
-    print('delect:${params}');
     Response response = await dio
         .post("http://10.0.2.2:8000/api/v1/updatetodolist", data: params);
     if (response.statusCode != null && response.statusCode == 201) {
@@ -234,7 +229,6 @@ class _ToDoListPageState extends State<ToDoListPage> with RouteAware {
     setState(() {
       todos.add(item);
     });
-    print(item.created_at);
     //ローカルにLISTを保存する
     SharedPreferences list = await SharedPreferences.getInstance();
     // List<String> events = todos.map((f) => json.encode(f.toJson())).toList();
@@ -286,9 +280,7 @@ class _ToDoListPageState extends State<ToDoListPage> with RouteAware {
         duration: Duration(seconds: 1),
       ));
     }
-    print(response);
     setState(() {});
-    print("添加的最新$id");
   }
 
   //時間の選択
@@ -324,7 +316,6 @@ class _ToDoListPageState extends State<ToDoListPage> with RouteAware {
               child: CupertinoDatePicker(
                 mode: CupertinoDatePickerMode.date, //这里改模式
                 onDateTimeChanged: (dateTime) {
-                  print("${dateTime.year}-${dateTime.month}-${dateTime.day}");
                   var startDate =
                       new DateTime(dateTime.year, dateTime.month, dateTime.day);
                   var endDate = new DateTime.now();
