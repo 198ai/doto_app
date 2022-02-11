@@ -141,9 +141,9 @@ class _CountdownState extends State<CountDown> {
           int differTimes = time - seconds;
           time = seconds;
           //saveTime(time);
-         if(differTimes!=0){
+          if (differTimes != 0) {
             updatetodolist(differTimes);
-        }
+          }
           _showADialog();
         }
       });
@@ -156,46 +156,12 @@ class _CountdownState extends State<CountDown> {
       time = seconds;
       cancelTimer();
       //saveTime(time);
-      if(differTimes!=0){
+      if (differTimes != 0) {
         updatetodolist(differTimes);
       }
       _timer = null;
     } else {
       startTimer();
-    }
-  }
-
-//图表API更新
-  Future postgraph(int differtime) async {
-    ///本地存储的数据先更新给API，同步数据
-    ///然后更新本地数据
-    Dio dio = new Dio();
-    dio.options.headers['content-Type'] = 'application/json';
-    print("Bearer ${userdata.accessToken}");
-    var contents = {
-      "events": widget.title,
-      "times": differtime,
-    };
-    var params = {
-      "date": widget.date,
-      "contents": contents,
-    };
-
-    ///请求header的配置
-    dio.options.headers['authorization'] = "Bearer ${userdata.accessToken}";
-    print('グラフの更新:${params}');
-    Response response =
-        await dio.post("http://10.0.2.2:8000/api/v1/postgraph", data: params);
-    if (response.statusCode != null && response.statusCode == 201) {
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-        content: Text('更新成功'),
-        duration: Duration(seconds: 1),
-      ));
-    } else {
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-        content: Text('更新失敗'),
-        duration: Duration(seconds: 1),
-      ));
     }
   }
 
