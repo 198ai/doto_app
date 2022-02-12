@@ -45,7 +45,7 @@ class Contents {
   late int times;
   Contents.fromJson(Map<String, dynamic> json){
     events = json['events'];
-    times = json['times'];
+    times = int.parse(json['times']);
   }
 
   Map<String, dynamic> toJson() {

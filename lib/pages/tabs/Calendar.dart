@@ -1,9 +1,12 @@
 import 'dart:collection';
 
 import 'package:date_format/date_format.dart';
+import 'package:dio/dio.dart';
 import 'package:doto_app/main.dart';
 import 'package:doto_app/model/alarm.dart';
+import 'package:doto_app/model/eventsToJoson.dart';
 import 'package:doto_app/model/myevents.dart';
+import 'package:doto_app/model/userData.dart';
 import 'package:doto_app/services/ScreenAdapter.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -33,8 +36,9 @@ class _CalendarPageState extends State<CalendarPage> {
   final dateController = TextEditingController();
   CalendarFormat _calendarFormat = CalendarFormat.month;
   late Map<DateTime, List<MyEvents>> mySelectedEvents;
-  List<MyAlarm> myAlarm = [];
+  // List<MyAlarm> myAlarm = [];
   int alarmId = 1;
+  late UserData userdata;
   bool visible = false; //アラーム表示するか
   late Map setChartJsonData;
   List setdate = [];
@@ -54,26 +58,120 @@ class _CalendarPageState extends State<CalendarPage> {
     super.initState();
     Future(() async {
       prefs = await SharedPreferences.getInstance();
-      setState(() {
-        mySelectedEvents =
-            decodeMap(json.decode(prefs.getString("events") ?? "{}"));
-      });
+      // setState(() {
+      //   mySelectedEvents =
+      //       decodeMap(json.decode(prefs.getString("events") ?? "{}"));
+      // });
 
-      prefs.getString("myAlarm") == null
-          ? storge = []
-          : storge = json.decode(prefs.getString("myAlarm") ?? "{}");
-      storge.forEach((e) {
-        myAlarm.add(MyAlarm.fromJson(json.decode(e)));
-      });
-      if (myAlarm.isNotEmpty) {
-        alarmId = myAlarm.last.alarmId + 1;
-      }
-      print("初始化$alarmId");
-      // prefs.remove("myAlarm");
-      // prefs.remove("events");
-      print(storge);
+      // prefs.getString("myAlarm") == null
+      //     ? storge = []
+      //     : storge = json.decode(prefs.getString("myAlarm") ?? "{}");
+      // storge.forEach((e) {
+      //   myAlarm.add(MyAlarm.fromJson(json.decode(e)));
+      // });
+      // if (myAlarm.isNotEmpty) {
+      // alarmId = myAlarm.last.alarmId + 1;
+      //}
+      //prefs.remove("myAlarm");
+      //prefs.remove("events");
+
       //print(prefs.getString("events").toString());
+      userData();
     });
+  }
+
+  Future userData() async {
+    SharedPreferences retult = await SharedPreferences.getInstance();
+    retult.getString("userdata") == null
+        ? userdata = UserData(name: "", email: "", accessToken: "")
+        : userdata =
+            UserData.fromJson(json.decode(retult.getString("userdata")));
+    if (userdata.accessToken != "") {
+      //先拿到数据，比较更新时间，如果时间比本地靠后，就执行更新，否则不执行本地更新
+      //本地数据拿出来发给后台对比
+      //然后再查询，返回查询数据，显示出来
+      getEvents();
+    }
+  }
+
+  Future deleteMyEvents(MyEvents events, DateTime selectedCalendarDate) async {
+      var date = DateFormat('yyyy-MM-dd').format(selectedCalendarDate);
+      Map calendar = {};
+      List calendarlist = [];
+      List eventslist = [];
+      eventslist.add(events.toJson());
+
+      calendar["calendar"] = date.toString();
+      calendar["events"] = eventslist;
+      calendarlist.add(calendar);
+      print(calendarlist);
+      Dio dio = new Dio();
+      dio.options.headers['content-Type'] = 'application/json';
+      //print("Bearer ${userdata.accessToken}");
+      ///请求header的配置
+      dio.options.headers['authorization'] = "Bearer ${userdata.accessToken}";
+      try{
+        Response response = await dio.post("http://10.0.2.2:8000/api/v1/deletemyevents",data: jsonEncode(calendarlist));
+        print("本地数据" + "${jsonEncode(calendarlist)}");
+        print("返回数据；$response");
+      }catch(onError) {
+      debugPrint("error:${onError.toString()}");
+    }
+     
+      
+  }
+
+  Future sendEvents(Map<DateTime, List<MyEvents>> myEvents) async {
+    //更新数据
+    //整理数据
+    List calendarlist = [];
+    // print(mySelectedEvents);
+    myEvents.forEach((key, value) {
+      Map calendar = {};
+      calendar["calendar"] = key.toString();
+      calendar["events"] = value.map((v) => v.toJson()).toList();
+      calendarlist.add(calendar);
+    });
+    //print(jsonEncode(calendarlist));
+    Dio dio = new Dio();
+    dio.options.headers['content-Type'] = 'application/json';
+    //print("Bearer ${userdata.accessToken}");
+    ///请求header的配置
+    dio.options.headers['authorization'] = "Bearer ${userdata.accessToken}";
+    Response response = await dio.post("http://10.0.2.2:8000/api/v1/myevents",
+        data: jsonEncode(calendarlist));
+    print("本地数据" + "$calendarlist");
+    print("返回数据；$response");
+  }
+
+  Future getEvents() async {
+    //整理数据
+    //print(mySelectedEvents);
+    Dio dio = new Dio();
+    dio.options.headers['content-Type'] = 'application/json';
+    //print("Bearer ${userdata.accessToken}");
+    ///请求header的配置
+    dio.options.headers['authorization'] = "Bearer ${userdata.accessToken}";
+    try {
+      Response response =
+          await dio.get("http://10.0.2.2:8000/api/v1/sendmyevents");
+      List<MyEvents> list = [];
+      DateTime date;
+      Map<DateTime, List<MyEvents>> newMap = {};
+      if (response.statusCode == 201) {
+        response.data.forEach((element) {
+          newMap[DateTime.parse(element["calendar"])] = element["events"]
+              .map((f) => MyEvents.fromJson(f))
+              .toList()
+              .cast<MyEvents>();
+        });
+        setState(() {
+          mySelectedEvents = newMap;
+        });
+      }
+    } catch (onError) {
+      debugPrint("error:${onError.toString()}");
+    }
   }
 
   Map<String, dynamic> encodeMap(Map<DateTime, List<MyEvents>> map) {
@@ -90,6 +188,9 @@ class _CalendarPageState extends State<CalendarPage> {
     map.forEach((key, value) {
       value.forEach((e) {
         list.add(MyEvents.fromJson(e));
+        if (alarmId < MyEvents.fromJson(e).alarmId) {
+          alarmId = MyEvents.fromJson(e).alarmId + 1;
+        }
       });
       if (list != []) {
         newMap[DateTime.parse(key)] = list;
@@ -114,7 +215,7 @@ class _CalendarPageState extends State<CalendarPage> {
                     },
                     child: Text(
                       'キャンセル',
-                      style: TextStyle(fontSize: 13, color: Colors.green),
+                      style: TextStyle(fontSize: ScreenAdapter.size(16), color: Colors.green),
                     )),
                 // ignore: deprecated_member_use
                 TextButton(
@@ -123,7 +224,7 @@ class _CalendarPageState extends State<CalendarPage> {
                     },
                     child: Text(
                       '確認',
-                      style: TextStyle(fontSize: ScreenAdapter.size(13), color: Colors.green),
+                      style: TextStyle(fontSize: ScreenAdapter.size(16), color: Colors.green),
                     )),
               ],
             ),
@@ -218,23 +319,25 @@ class _CalendarPageState extends State<CalendarPage> {
                     ),
                   ],
                 ),
-                content: Column(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    buildTextField(controller: titleController, hint: 'タイトル'),
-                    const SizedBox(
-                      height: 20.0,
-                    ),
-                    buildTextField(controller: descpController, hint: 'メモ'),
-                    const SizedBox(
-                      height: 20.0,
-                    ),
-                    visible
-                        ? buildTextField(
-                            controller: dateController, hint: 'アラーム')
-                        : Container(),
-                  ],
+                content: SingleChildScrollView(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      buildTextField(controller: titleController, hint: 'タイトル'),
+                      SizedBox(
+                        height: ScreenAdapter.height(23),
+                      ),
+                      buildTextField(controller: descpController, hint: 'メモ'),
+                      SizedBox(
+                        height: ScreenAdapter.height(23),
+                      ),
+                      visible
+                          ? buildTextField(
+                              controller: dateController, hint: 'アラーム')
+                          : Container(),
+                    ],
+                  ),
                 ),
                 actions: [
                   TextButton(
@@ -249,6 +352,8 @@ class _CalendarPageState extends State<CalendarPage> {
                       var date = DateFormat('yyyy-MM-dd')
                           .format(selectedCalendarDate!);
                       int localAlarmId = alarmId;
+                      //现在最大ID取得
+
                       if (titleController.text.isEmpty &&
                           descpController.text.isEmpty) {
                         ScaffoldMessenger.of(context).showSnackBar(
@@ -261,53 +366,55 @@ class _CalendarPageState extends State<CalendarPage> {
                         return;
                       } else {
                         setState(() {
-                          localAlarmId =
-                              dateController.text == "" ? 0 : alarmId;
+                          //localAlarmId =dateController.text == "" ? 0 : alarmId;
                           if (mySelectedEvents[DateTime.parse(date)] != null) {
                             mySelectedEvents[DateTime.parse(date)]?.add(
                                 MyEvents(
                                     eventTitle: titleController.text,
                                     eventDescp: descpController.text,
                                     alarm: dateController.text,
-                                    alarmId: localAlarmId));
+                                    alarmId: alarmId,
+                                    status: 0,
+                                    updatetime: DateTime.now().toString()));
                           } else {
                             mySelectedEvents[DateTime.parse(date)] = [
                               MyEvents(
                                   eventTitle: titleController.text,
                                   eventDescp: descpController.text,
                                   alarm: dateController.text,
-                                  alarmId: localAlarmId)
+                                  alarmId: alarmId,
+                                  status: 0,
+                                  updatetime: DateTime.now().toString())
                             ];
                           }
                         });
 
                         //アラームの設定があるか
                         if (dateController.text != "") {
-                          myAlarm.add(MyAlarm(
-                              alarmId: alarmId,
-                              alarmTitle: titleController.text,
-                              alarmSubTitle: descpController.text,
-                              alarmDate: dateController.text,
-                              status: 0));
+                          // myAlarm.add(MyAlarm(
+                          //     alarmId: alarmId,
+                          //     alarmTitle: titleController.text,
+                          //     alarmSubTitle: descpController.text,
+                          //     alarmDate: dateController.text,
+                          //     status: 0));
                           scheduleAlarm(DateTime.parse(dateController.text),
                               titleController.text, alarmId);
-                          alarmId++;
                         }
-                        print("添加后的闹钟ID${alarmId}");
+                        alarmId++;
                         mySelectedEvents.forEach((key, value) {
                           var date = DateFormat('yyyy-MM-dd').format(key);
                           _events[DateTime.parse(date)] = value;
                         });
-                        prefs.setString(
-                            "events", json.encode(encodeMap(_events)));
+                        //发送api
+                        await sendEvents(mySelectedEvents);
+                        // prefs.setString(
+                        //     "events", json.encode(encodeMap(_events)));
 
                         //アラーム保存
-                        List<String> events = myAlarm
-                            .map((f) => json.encode(f.toJson()))
-                            .toList();
-                        prefs.setString("myAlarm", json.encode(events));
-                        print(json.encode(encodeMap(_events)));
-                        print(events);
+                        // List<String> events = myAlarm
+                        //     .map((f) => json.encode(f.toJson()))
+                        //     .toList();
+                        //prefs.setString("myAlarm", json.encode(events));
                         //入力した内容をクリアする
                         titleController.clear();
                         descpController.clear();
@@ -330,20 +437,25 @@ class _CalendarPageState extends State<CalendarPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        appBar:
-            AppBar(centerTitle: true, title: Text("カレンダー"), backgroundColor: Colors.green, actions: <Widget>[
-          IconButton(
-              splashColor: Colors.transparent,
-              highlightColor: Colors.transparent,
-              icon: Icon(Icons.add),
-              onPressed: () {
-                _showAddEventDialog();
-              }),
-        ]),
+        appBar: AppBar(
+            backgroundColor: Color(0xFF8ddf67),
+            centerTitle: true,
+            title: Text("カレンダー"),
+            actions: <Widget>[
+              IconButton(
+                  splashColor: Colors.transparent,
+                  highlightColor: Colors.transparent,
+                  icon: Icon(Icons.add),
+                  onPressed: () {
+                    _showAddEventDialog();
+                  }),
+            ]),
         body: SingleChildScrollView(
             child: Column(children: [
           Card(
-            margin: EdgeInsets.all(15.0),
+            margin: EdgeInsets.all(
+              ScreenAdapter.height(20),
+            ),
             elevation: 15.0,
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.all(
@@ -457,7 +569,7 @@ class _CalendarPageState extends State<CalendarPage> {
           //   shrinkWrap: true,
           //   children:
           ..._listOfDayEvents(selectedCalendarDate!).map((myEvents) => Padding(
-              padding: const EdgeInsets.all(5),
+              padding: EdgeInsets.all(ScreenAdapter.height(5)),
               child: ListTile(
                 onTap: () {},
                 // leading: const Icon(
@@ -465,7 +577,7 @@ class _CalendarPageState extends State<CalendarPage> {
                 //   color: Colors.black,
                 // ),
                 title: Padding(
-                  padding: const EdgeInsets.only(bottom: 8.0),
+                  padding: EdgeInsets.only(bottom: ScreenAdapter.height(10)),
                   child: Text('タイトル:　${myEvents.eventTitle}'),
                 ),
                 subtitle: Column(
@@ -481,32 +593,42 @@ class _CalendarPageState extends State<CalendarPage> {
                     onPressed: () async {
                       var index = _listOfDayEvents(selectedCalendarDate!)
                           .indexOf(myEvents);
-                      var alramIndex = 0;
+                      //var alramIndex = 0;
                       var alramId = 0;
                       if (_listOfDayEvents(selectedCalendarDate!)[index]
                               .alarm !=
                           "") {
                         alramId = _listOfDayEvents(selectedCalendarDate!)[index]
-                            .alarmId!;
-                        print(alramId);
-                        alramIndex = myAlarm.indexWhere(
-                            (element) => element.alarmId == alramId);
-                        print(alramIndex);
-                        myAlarm.removeAt(alramIndex);
+                            .alarmId;
+                        // alramIndex = myAlarm.indexWhere(
+                        //     (element) => element.alarmId == alramId);
+                        // myAlarm.removeAt(alramIndex);
                       }
-
+                      //アラームの削除
+                      await flutterLocalNotificationsPlugin.cancel(alramId);
+                      await deleteMyEvents(
+                          _listOfDayEvents(selectedCalendarDate!)[index],
+                          selectedCalendarDate!);
+                      //更改对应状态
+                      //print(_listOfDayEvents(selectedCalendarDate!)[index].status = 1);
                       setState(() {
                         _listOfDayEvents(selectedCalendarDate!).removeAt(index);
                       });
-                      //アラームの削除
-                      await flutterLocalNotificationsPlugin.cancel(alramId);
+
+                      if (_listOfDayEvents(selectedCalendarDate!).isEmpty) {
+                        //选中的日期里没有内容就删除日期
+                        var date = DateFormat('yyyy-MM-dd')
+                            .format(selectedCalendarDate!);
+                        mySelectedEvents.remove(DateTime.parse(date));
+                      }
+
                       //还要删除对应的MAp的时间
-                      prefs.setString(
-                          "events", json.encode(encodeMap(mySelectedEvents)));
-                      List<String> events =
-                          myAlarm.map((f) => json.encode(f.toJson())).toList();
-                      prefs.setString("myAlarm", json.encode(events));
-                      print(events);
+                      // prefs.setString(
+                      //     "events", json.encode(encodeMap(mySelectedEvents)));
+
+                      // List<String> events =
+                      //     myAlarm.map((f) => json.encode(f.toJson())).toList();
+                      // prefs.setString("myAlarm", json.encode(events));
                     },
                     icon: Icon(Icons.delete)),
               )))
@@ -517,8 +639,8 @@ class _CalendarPageState extends State<CalendarPage> {
 
   Widget _buildEventsMarker(DateTime date, List events) {
     return Positioned(
-      right: 5,
-      bottom: 5,
+      right: ScreenAdapter.width(10),
+      bottom: ScreenAdapter.height(10),
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 300),
         decoration: BoxDecoration(
@@ -562,7 +684,6 @@ void scheduleAlarm(
       presentSound: true);
   var platformChannelSpecifics = NotificationDetails(
       androidPlatformChannelSpecifics, iOSPlatformChannelSpecifics);
-  print(scheduledNotificationDateTime);
   await flutterLocalNotificationsPlugin.schedule(
     id,
     'リマインド!',

@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:convert';
+import 'package:date_format/date_format.dart';
 import 'package:dio/dio.dart';
 import 'package:doto_app/model/ringtonePlayer.dart';
 import 'package:doto_app/model/userData.dart';
@@ -60,8 +61,6 @@ class _ToDoListPageState extends State<ToDoListPage> with RouteAware {
     List jsonData;
     TodoModel data;
     dio.options.headers['content-Type'] = 'application/json';
-    print("Bearer ${userdata.accessToken}");
-
     ///请求header的配置
     dio.options.headers['authorization'] = "Bearer ${userdata.accessToken}";
 
@@ -70,12 +69,44 @@ class _ToDoListPageState extends State<ToDoListPage> with RouteAware {
     jsonData = response.data;
     //data = TodoModel.fromJson(response.data);
     jsonData.forEach((element) {
-      print(element);
       todos.add(TodoModel.fromJson(element));
       //从API中拿到数据后
       //本地存储
       //然后添加
+      id = todos.last.id;
     });
+  }
+
+  Future deltodolist(int index) async {
+    ///本地存储的数据先更新给API，同步数据
+    ///然后更新本地数据
+    Dio dio = new Dio();
+    dio.options.headers['content-Type'] = 'application/json';
+    var params = {
+      "id": todos[index].id,
+      "title": todos[index].title,
+      "complete": 0,
+      "time": todos[index].time,
+      "date": todos[index].date,
+      "endDate": todos[index].endDate,
+      "status": 1,
+    };
+
+    ///请求header的配置
+    dio.options.headers['authorization'] = "Bearer ${userdata.accessToken}";
+    Response response = await dio
+        .post("http://10.0.2.2:8000/api/v1/updatetodolist", data: params);
+    if (response.statusCode != null && response.statusCode == 201) {
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+        content: Text('削除しました'),
+        duration: Duration(seconds: 1),
+      ));
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+        content: Text('削除失敗しました'),
+        duration: Duration(seconds: 1),
+      ));
+    }
   }
 
   @override
@@ -89,19 +120,19 @@ class _ToDoListPageState extends State<ToDoListPage> with RouteAware {
   void didPopNext() async {
     debugPrint("------>アジェンダ画面に戻った");
     super.didPopNext();
-    todos = [];
-    Future(() async {
-      SharedPreferences retult = await SharedPreferences.getInstance();
-      if (retult.getString("toDoList") != null) {
-        storge.addAll(json.decode(retult.getString("toDoList") ?? "{}"));
-      }
-      storge.forEach((e) {
-        todos.add(TodoModel.fromJson(json.decode(e)));
-      });
-      setState(() {
-        _listView();
-      });
-    });
+    // todos = [];
+    // Future(() async {
+    //   SharedPreferences retult = await SharedPreferences.getInstance();
+    //   if (retult.getString("toDoList") != null) {
+    //     //storge.addAll(json.decode(retult.getString("toDoList") ?? "{}"));
+    //   }
+    //   storge.forEach((e) {
+    //     // todos.add(TodoModel.fromJson(json.decode(e)));
+    //   });
+    //   setState(() {
+    //     _listView();
+    //   });
+    // });
   }
 
   @override
@@ -124,15 +155,20 @@ class _ToDoListPageState extends State<ToDoListPage> with RouteAware {
     Future(() async {
       SharedPreferences retult = await SharedPreferences.getInstance();
       retult = await SharedPreferences.getInstance();
-      retult.getString("userdata")==null?userdata=UserData(name: "", email: "", accessToken: ""):
-      userdata = UserData.fromJson(json.decode(retult.getString("userdata")));
-      //await gettodolist();
+      //获取user token
+      retult.getString("userdata") == null
+          ? userdata = UserData(name: "", email: "", accessToken: "")
+          : userdata =
+              UserData.fromJson(json.decode(retult.getString("userdata")));
+      if (userdata.accessToken != "") {
+        await gettodolist();
+      }
       if (retult.getString("toDoList") != null) {
-        storge.addAll(json.decode(retult.getString("toDoList") ?? "{}"));
+        // storge.addAll(json.decode(retult.getString("toDoList") ?? "{}"));
       }
       storge.forEach((e) {
         //画面リロード
-        todos.add(TodoModel.fromJson(json.decode(e)));
+        // todos.add(TodoModel.fromJson(json.decode(e)));
         todos.forEach((e) async {
           await dateChange(e.endDate);
         });
@@ -185,6 +221,10 @@ class _ToDoListPageState extends State<ToDoListPage> with RouteAware {
       time: gettime,
       complete: 0,
       endDate: getendDate,
+      created_at:
+          DateFormat('yyyy-mm-dd hh:mm:ss').format(DateTime.now()).toString(),
+      updated_at:
+          DateFormat('yyyy-mm-dd hh:mm:ss').format(DateTime.now()).toString(),
     );
     //画面をリロードして、新たな項目を表示する
     setState(() {
@@ -192,8 +232,8 @@ class _ToDoListPageState extends State<ToDoListPage> with RouteAware {
     });
     //ローカルにLISTを保存する
     SharedPreferences list = await SharedPreferences.getInstance();
-    List<String> events = todos.map((f) => json.encode(f.toJson())).toList();
-    list.setString("toDoList", json.encode(events));
+    // List<String> events = todos.map((f) => json.encode(f.toJson())).toList();
+    // list.setString("toDoList", json.encode(events));
   }
 
   //用户名输入框的焦点控制
@@ -213,22 +253,35 @@ class _ToDoListPageState extends State<ToDoListPage> with RouteAware {
       String getendDate) async {
     Dio dio = new Dio();
     dio.options.headers['content-Type'] = 'application/json';
-    print("Bearer ${userdata.accessToken}");
+    print("アジェンダ送信");
     var params = {
       "title": editText,
       "complete": 0,
       "time": gettime,
       "date": getdate,
       "endDate": getendDate,
-      "status": 0
+      "status": 0,
     };
+    print(params);
 
     ///请求header的配置
     dio.options.headers['authorization'] = "Bearer ${userdata.accessToken}";
 
     Response response =
         await dio.post("http://10.0.2.2:8000/api/v1/addtodolist", data: params);
-    print(response);
+    if (response.statusCode == 201) {
+      id = response.data;
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+        content: Text('アジェンダ追加成功'),
+        duration: Duration(seconds: 1),
+      ));
+    }else {
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+        content: Text('アジェンダ追加失敗'),
+        duration: Duration(seconds: 1),
+      ));
+    }
+    setState(() {});
   }
 
   //時間の選択
@@ -264,7 +317,6 @@ class _ToDoListPageState extends State<ToDoListPage> with RouteAware {
               child: CupertinoDatePicker(
                 mode: CupertinoDatePickerMode.date, //这里改模式
                 onDateTimeChanged: (dateTime) {
-                  print("${dateTime.year}-${dateTime.month}-${dateTime.day}");
                   var startDate =
                       new DateTime(dateTime.year, dateTime.month, dateTime.day);
                   var endDate = new DateTime.now();
@@ -474,7 +526,177 @@ class _ToDoListPageState extends State<ToDoListPage> with RouteAware {
                                                   fontSize:
                                                       ScreenAdapter.size(15),
                                                   color: Colors.green),
+/*
+          child: AppBar(
+              backgroundColor: Color(0xFF8ddf67),
+              centerTitle: true,
+              title: Text("アジェンダ"),
+              actions: <Widget>[
+                IconButton(
+                  splashColor: Colors.transparent,
+                  highlightColor: Colors.transparent,
+                  icon: Icon(Icons.add),
+                  onPressed: () {
+                    textController.text = "";
+                    dateController.text = "";
+                    timeController.text = "";
+                    //足すボダン押した時、ポップアップが出ます
+                    showDialog(
+                        barrierDismissible: false,
+                        context: context,
+                        builder: (context) {
+                          return Dialog(
+                            child: Container(
+                              color: Colors.white,
+                              width: ScreenAdapter.width(250),
+                              height: ScreenAdapter.height(430),
+                              child: Center(
+                                child: SingleChildScrollView(
+                                    child: Column(
+                                  children: [
+                                    Padding(
+                                      padding: EdgeInsets.fromLTRB(
+                                          ScreenAdapter.width(30),
+                                          ScreenAdapter.height(30),
+                                          ScreenAdapter.width(30),
+                                          ScreenAdapter.height(30)),
+                                      child: Column(
+                                        children: [
+                                          Text("新たな挑戦を始めるね！"),
+                                          Text("＾-＾素晴らしい！")
+                                        ],
+                                      ),
+                                    ),
+                                    Padding(
+                                      padding: EdgeInsets.fromLTRB(
+                                          ScreenAdapter.width(30),
+                                          ScreenAdapter.height(0),
+                                          ScreenAdapter.width(30),
+                                          ScreenAdapter.height(0)),
+                                      child: TextField(
+                                        style: TextStyle(color: Colors.black87),
+                                        controller: textController,
+                                        decoration: InputDecoration(
+                                            icon: Icon(Icons.article_outlined),
+                                            labelText: "タスク名称",
+                                            enabledBorder: UnderlineInputBorder(
+                                              borderSide: BorderSide(
+                                                  color: Colors.blue),
+*/
                                             ),
+                                            focusedBorder: UnderlineInputBorder(
+                                              borderSide: BorderSide(
+                                                  color: Colors.blue),
+                                            )),
+                                      ),
+                                    ),
+                                    Padding(
+                                        padding: EdgeInsets.fromLTRB(
+                                            ScreenAdapter.width(30),
+                                            ScreenAdapter.height(0),
+                                            ScreenAdapter.width(30),
+                                            ScreenAdapter.height(0)),
+                                        child: TextField(
+                                            decoration: new InputDecoration(
+                                              icon: Icon(Icons.access_time),
+                                              hintText: "時間選択",
+                                            ),
+                                            controller: timeController,
+                                            onTap: () async {
+                                              await _showTimePicker();
+                                            })),
+                                    Padding(
+                                        padding: EdgeInsets.fromLTRB(
+                                            ScreenAdapter.width(30),
+                                            ScreenAdapter.height(0),
+                                            ScreenAdapter.width(30),
+                                            ScreenAdapter.height(0)),
+                                        child: TextField(
+                                            decoration: new InputDecoration(
+                                              icon: Icon(Icons
+                                                  .calendar_today_outlined),
+                                              hintText: "完成予定日選択",
+                                            ),
+                                            controller: dateController,
+                                            onTap: () {
+                                              _showDatePicker();
+                                            })),
+                                    Container(
+                                      height: btnHeight,
+                                      margin: EdgeInsets.fromLTRB(
+                                          ScreenAdapter.width(30),
+                                          ScreenAdapter.height(0),
+                                          ScreenAdapter.width(30),
+                                          ScreenAdapter.height(0)),
+                                      child: Column(
+                                        children: [
+                                          Row(
+                                            mainAxisAlignment:
+                                                MainAxisAlignment.spaceEvenly,
+                                            children: [
+                                              TextButton(
+                                                onPressed: () {
+                                                  textController.text = "";
+                                                  dateController.text = "";
+                                                  timeController.text = "";
+                                                  Navigator.of(context).pop();
+                                                },
+                                                child: Text(
+                                                  "サボる",
+                                                  style: TextStyle(
+                                                      fontSize:
+                                                          ScreenAdapter.size(
+                                                              15),
+                                                      color: Colors.blue),
+                                                ),
+                                              ),
+                                              TextButton(
+                                                  onPressed: () async {
+                                                    //setState((){
+                                                      if (textController.text == "" &&
+                                                          dateController.text ==
+                                                              "" &&
+                                                          timeController.text ==
+                                                              "") {
+                                                        ScaffoldMessenger.of(
+                                                                context)
+                                                            .showSnackBar(
+                                                          const SnackBar(
+                                                            content: Text(
+                                                                '全ての内容を入力してください'),
+                                                            duration: Duration(
+                                                                seconds: 3),
+                                                          ),
+                                                        );
+                                                        //Navigator.pop(context);
+                                                        return;
+                                                      } else {
+                                                      await addtodolist(
+                                                          textController.text,
+                                                          days.toString(),
+                                                          inSeconds.toString(),
+                                                          enddate.toString(),
+                                                        );
+                                                        _editParentText(
+                                                            textController.text,
+                                                            days.toString(),
+                                                            inSeconds
+                                                                .toString(),
+                                                            enddate.toString());
+                                                        Navigator.of(context)
+                                                            .pop();
+                                                      }
+                                                    //});
+                                                  },
+                                                  child: Text(
+                                                    "チャレンジする",
+                                                    style: TextStyle(
+                                                        fontSize:
+                                                            ScreenAdapter.size(
+                                                                15),
+                                                        color: Colors.blue),
+                                                  )),
+                                            ],
                                           ),
                                           TextButton(
                                               onPressed: () async {
@@ -518,20 +740,19 @@ class _ToDoListPageState extends State<ToDoListPage> with RouteAware {
                                                         ScreenAdapter.size(15),
                                                     color: Colors.green),
                                               )),
+
                                         ],
                                       ),
-                                    ],
-                                  ),
-                                )
-                              ],
-                            )),
-                          ),
-                        ),
-                      );
-                    });
-              },
-            ),
-          ]),
+                                    )
+                                  ],
+                                )),
+                              ),
+                            ),
+                          );
+                        });
+                  },
+                ),
+              ]),
           preferredSize: Size.fromHeight(ScreenAdapter.height(61)),
         ),
         drawer: drawerEX(),
@@ -601,11 +822,12 @@ class _ToDoListPageState extends State<ToDoListPage> with RouteAware {
             ],
           );
           if (selected == 0) {
+            await deltodolist(index);
             setState(() {
               todos.removeAt(index);
-              List<String> events =
-                  todos.map((f) => json.encode(f.toJson())).toList();
-              list.setString("toDoList", json.encode(events));
+              // List<String> events =
+              //     todos.map((f) => json.encode(f.toJson())).toList();
+              // list.setString("toDoList", json.encode(events));
             });
           } else if (selected == 1) {
             setState(() {
@@ -615,9 +837,10 @@ class _ToDoListPageState extends State<ToDoListPage> with RouteAware {
               done.add(todos[index].title);
               list.setStringList("done", done);
               todos.removeAt(index);
-              List<String> events =
-                  todos.map((f) => json.encode(f.toJson())).toList();
-              list.setString("toDoList", json.encode(events));
+
+              // List<String> events =
+              //     todos.map((f) => json.encode(f.toJson())).toList();
+              // list.setString("toDoList", json.encode(events));
             });
           } else if (selected == 2) {
             Navigator.of(context)
@@ -706,8 +929,9 @@ class _ToDoListPageState extends State<ToDoListPage> with RouteAware {
                                 builder: (context) => CountDown(
                                       date: int.parse(item.date),
                                       time: int.parse(item.time),
-                                      name: "toDoList",
+                                      title: todos[index].title,
                                       index: index,
+                                      id: todos[index].id,
                                     )
                                 //没传值
                                 //builder: (context)=>Detail()

@@ -2,11 +2,14 @@ import 'dart:async';
 import 'dart:convert';
 
 import 'package:date_format/date_format.dart';
+import 'package:dio/dio.dart';
 import 'package:doto_app/model/chartJsonData.dart';
 import 'package:doto_app/model/ringtonePlayer.dart';
 import 'package:doto_app/model/tasklist.dart';
+import 'package:doto_app/model/userData.dart';
 import 'package:doto_app/pages/tabs/Tabs.dart';
 import 'package:doto_app/pages/tabs/ToDoList.dart';
+import 'package:doto_app/services/ScreenAdapter.dart';
 import 'package:flutter_ringtone_player/flutter_ringtone_player.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -14,36 +17,40 @@ import 'package:shared_preferences/shared_preferences.dart';
 class CountDown extends StatefulWidget {
   int time;
   int date;
-  String name;
+  String title;
   int index;
+  int id;
   CountDown({
     Key? key,
     this.date = 0,
     this.time = 0,
-    this.name = "",
+    this.title = "",
     this.index = 0,
+    this.id = 0,
   }) : super(key: key);
   @override
   _CountdownState createState() =>
-      _CountdownState(this.date, this.time, this.name);
+      _CountdownState(this.date, this.time, this.title, this.id);
 }
 
 class _CountdownState extends State<CountDown> {
   int time;
   int date;
-  String name;
+  String title;
+  int id;
   Alarm alarm = new Alarm();
-  _CountdownState(this.date, this.time, this.name) : super();
+  _CountdownState(this.date, this.time, this.title, this.id) : super();
   var _timer;
   int seconds = 0;
   bool running = false;
-  List<TodoModel> todos = [];
-  List storge = []; //ローカルから取り出した値をここに
-  List<ChartJsonData> getCountDate = [];
-  List countDate = [];
+  //List<TodoModel> todos = [];
+  //List storge = []; //ローカルから取り出した値をここに
+  //List<ChartJsonData> getCountDate = [];
+  //List countDate = [];
   late ChartJsonData data;
   List<Contents> contents = [];
   List<String> eventsNames = [];
+  late UserData userdata;
   late var formatToday;
   //时间格式化，根据总秒数转换为对应的 hh:mm:ss 格式
   String constructTime(int seconds) {
@@ -66,7 +73,7 @@ class _CountdownState extends State<CountDown> {
   void initState() {
     super.initState();
     startTimer();
-    data = ChartJsonData(date: "", contents: contents);
+    //data = ChartJsonData(date: "", contents: contents);
     //日付取得
     var today = DateTime.now();
     formatToday = formatDate(today, [
@@ -78,25 +85,37 @@ class _CountdownState extends State<CountDown> {
     ]).toString();
     Future(() async {
       SharedPreferences list = await SharedPreferences.getInstance();
-      list.getString("toDoList") == null
-          ? storge = []
-          : storge = json.decode(list.getString("toDoList") ?? "{}");
-      storge.forEach((e) {
-        todos.add(TodoModel.fromJson(json.decode(e)));
-      });
-      list.getString("counts") == null
-          ? countDate = []
-          : countDate = json.decode(list.getString("counts"));
-      countDate.forEach((e) {
-        getCountDate.add(ChartJsonData.fromJson(json.decode(e)));
-      });
-      getCountDate.forEach((element) {
-        if (element.date == formatToday) {
-          element.contents.forEach((e) {
-            eventsNames.add(e.events);
-          });
-        }
-      });
+      //获取user token
+      list.getString("userdata") == null
+          ? userdata = UserData(name: "", email: "", accessToken: "")
+          : userdata =
+              UserData.fromJson(json.decode(list.getString("userdata")));
+
+      if (list.getString("userdata") != null) {
+        userdata = UserData.fromJson(json.decode(list.getString("userdata")));
+      } else {
+        userdata = UserData(name: "", email: "", accessToken: "");
+      }
+
+      // list.getString("toDoList") == null
+      //     ? storge = []
+      //     : storge = json.decode(list.getString("toDoList") ?? "{}");
+      // storge.forEach((e) {
+      //   todos.add(TodoModel.fromJson(json.decode(e)));
+      // });
+      // list.getString("counts") == null
+      //     ? countDate = []
+      //     : countDate = json.decode(list.getString("counts"));
+      // countDate.forEach((e) {
+      //   getCountDate.add(ChartJsonData.fromJson(json.decode(e)));
+      // });
+      // getCountDate.forEach((element) {
+      //   if (element.date == formatToday) {
+      //     element.contents.forEach((e) {
+      //       eventsNames.add(e.events);
+      //     });
+      //   }
+      // });
     });
   }
 
@@ -116,12 +135,15 @@ class _CountdownState extends State<CountDown> {
           //秒数减一，因为一秒回调一次
           seconds--;
         });
-
         if (seconds == 0) {
           //倒计时秒数为0，取消定时器
           cancelTimer();
+          int differTimes = time - seconds;
           time = seconds;
-          saveTime(time);
+          //saveTime(time);
+          if (differTimes != 0) {
+            updatetodolist(differTimes);
+          }
           _showADialog();
         }
       });
@@ -130,23 +152,63 @@ class _CountdownState extends State<CountDown> {
 
   void stopTimer() async {
     if (running && seconds != 0) {
+      int differTimes = time - seconds;
       time = seconds;
       cancelTimer();
-      saveTime(time);
+      //saveTime(time);
+      if (differTimes != 0) {
+        updatetodolist(differTimes);
+      }
       _timer = null;
     } else {
       startTimer();
     }
   }
 
+  updatetodolist(int differTimes) async {
+    ///本地存储的数据先更新给API，同步数据
+    ///然后更新本地数据
+    Dio dio = new Dio();
+    dio.options.headers['content-Type'] = 'application/json';
+    var params = {
+      "id": id,
+      "complete": 0,
+      "time": time,
+      "differTimes": differTimes,
+      "date": formatToday
+    };
+
+    ///请求header的配置
+    dio.options.headers['authorization'] = "Bearer ${userdata.accessToken}";
+    print('時間更新:${params}');
+    Response response =
+        await dio.post("http://10.0.2.2:8000/api/v1/updatetime", data: params);
+    print(response.data);
+    if (response.statusCode != null && response.statusCode == 201) {
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+        content: Text('時間更新しました'),
+        duration: Duration(seconds: 1),
+      ));
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+        content: Text('時間の更新に失敗しました'),
+        duration: Duration(seconds: 1),
+      ));
+    }
+  }
+
   //変更された時間を再保存
   void saveTime(int time) async {
-    int differTimes = int.parse(todos[widget.index].time) - time;
-    todos[widget.index].time = time.toString();
-    SharedPreferences list = await SharedPreferences.getInstance();
-    List<String> events = todos.map((f) => json.encode(f.toJson())).toList();
-    list.setString("toDoList", json.encode(events));
-    makeCountData(differTimes);
+    //int differTimes = int.parse(todos[widget.index].time) - time;
+    int differTimes = widget.time - time;
+    //todos[widget.index].time = time.toString();
+    // SharedPreferences list = await SharedPreferences.getInstance();
+    // List<String> events = todos.map((f) => json.encode(f.toJson())).toList();
+    // list.setString("toDoList", json.encode(events));
+    //
+
+    //makeCountData(differTimes);
+    //postgraph(differTimes);
   }
 
   void cancelTimer() {
@@ -157,54 +219,54 @@ class _CountdownState extends State<CountDown> {
     }
   }
 
-  //統計画面のデータ設定
-  makeCountData(int differTimes) async {
-    SharedPreferences list = await SharedPreferences.getInstance();
-    Contents localcontents = Contents(events: "", times: 0);
-    bool newdata = false;
-    //記録時間取得
-    //イベント名前取得
-    if (getCountDate.isNotEmpty && eventsNames.isNotEmpty) {
-      getCountDate.forEach((element) {
-        //今日の記録タスクがある場合
-        if (element.date == formatToday) {
-          for (var e in element.contents) {
-            //今日重複やったタスク
-            if (eventsNames.contains(todos[widget.index].title)) {
-              if (e.events == todos[widget.index].title) {
-                var newTimes = differTimes + e.times;
-                e.times = newTimes;
-              }
-            } else if (!eventsNames.contains(todos[widget.index].title)) {
-              //今日はじめてやったタスク
-              eventsNames.add(todos[widget.index].title);
-              newdata = true;
-              localcontents = Contents(
-                  events: todos[widget.index].title, times: differTimes);
-            }
-          }
-          if (newdata) {
-            element.contents.add(localcontents);
-            newdata = false;
-          }
-        }
-      });
-    } else {
-      eventsNames.add(todos[widget.index].title);
-      contents
-          .add(Contents(events: todos[widget.index].title, times: differTimes));
-      data = ChartJsonData(date: formatToday, contents: contents);
-      getCountDate.add(data);
-      List<String> countData =
-          getCountDate.map((f) => json.encode(f.toJson())).toList();
-      list.setString("counts", json.encode(countData));
-    }
-    List<String> countData =
-        getCountDate.map((f) => json.encode(f.toJson())).toList();
-    list.setString("counts", json.encode(countData));
-    //list.remove("counts");
-    print(countData);
-  }
+  // //統計画面のデータ設定
+  // makeCountData(int differTimes) async {
+  //   //SharedPreferences list = await SharedPreferences.getInstance();
+  //   Contents localcontents = Contents(events: "", times: 0);
+  //   bool newdata = false;
+  //   //記録時間取得
+  //   //イベント名前取得
+  //   if (getCountDate.isNotEmpty && eventsNames.isNotEmpty) {
+  //     getCountDate.forEach((element) {
+  //       //今日の記録タスクがある場合
+  //       if (element.date == formatToday) {
+  //         for (var e in element.contents) {
+  //           //今日重複やったタスク
+  //           if (eventsNames.contains(todos[widget.index].title)) {
+  //             if (e.events == todos[widget.index].title) {
+  //               var newTimes = differTimes + e.times;
+  //               e.times = newTimes;
+  //             }
+  //           } else if (!eventsNames.contains(todos[widget.index].title)) {
+  //             //今日はじめてやったタスク
+  //             eventsNames.add(todos[widget.index].title);
+  //             newdata = true;
+  //             localcontents = Contents(
+  //                 events: todos[widget.index].title, times: differTimes);
+  //           }
+  //         }
+  //         if (newdata) {
+  //           element.contents.add(localcontents);
+  //           newdata = false;
+  //         }
+  //       }
+  //     });
+  //   } else {
+  //     eventsNames.add(todos[widget.index].title);
+  //     contents
+  //         .add(Contents(events: todos[widget.index].title, times: differTimes));
+  //     data = ChartJsonData(date: formatToday, contents: contents);
+  //     getCountDate.add(data);
+  //     List<String> countData =
+  //         getCountDate.map((f) => json.encode(f.toJson())).toList();
+  //     //list.setString("counts", json.encode(countData));
+  //   }
+  //   List<String> countData =
+  //       getCountDate.map((f) => json.encode(f.toJson())).toList();
+  //   //list.setString("counts", json.encode(countData));
+  //   //list.remove("counts");
+  //   print("更改后的信息$countData");
+  // }
 
   @override
   void dispose() {
@@ -216,6 +278,7 @@ class _CountdownState extends State<CountDown> {
   Widget build(BuildContext context) {
     return Scaffold(
         appBar: AppBar(
+          backgroundColor: Color(0xFF8ddf67),
           leading: new IconButton(
             icon: new Icon(Icons.arrow_back_ios),
             onPressed: () => {
@@ -234,17 +297,21 @@ class _CountdownState extends State<CountDown> {
           Column(
             children: [
               Container(
-                  margin: EdgeInsets.only(top: 150),
+                  margin: EdgeInsets.only(top: ScreenAdapter.height(150)),
                   alignment: Alignment.topCenter,
                   child: Text(constructTime(seconds),
-                      style: TextStyle(fontSize: 80, color: Colors.black87))),
+                      style: TextStyle(
+                          fontSize: ScreenAdapter.size(100),
+                          color: Colors.black87))),
               Container(
-                margin: EdgeInsets.only(top: 150),
+                margin: EdgeInsets.only(top: ScreenAdapter.height(180)),
                 alignment: Alignment.topCenter,
                 child: TextButton(
                     child: Text("停止",
-                        style: TextStyle(fontSize: 50, color: Colors.black87)),
-                    onPressed: () {
+                        style: TextStyle(
+                            fontSize: ScreenAdapter.size(70),
+                            color: Colors.black87)),
+                    onPressed: () async {
                       stopTimer();
                     }),
               )

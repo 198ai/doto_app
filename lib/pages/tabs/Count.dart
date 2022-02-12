@@ -1,7 +1,9 @@
 import 'dart:convert';
 
 import 'package:date_format/date_format.dart';
+import 'package:dio/dio.dart';
 import 'package:doto_app/model/chartJsonData.dart';
+import 'package:doto_app/model/userData.dart';
 import 'package:doto_app/services/ScreenAdapter.dart';
 import 'package:flutter/material.dart';
 import 'package:charts_flutter/flutter.dart' as charts;
@@ -35,21 +37,6 @@ class PieChart {
       };
 }
 
-class SalesData {
-  final int month;
-  final int time;
-
-  SalesData(this.month, this.time);
-}
-
-class PopulationData {
-  int year;
-  int population;
-  charts.Color barColor;
-  PopulationData(
-      {required this.year, required this.population, required this.barColor});
-}
-
 enum setdate { date, month, week }
 
 class _CountPage extends State<CountPage> {
@@ -57,78 +44,6 @@ class _CountPage extends State<CountPage> {
   String hasdate2 = "";
   bool visible = false;
   var selectdate = setdate.date;
-
-  final List<PopulationData> data = [
-    PopulationData(
-        year: 1880,
-        population: 50189209,
-        barColor: charts.ColorUtil.fromDartColor(Colors.lightBlue)),
-    PopulationData(
-        year: 1890,
-        population: 62979766,
-        barColor: charts.ColorUtil.fromDartColor(Colors.lightBlue)),
-    PopulationData(
-        year: 1900,
-        population: 76212168,
-        barColor: charts.ColorUtil.fromDartColor(Colors.lightBlue)),
-    PopulationData(
-        year: 1910,
-        population: 92228496,
-        barColor: charts.ColorUtil.fromDartColor(Colors.lightBlue)),
-    PopulationData(
-        year: 1920,
-        population: 106021537,
-        barColor: charts.ColorUtil.fromDartColor(Colors.blue)),
-    PopulationData(
-        year: 1930,
-        population: 123202624,
-        barColor: charts.ColorUtil.fromDartColor(Colors.blue)),
-    PopulationData(
-        year: 1940,
-        population: 132164569,
-        barColor: charts.ColorUtil.fromDartColor(Colors.blue)),
-    PopulationData(
-        year: 1950,
-        population: 151325798,
-        barColor: charts.ColorUtil.fromDartColor(Colors.blue)),
-    PopulationData(
-        year: 1960,
-        population: 179323175,
-        barColor: charts.ColorUtil.fromDartColor(Colors.blue)),
-    PopulationData(
-        year: 1970,
-        population: 203302031,
-        barColor: charts.ColorUtil.fromDartColor(Colors.purple)),
-    PopulationData(
-        year: 1980,
-        population: 226542199,
-        barColor: charts.ColorUtil.fromDartColor(Colors.purple)),
-    PopulationData(
-        year: 1990,
-        population: 248709873,
-        barColor: charts.ColorUtil.fromDartColor(Colors.purple)),
-    PopulationData(
-        year: 2000,
-        population: 281421906,
-        barColor: charts.ColorUtil.fromDartColor(Colors.purple)),
-    PopulationData(
-        year: 2010,
-        population: 307745538,
-        barColor: charts.ColorUtil.fromDartColor(Colors.black)),
-    PopulationData(
-        year: 2017,
-        population: 323148586,
-        barColor: charts.ColorUtil.fromDartColor(Colors.black)),
-  ];
-
-  // final List<GradesData> data2 = [
-  //   GradesData('項目名', 190),
-  //   GradesData('B', 230),
-  //   GradesData('C', 150),
-  //   GradesData('D', 73),
-  //   GradesData('E', 31),
-  //   GradesData('Fail', 13),
-  // ];
 
   List<Contents> dashboardResult = [];
   List<ChartJsonData> chartJsonData = [];
@@ -139,6 +54,54 @@ class _CountPage extends State<CountPage> {
   Color onSelected = Colors.black87;
   Color onSelected2 = Colors.black87;
   Color onSelected3 = Colors.black87;
+  late UserData userdata;
+
+  Future getEvents() async {
+    //整理数据
+    //print(mySelectedEvents);
+    Dio dio = new Dio();
+    dio.options.headers['content-Type'] = 'application/json';
+    ///请求header的配置
+    dio.options.headers['authorization'] = "Bearer ${userdata.accessToken}";
+    try {
+      Response response = await dio.get("http://10.0.2.2:8000/api/v1/getgraph");
+
+      if (response.statusCode == 201) {
+        //data2 = json.decode(jsonString2);
+        //data2 =  json.decode(response.data);
+        print(response);
+        response.data.forEach((e) {
+          print(e);
+          //chartJsonData.add(ChartJsonData.fromJson(json.decode(e)));
+          chartJsonData.add(ChartJsonData.fromJson(e));
+        });
+        chartJsonData.forEach((element) {
+          element.contents.forEach((e) {
+            totalTimes = totalTimes + e.times;
+          });
+        });
+        setState(() {});
+        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+        content: Text('グラフ更新しました'),
+        duration: Duration(seconds: 1),
+      ));
+      }
+    } catch (onError) {
+      debugPrint("error:${onError.toString()}");
+    }
+  }
+
+  Future userData() async {
+    SharedPreferences retult = await SharedPreferences.getInstance();
+    retult.getString("userdata") == null
+        ? userdata = UserData(name: "", email: "", accessToken: "")
+        : userdata =
+            UserData.fromJson(json.decode(retult.getString("userdata")));
+    if (userdata.accessToken != "") {
+      await getEvents();
+    }
+  }
+
   @override
   void initState() {
     super.initState();
@@ -151,56 +114,15 @@ class _CountPage extends State<CountPage> {
       'dd',
     ]).toString();
     Future(() async {
+     await userData();
       SharedPreferences list = await SharedPreferences.getInstance();
       list.getString("counts") == null
           ? jsonString2 = ""
           : jsonString2 = list.getString("counts");
-      data2 = json.decode(jsonString2);
-      data2.forEach((e) {
-        chartJsonData.add(ChartJsonData.fromJson(json.decode(e)));
-      });
-      chartJsonData.forEach((element) {
-        element.contents.forEach((e) {
-          totalTimes = totalTimes + e.times;
-        });
-      });
       gettimes();
       dataChange();
-      setState(() {
-        
-      });
+      setState(() {});
     });
-   
-    //饼状图用分钟数来表示每天的数据记录
-    String jsonString = '''
-           [ {
-"date":"2021-12-26",
- "contents":[{"events":"読書","times":280},{"events":"ごみ捨て","times":1000000},{"events":"ごみ捨て","times":1000}]
-             },
-  {"date":"2021-12-27",
-              "contents":[{"events":"買い物","times":80},{"events":"ご飯食べる","times":150},{"events":"野菜","times":1050},{"events":"遊び","times":150}]
-             },
-  {"date":"2021-12-28",
-              "contents":[{"events":"ねる","times":500},{"events":"トイレ","times":105},{"events":"お野菜","times":105}]
-             },
-             {"date":"2021-11-28",
-              "contents":[{"events":"11月","times":500},{"events":"トイレ","times":105},{"events":"お野菜","times":105}]
-             },
-             {"date":"2021-10-28",
-              "contents":[{"events":"10月","times":500},{"events":"トイレ","times":105},{"events":"お野菜","times":105}]
-             },
-             {"date":"2021-10-01",
-              "contents":[{"events":"10月01","times":500},{"events":"测试3","times":105},{"events":"努力测试3","times":105}]
-             },
-              {"date":"2021-10-25",
-              "contents":[{"events":"10月25","times":500},{"events":"测试","times":105},{"events":"努力测试","times":105}]
-             },
-             {"date":"2021-10-31",
-              "contents":[{"events":"10月31","times":500},{"events":"测试1","times":105},{"events":"努力测试1","times":105}]
-             },
-             {"date":"2021-11-01",
-              "contents":[{"events":"11月1","times":500},{"events":"测试11","times":105},{"events":"努力测试11","times":105}]
-             }]''';
   }
 
   gettimes() {
@@ -301,6 +223,7 @@ class _CountPage extends State<CountPage> {
   Widget build(BuildContext context) {
     return Scaffold(
         appBar: AppBar(
+          backgroundColor: Color(0xFF8ddf67),
           centerTitle: true,
           //title: Text(_strTitle, style: TextStyle(color: commonStrColor)), //AIForce Equipment App
           title: Text('統計'),
@@ -313,12 +236,13 @@ class _CountPage extends State<CountPage> {
             child: Column(
               children: [
                 Container(
-                  height: 80,
-                  width: 600,
+                  height: ScreenAdapter.height(80),
+                  width: ScreenAdapter.width(600),
                   child: Card(
                       child: Container(
                           alignment: Alignment.center,
-                          margin: EdgeInsets.only(top: 10),
+                          margin:
+                              EdgeInsets.only(top: ScreenAdapter.height(10)),
                           child: SingleChildScrollView(
                             scrollDirection: Axis.horizontal,
                             child: Row(
@@ -327,13 +251,20 @@ class _CountPage extends State<CountPage> {
                                 Text(
                                   "累計総時間:",
                                   style: TextStyle(
-                                      fontSize: 18.0,
+                                      fontSize: ScreenAdapter.size(25),
                                       // fontStyle: FontStyle.italic,
-                                      color: Colors.pink,
+                                      color: Color(0xFF8ddf67),
                                       fontWeight: FontWeight.bold),
                                 ),
-                                SizedBox(width: 20),
-                                Text("${constructTime(totalTimes)}"),
+                                SizedBox(width: ScreenAdapter.width(20)),
+                                Text(
+                                  "${constructTime(totalTimes)}",
+                                  style: TextStyle(
+                                      fontSize: ScreenAdapter.size(25),
+                                      // fontStyle: FontStyle.italic,
+                                      color: Colors.black,
+                                      fontWeight: FontWeight.bold),
+                                ),
 
                                 //   Column(children: [
                                 //     Text(
@@ -368,10 +299,10 @@ class _CountPage extends State<CountPage> {
                           ))),
                 ),
                 Container(
-                    height: 550,
+                    height: ScreenAdapter.height(640),
                     child: Card(
                       child: Padding(
-                        padding: EdgeInsets.all(8.0),
+                        padding: EdgeInsets.all(ScreenAdapter.width(8)),
                         child: Column(
                           children: <Widget>[
                             Row(
@@ -435,43 +366,6 @@ class _CountPage extends State<CountPage> {
                                     },
                                     child: Text("日")),
                                 OutlineButton(
-                                    textColor: onSelected2,
-                                    onPressed: () {
-                                      onSelected2 = Colors.pink;
-                                      onSelected = Colors.black87;
-                                      onSelected3 = Colors.black87;
-                                      selectdate = setdate.month;
-                                      var usedate = hasdate == ""
-                                          ? new DateTime.now()
-                                          : DateTime.parse(hasdate);
-                                      var changeddate = new DateTime(
-                                          usedate.year, usedate.month, 01);
-                                      var changeddate2 = new DateTime(
-                                          changeddate.year,
-                                          changeddate.month + 1,
-                                          01);
-                                      hasdate = formatDate(changeddate, [
-                                        'yyyy',
-                                        "-",
-                                        'mm',
-                                        "-",
-                                        'dd',
-                                      ]).toString();
-                                      hasdate2 = formatDate(changeddate2, [
-                                        'yyyy',
-                                        "-",
-                                        'mm',
-                                        "-",
-                                        'dd',
-                                      ]).toString();
-                                      dashboardResult = [];
-                                      selectedTotalTimes = 0;
-                                      gettimes();
-                                      dataChange();
-                                      setState(() {});
-                                    },
-                                    child: Text("月")),
-                                OutlineButton(
                                     textColor: onSelected3,
                                     onPressed: () {
                                       onSelected3 = Colors.pink;
@@ -512,19 +406,58 @@ class _CountPage extends State<CountPage> {
                                       setState(() {});
                                     },
                                     child: Text("週")),
+                                OutlineButton(
+                                    textColor: onSelected2,
+                                    onPressed: () {
+                                      onSelected2 = Colors.pink;
+                                      onSelected = Colors.black87;
+                                      onSelected3 = Colors.black87;
+                                      selectdate = setdate.month;
+                                      var usedate = hasdate == ""
+                                          ? new DateTime.now()
+                                          : DateTime.parse(hasdate);
+                                      var changeddate = new DateTime(
+                                          usedate.year, usedate.month, 01);
+                                      var changeddate2 = new DateTime(
+                                          changeddate.year,
+                                          changeddate.month + 1,
+                                          01);
+                                      hasdate = formatDate(changeddate, [
+                                        'yyyy',
+                                        "-",
+                                        'mm',
+                                        "-",
+                                        'dd',
+                                      ]).toString();
+                                      hasdate2 = formatDate(changeddate2, [
+                                        'yyyy',
+                                        "-",
+                                        'mm',
+                                        "-",
+                                        'dd',
+                                      ]).toString();
+                                      dashboardResult = [];
+                                      selectedTotalTimes = 0;
+                                      gettimes();
+                                      dataChange();
+                                      setState(() {});
+                                    },
+                                    child: Text("月")),
                               ],
                             ),
                             Visibility(
                                 visible: visible,
                                 child: Container(
-                                  height: 400,
-                                  width: 400,
+                                  height: ScreenAdapter.height(450),
+                                  width: ScreenAdapter.width(400),
                                   child: SfCircularChart(
                                     title: ChartTitle(
                                         text:
                                             '総時間:${constructTime(selectedTotalTimes)}',
-                                        textStyle: TextStyle(fontSize: 13)),
-                                    margin: EdgeInsets.only(top: 10),
+                                        textStyle: TextStyle(
+                                            fontSize: ScreenAdapter.size(23))),
+                                    margin: EdgeInsets.only(
+                                        top: ScreenAdapter.height(10)),
                                     legend: Legend(
                                         position: LegendPosition.bottom,
                                         isVisible: true,
@@ -561,9 +494,11 @@ class _CountPage extends State<CountPage> {
                               visible: !visible,
                               child: Container(
                                 alignment: Alignment.center,
-                                margin: EdgeInsets.only(top: 50),
+                                margin: EdgeInsets.only(
+                                    top: ScreenAdapter.height(50)),
                                 child: Text("この日には何もやっていないよ",
-                                    style: TextStyle(fontSize: 16.0)),
+                                    style: TextStyle(
+                                        fontSize: ScreenAdapter.size(23))),
                               ),
                             ),
                           ],
