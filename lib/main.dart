@@ -1,5 +1,6 @@
 import 'dart:convert';
 
+import 'package:doto_app/pages/tabs/Tabs.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:intl/date_symbol_data_local.dart';
@@ -7,6 +8,7 @@ import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 // import 'pages/tabs/Tabs.dart';
 import 'package:doto_app/model/myevents.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:splashscreen/splashscreen.dart';
 import 'routers/router.dart';
 
 final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
@@ -29,6 +31,7 @@ void main() async {
       debugPrint('notification payload: ' + payload);
     }
   });
+
   initializeDateFormatting().then((_) => runApp(MyApp()));
 }
 
@@ -85,38 +88,25 @@ class _MyAppState extends State<MyApp> {
     return ScreenUtilInit(
         designSize: Size(428, 926),
         builder: () => MaterialApp(
-            //home: Tabs(),
+            home: Splash2(),
             navigatorObservers: [MyApp.routeObserver], //添加路由观察者
             debugShowCheckedModeBanner: false,
             initialRoute: '/',
             onGenerateRoute: onGenerateRoute));
   }
 }
-
-
-void scheduleAlarm(
-    DateTime scheduledNotificationDateTime, String alarmInfo) async {
-  var androidPlatformChannelSpecifics = AndroidNotificationDetails(
-    'alarm_notif',
-    'alarm_notif',
-    'Channel for Alarm notification',
-    icon: 'ic_launcher',
-    sound: RawResourceAndroidNotificationSound('clock'),
-    largeIcon: DrawableResourceAndroidBitmap('ic_launcher'),
-  );
-
-  var iOSPlatformChannelSpecifics = IOSNotificationDetails(
-      sound: 'clock.wav',
-      presentAlert: true,
-      presentBadge: true,
-      presentSound: true);
-  var platformChannelSpecifics = NotificationDetails(
-      androidPlatformChannelSpecifics, iOSPlatformChannelSpecifics);
-
-  await flutterLocalNotificationsPlugin.schedule(
-      0,
-      'リマインド!',
-      alarmInfo + "の時間だよ!",
-      scheduledNotificationDateTime,
-      platformChannelSpecifics);
+class Splash2 extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return SplashScreen(
+      seconds: 3,
+      navigateAfterSeconds: new Tabs(),
+      title: new Text('美らじぇんだ\n~目標達成までちゃ～まじゅん！~',textScaleFactor: 1.8,textAlign: TextAlign.center,),
+      image: Image.asset("images/ic_launcher.png"),
+        loadingText: Text("Loading"),
+      photoSize: 40.0,
+      loaderColor: Colors.green,
+    );
+  }
 }
+
