@@ -19,6 +19,7 @@ class LoginPage extends StatefulWidget {
 
 class _LoginPageState extends State<LoginPage> {
   bool _isShow = false;
+  var _isFocus = false;
   late SharedPreferences prefs;
   late UserData userdate;
   //用户名输入框的焦点控制
@@ -62,6 +63,7 @@ class _LoginPageState extends State<LoginPage> {
       child: Scaffold(
         appBar: AppBar(
           title: Text("ログイン"),
+          backgroundColor: Colors.green,
         ),
         //登录页面的主体
         body: buildLoginWidget(),
@@ -114,6 +116,9 @@ class _LoginPageState extends State<LoginPage> {
                   Navigator.pushNamed(context, '/');
                 }
               },
+                style: ElevatedButton.styleFrom(
+                  primary: Colors.green,
+                )
             ),
           ),
           Row(mainAxisAlignment: MainAxisAlignment.spaceEvenly, children: [
@@ -161,6 +166,7 @@ class _LoginPageState extends State<LoginPage> {
           //抖动控制器
           shakeAnimationController: _userPasswordAnimation,
           child: new TextField(
+            cursorColor: Colors.green,
             focusNode: _passwordFocusNode,
             controller: _passwordController,
             onSubmitted: (String value) {
@@ -177,10 +183,18 @@ class _LoginPageState extends State<LoginPage> {
             //边框样式设置
             decoration: InputDecoration(
               labelText: "パスワード",
+              labelStyle: TextStyle(
+                color: _isFocus ? Colors.green : Colors.grey,
+              ),
               errorText: snapshot.data,
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.all(Radius.circular(10)),
               ),
+                focusedBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.all(Radius.circular(10)),
+                  borderSide:
+                  BorderSide(color: Colors.green),
+                ),
               suffix: GestureDetector(
                   onTap: () {
                     setState(() {
@@ -213,6 +227,7 @@ class _LoginPageState extends State<LoginPage> {
           //抖动控制器
           shakeAnimationController: _userEmailAnimation,
           child: new TextField(
+            cursorColor: Colors.green,
             focusNode: _emailFocusNode,
             controller: _emailController,
             onSubmitted: (String value) {
@@ -227,9 +242,17 @@ class _LoginPageState extends State<LoginPage> {
             //边框样式设置
             decoration: InputDecoration(
               labelText: "メールアドレス",
+              labelStyle: TextStyle(
+                color: _isFocus ? Colors.green : Colors.grey,
+              ),
               errorText: snapshot.data,
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.all(Radius.circular(10)),
+              ),
+              focusedBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.all(Radius.circular(10)),
+                borderSide:
+                BorderSide(color: Colors.green),
               ),
             ),
           ),
@@ -253,6 +276,7 @@ class _LoginPageState extends State<LoginPage> {
           //抖动控制器
           shakeAnimationController: _userNameAnimation,
           child: new TextField(
+            cursorColor: Colors.green,
             //焦点控制
             focusNode: _userNameFocusNode,
             //文本控制器
@@ -272,11 +296,19 @@ class _LoginPageState extends State<LoginPage> {
               //红色的错误提示文本
               errorText: snapshot.data,
               labelText: "ユーザ名",
+              labelStyle: TextStyle(
+                color: _isFocus ? Colors.green : Colors.grey,
+              ),
               //设置上下左右 都有边框
               //设置四个角的弧度
               border: OutlineInputBorder(
                 //设置边框四个角的弧度
                 borderRadius: BorderRadius.all(Radius.circular(10)),
+              ),
+              focusedBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.all(Radius.circular(10)),
+                borderSide:
+                BorderSide(color: Colors.green),
               ),
             ),
           ),

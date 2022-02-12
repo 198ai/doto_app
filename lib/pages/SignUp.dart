@@ -19,6 +19,7 @@ class SignUpPage extends StatefulWidget {
 
 class _SignUpPageState extends State<SignUpPage> {
   bool _isShow = false;
+  var _isFocus = false;
   late SharedPreferences prefs;
   //用户名输入框的焦点控制
   FocusNode _userNameFocusNode = new FocusNode();
@@ -61,6 +62,7 @@ class _SignUpPageState extends State<SignUpPage> {
       child: Scaffold(
         appBar: AppBar(
           title: Text("アカント新規"),
+          backgroundColor: Colors.green,
         ),
         //登录页面的主体
         body: buildLoginWidget(),
@@ -113,6 +115,9 @@ class _SignUpPageState extends State<SignUpPage> {
                   Navigator.pushNamed(context, '/');
                 }
               },
+              style: ElevatedButton.styleFrom(
+                primary: Colors.green,
+              )
             ),
           )
         ],
@@ -132,6 +137,7 @@ class _SignUpPageState extends State<SignUpPage> {
           //抖动控制器
           shakeAnimationController: _userPasswordAnimation,
           child: new TextField(
+            cursorColor: Colors.green,
             focusNode: _passwordFocusNode,
             controller: _passwordController,
             onSubmitted: (String value) {
@@ -148,9 +154,17 @@ class _SignUpPageState extends State<SignUpPage> {
             //边框样式设置
             decoration: InputDecoration(
               labelText: "パスワード",
+              labelStyle: TextStyle(
+                color: _isFocus ? Colors.green : Colors.grey,
+              ),
               errorText: snapshot.data,
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.all(Radius.circular(10)),
+              ),
+              focusedBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.all(Radius.circular(10)),
+                borderSide:
+                BorderSide(color: Colors.green),
               ),
               suffix: GestureDetector(
                   onTap: () {
@@ -184,6 +198,7 @@ class _SignUpPageState extends State<SignUpPage> {
           //抖动控制器
           shakeAnimationController: _userEmailAnimation,
           child: new TextField(
+            cursorColor: Colors.green,
             focusNode: _emailFocusNode,
             controller: _emailController,
             onSubmitted: (String value) {
@@ -200,9 +215,17 @@ class _SignUpPageState extends State<SignUpPage> {
             //边框样式设置
             decoration: InputDecoration(
               labelText: "メールアドレス",
+              labelStyle: TextStyle(
+                color: _isFocus ? Colors.green : Colors.grey,
+              ),
               errorText: snapshot.data,
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.all(Radius.circular(10)),
+              ),
+              focusedBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.all(Radius.circular(10)),
+                borderSide:
+                BorderSide(color: Colors.green),
               ),
             ),
           ),
@@ -226,6 +249,7 @@ class _SignUpPageState extends State<SignUpPage> {
           //抖动控制器
           shakeAnimationController: _userNameAnimation,
           child: new TextField(
+            cursorColor: Colors.green,
             //焦点控制
             focusNode: _userNameFocusNode,
             //文本控制器
@@ -245,11 +269,19 @@ class _SignUpPageState extends State<SignUpPage> {
               //红色的错误提示文本
               errorText: snapshot.data,
               labelText: "ユーザ名",
+              labelStyle: TextStyle(
+                color: _isFocus ? Colors.green : Colors.grey,
+              ),
               //设置上下左右 都有边框
               //设置四个角的弧度
               border: OutlineInputBorder(
                 //设置边框四个角的弧度
                 borderRadius: BorderRadius.all(Radius.circular(10)),
+              ),
+              focusedBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.all(Radius.circular(10)),
+                borderSide:
+                BorderSide(color: Colors.green),
               ),
             ),
           ),

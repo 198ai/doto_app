@@ -99,7 +99,7 @@ class Splash2 extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return SplashScreen(
-      seconds: 30,
+      seconds: 3,
       navigateAfterSeconds: new Tabs(),
       title: new Text('美らじぇんだ\n~目標達成までちゃ～まじゅん！~',textScaleFactor: 1.8,textAlign: TextAlign.center,),
       image: Image.asset("images/ic_launcher.png"),

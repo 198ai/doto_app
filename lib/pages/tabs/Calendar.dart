@@ -23,6 +23,7 @@ class CalendarPage extends StatefulWidget {
 
 class _CalendarPageState extends State<CalendarPage> {
   final todaysDate = DateTime.now();
+  var _isFocus = false;
   var _focusedCalendarDate = DateTime.now();
   final _initialCalendarDate = DateTime(2000);
   final _lastCalendarDate = DateTime(3000);
@@ -113,7 +114,7 @@ class _CalendarPageState extends State<CalendarPage> {
                     },
                     child: Text(
                       'キャンセル',
-                      style: TextStyle(fontSize: 13),
+                      style: TextStyle(fontSize: 13, color: Colors.green),
                     )),
                 // ignore: deprecated_member_use
                 TextButton(
@@ -122,7 +123,7 @@ class _CalendarPageState extends State<CalendarPage> {
                     },
                     child: Text(
                       '確認',
-                      style: TextStyle(fontSize: ScreenAdapter.size(13)),
+                      style: TextStyle(fontSize: ScreenAdapter.size(13), color: Colors.green),
                     )),
               ],
             ),
@@ -167,10 +168,14 @@ class _CalendarPageState extends State<CalendarPage> {
   Widget buildTextField(
       {String? hint, required TextEditingController controller}) {
     return TextField(
+      cursorColor: Colors.green,
       controller: controller,
       textCapitalization: TextCapitalization.words,
       decoration: InputDecoration(
         labelText: hint ?? '',
+        labelStyle: TextStyle(
+          color: _isFocus ? Colors.green : Colors.grey,
+        ),
         focusedBorder: OutlineInputBorder(
           borderSide: BorderSide(color: Colors.black, width: 1.5),
           borderRadius: BorderRadius.circular(
@@ -206,7 +211,10 @@ class _CalendarPageState extends State<CalendarPage> {
 
                         await _showDatePicker();
                       },
-                      child: Text('アラーム設定'),
+                      child: Text(
+                          'アラーム設定',
+                          style: TextStyle(color: Colors.green),
+                      ),
                     ),
                   ],
                 ),
@@ -231,7 +239,10 @@ class _CalendarPageState extends State<CalendarPage> {
                 actions: [
                   TextButton(
                     onPressed: () => Navigator.pop(context),
-                    child: const Text('キャンセル'),
+                    child: const Text(
+                        'キャンセル',
+                      style: TextStyle(color: Colors.green),
+                    ),
                   ),
                   TextButton(
                     onPressed: () async {
@@ -306,7 +317,10 @@ class _CalendarPageState extends State<CalendarPage> {
                         return;
                       }
                     },
-                    child: const Text('確認'),
+                    child: const Text(
+                        '確認',
+                      style: TextStyle(color: Colors.green),
+                    ),
                   ),
                 ],
               );
@@ -317,7 +331,7 @@ class _CalendarPageState extends State<CalendarPage> {
   Widget build(BuildContext context) {
     return Scaffold(
         appBar:
-            AppBar(centerTitle: true, title: Text("カレンダー"), actions: <Widget>[
+            AppBar(centerTitle: true, title: Text("カレンダー"), backgroundColor: Colors.green, actions: <Widget>[
           IconButton(
               splashColor: Colors.transparent,
               highlightColor: Colors.transparent,
@@ -402,12 +416,12 @@ class _CalendarPageState extends State<CalendarPage> {
                 weekendTextStyle: TextStyle(color: Colors.pink),
                 // highlighted color for today
                 todayDecoration: BoxDecoration(
-                  color: Colors.blue,
+                  color: Colors.green,
                   shape: BoxShape.circle,
                 ),
                 // highlighted color for selected day
                 selectedDecoration: BoxDecoration(
-                  color: Colors.blue,
+                  color: Colors.green,
                   shape: BoxShape.circle,
                 ),
                 markerDecoration:

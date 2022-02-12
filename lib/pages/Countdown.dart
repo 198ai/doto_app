@@ -228,6 +228,7 @@ class _CountdownState extends State<CountDown> {
           ),
           centerTitle: true,
           title: Text('タイマー'),
+          backgroundColor: Colors.green,
         ),
         body: Stack(children: [
           Column(

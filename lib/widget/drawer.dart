@@ -202,7 +202,12 @@ class _drawerEX extends State<drawerEX> {
                                 onPressed: () {
                                   Navigator.pop(context);
                                 },
-                                child: const Text('キャンセル'),
+                                child: const Text(
+                                    'キャンセル',
+                                style: TextStyle(
+                              color: Colors.green,
+                              ),
+                                ),
                               ),
                               TextButton(
                                 onPressed: () async {
@@ -214,7 +219,12 @@ class _drawerEX extends State<drawerEX> {
                                   prefs.remove("userdata");
                                   Navigator.pop(context);
                                 },
-                                child: const Text('確認'),
+                                child: const Text(
+                                    '確認',
+                                  style: TextStyle(
+                                    color: Colors.green,
+                                  ),
+                                ),
                               ),
                             ],
                           );

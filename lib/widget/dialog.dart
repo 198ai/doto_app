@@ -10,7 +10,7 @@ class DialogEX extends AlertDialog {
           contentPadding: EdgeInsets.zero,
           shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(20),
-              side: BorderSide(color: Colors.blue, width: 3)),
+              side: BorderSide(color: Colors.green, width: 3)),
         );
 }
 
@@ -75,10 +75,10 @@ class _DialogContentState extends State<DialogContent> {
                 decoration: InputDecoration(
                   labelText: "どうな名前がいいのかな。。。",
                     enabledBorder: UnderlineInputBorder(
-                      borderSide: BorderSide(color: Colors.blue),
+                      borderSide: BorderSide(color: Colors.green),
                     ),
                     focusedBorder: UnderlineInputBorder(
-                      borderSide: BorderSide(color: Colors.blue),
+                      borderSide: BorderSide(color: Colors.green),
                     )),
               ),
             ),
@@ -98,7 +98,7 @@ class _DialogContentState extends State<DialogContent> {
                         },
                         child: Text(
                           widget.cancelBtnTitle,
-                          style: TextStyle(fontSize: 15, color: Colors.blue),
+                          style: TextStyle(fontSize: 15, color: Colors.green),
                         ),
                       ),
                       TextButton(
@@ -111,7 +111,7 @@ class _DialogContentState extends State<DialogContent> {
                           },
                           child: Text(
                             widget.okBtnTitle,
-                            style: TextStyle(fontSize: 15, color: Colors.blue),
+                            style: TextStyle(fontSize: 15, color: Colors.green),
                           )),
                     ],
                   ),

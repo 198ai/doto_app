@@ -304,6 +304,7 @@ class _CountPage extends State<CountPage> {
           centerTitle: true,
           //title: Text(_strTitle, style: TextStyle(color: commonStrColor)), //AIForce Equipment App
           title: Text('統計'),
+          backgroundColor: Colors.green,
           automaticallyImplyLeading: false,
         ),
         body: SingleChildScrollView(
