@@ -53,19 +53,19 @@ class _drawerEX extends State<drawerEX> {
     ///请求header的配置
     dio.options.headers['authorization'] = "Bearer ${userdata.accessToken}";
     try {
-      Response response = await dio.get("http://10.0.2.2:8000/api/v1/logout");
+      Response response = await dio.get("http://www.leishengle.com/api/v1/logout");
       print(response.statusCode);
       if (response.statusCode != null) {
         if (response.statusCode == 201) {
           ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
             content: Text('ログアウトしました'),
-            duration: Duration(seconds: 3),
+            duration: Duration(seconds: 1),
           ));
         }
       } else {
         ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
           content: Text('未知なエラーが発生しました'),
-          duration: Duration(seconds: 3),
+          duration: Duration(seconds: 1),
         ));
       }
     } on DioError catch (e) {
@@ -74,18 +74,18 @@ class _drawerEX extends State<drawerEX> {
         print(e.response);
         ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
           content: Text('既にログアウトしています'),
-          duration: Duration(seconds: 3),
+          duration: Duration(seconds: 1),
         ));
       } else if (e.response!.statusCode == 500) {
         ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
           content: Text('既にログアウトしています'),
-          duration: Duration(seconds: 3),
+          duration: Duration(seconds: 1),
         ));
         return false;
       } else {
         ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
           content: Text('未知なエラーが発生しました'),
-          duration: Duration(seconds: 3),
+          duration: Duration(seconds: 1),
         ));
         throw (e);
       }
@@ -159,30 +159,30 @@ class _drawerEX extends State<drawerEX> {
                       })),
             ],
           ),
-          Divider(
-            height: 1,
-            color: Colors.black,
-          ),
-          ListTile(
-            leading: CircleAvatar(
-                backgroundColor: Color(0xFF8ddf67),
-                child: Icon(
-                  Icons.help_outline_sharp,
-                  color: Colors.white,
-                )),
-            title: Text(
-              "ヘルプ",
-              style: TextStyle(fontWeight: FontWeight.bold),
-            ),
-          ),
-          Divider(
-            height: 1,
-            color: Colors.black,
-          ),
+          // Divider(
+          //   height: 1,
+          //   color: Colors.black,
+          // ),
+          // ListTile(
+          //   leading: CircleAvatar(
+          //       backgroundColor: Color(0xFF8ddf67),
+          //       child: Icon(
+          //         Icons.help_outline_sharp,
+          //         color: Colors.white,
+          //       )),
+          //   title: Text(
+          //     "ヘルプ",
+          //     style: TextStyle(fontWeight: FontWeight.bold),
+          //   ),
+          // ),
+          // Divider(
+          //   height: 1,
+          //   color: Colors.black,
+          // ),
           ListTile(
               leading: CircleAvatar(
-                  backgroundColor: Color(0xFF8ddf67),
-                  child: Icon(Icons.settings_sharp, color: Colors.white)),
+                  backgroundColor: Colors.green,
+                  child: Icon(Icons.logout, color: Colors.white)),
               onTap: () {
                 showDialog(
                     context: context,
@@ -228,12 +228,12 @@ class _drawerEX extends State<drawerEX> {
             height: 1,
             color: Colors.black,
           ),
-          ListTile(
-            leading: CircleAvatar(
-                backgroundColor: Color(0xFF8ddf67),
-                child: Icon(Icons.markunread_outlined, color: Colors.white)),
-            title: Text("連絡先", style: TextStyle(fontWeight: FontWeight.bold)),
-          ),
+          // ListTile(
+          //   leading: CircleAvatar(
+          //       backgroundColor: Color(0xFF8ddf67),
+          //       child: Icon(Icons.markunread_outlined, color: Colors.white)),
+          //   title: Text("連絡先", style: TextStyle(fontWeight: FontWeight.bold)),
+          // ),
         ],
       ),
     );

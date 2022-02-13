@@ -64,7 +64,7 @@ class _CountPage extends State<CountPage> {
     ///请求header的配置
     dio.options.headers['authorization'] = "Bearer ${userdata.accessToken}";
     try {
-      Response response = await dio.get("http://10.0.2.2:8000/api/v1/getgraph");
+      Response response = await dio.get("http://www.leishengle.com/api/v1/getgraph");
 
       if (response.statusCode == 201) {
         //data2 = json.decode(jsonString2);
@@ -223,7 +223,7 @@ class _CountPage extends State<CountPage> {
   Widget build(BuildContext context) {
     return Scaffold(
         appBar: AppBar(
-          backgroundColor: Color(0xFF8ddf67),
+          backgroundColor: Colors.green,
           centerTitle: true,
           //title: Text(_strTitle, style: TextStyle(color: commonStrColor)), //AIForce Equipment App
           title: Text('統計'),
@@ -252,7 +252,7 @@ class _CountPage extends State<CountPage> {
                                   style: TextStyle(
                                       fontSize: ScreenAdapter.size(25),
                                       // fontStyle: FontStyle.italic,
-                                      color: Color(0xFF8ddf67),
+                                      color: Colors.green,
                                       fontWeight: FontWeight.bold),
                                 ),
                                 SizedBox(width: ScreenAdapter.width(20)),
@@ -271,7 +271,7 @@ class _CountPage extends State<CountPage> {
                                 //       style: TextStyle(
                                 //           fontSize: 18.0,
                                 //           // fontStyle: FontStyle.italic,
-                                //           color: Colors.pink,
+                                //           color: Colors.green,
                                 //           fontWeight: FontWeight.bold),
                                 //     ),
                                 //     SizedBox(
@@ -285,7 +285,7 @@ class _CountPage extends State<CountPage> {
                                 //       style: TextStyle(
                                 //           fontSize: 18.0,
                                 //           // fontStyle: FontStyle.italic,
-                                //           color: Colors.pink,
+                                //           color: Colors.green,
                                 //           fontWeight: FontWeight.bold),
                                 //     ),
                                 //     SizedBox(
@@ -343,7 +343,7 @@ class _CountPage extends State<CountPage> {
                                 OutlineButton(
                                     textColor: onSelected,
                                     onPressed: () {
-                                      onSelected = Colors.pink;
+                                      onSelected = Colors.green;
                                       onSelected2 = Colors.black87;
                                       onSelected3 = Colors.black87;
 
@@ -367,7 +367,7 @@ class _CountPage extends State<CountPage> {
                                 OutlineButton(
                                     textColor: onSelected3,
                                     onPressed: () {
-                                      onSelected3 = Colors.pink;
+                                      onSelected3 = Colors.green;
                                       onSelected2 = Colors.black87;
                                       onSelected = Colors.black87;
                                       selectdate = setdate.week;
@@ -408,7 +408,7 @@ class _CountPage extends State<CountPage> {
                                 OutlineButton(
                                     textColor: onSelected2,
                                     onPressed: () {
-                                      onSelected2 = Colors.pink;
+                                      onSelected2 = Colors.green;
                                       onSelected = Colors.black87;
                                       onSelected3 = Colors.black87;
                                       selectdate = setdate.month;

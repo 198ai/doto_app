@@ -208,7 +208,7 @@ class _StartPageState extends State<StartPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        backgroundColor: Color(0xFF8ddf67),
+        backgroundColor: Colors.green,
         centerTitle: true,
         title: Text('スタート'),
       ),

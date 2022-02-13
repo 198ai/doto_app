@@ -63,7 +63,7 @@ class _ToDoListPageState extends State<ToDoListPage> with RouteAware {
     ///请求header的配置
     dio.options.headers['authorization'] = "Bearer ${userdata.accessToken}";
 
-    Response response = await dio.get("http://10.0.2.2:8000/api/v1/todolist");
+    Response response = await dio.get("http://www.leishengle.com/api/v1/todolist");
 
     jsonData = response.data;
     //data = TodoModel.fromJson(response.data);
@@ -94,7 +94,7 @@ class _ToDoListPageState extends State<ToDoListPage> with RouteAware {
     ///请求header的配置
     dio.options.headers['authorization'] = "Bearer ${userdata.accessToken}";
     Response response = await dio
-        .post("http://10.0.2.2:8000/api/v1/updatetodolist", data: params);
+        .post("http://www.leishengle.com/api/v1/updatetodolist", data: params);
     if (response.statusCode != null && response.statusCode == 201) {
       ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
         content: Text('削除しました'),
@@ -267,7 +267,7 @@ class _ToDoListPageState extends State<ToDoListPage> with RouteAware {
     dio.options.headers['authorization'] = "Bearer ${userdata.accessToken}";
 
     Response response =
-        await dio.post("http://10.0.2.2:8000/api/v1/addtodolist", data: params);
+        await dio.post("http://www.leishengle.com/api/v1/addtodolist", data: params);
     if (response.statusCode == 201) {
       id = response.data;
       ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
@@ -298,7 +298,7 @@ class _ToDoListPageState extends State<ToDoListPage> with RouteAware {
                     },
                     child: Text(
                       'キャンセル',
-                      style: TextStyle(fontSize: ScreenAdapter.size(13)),
+                      style: TextStyle(fontSize: ScreenAdapter.size(13),color: Colors.green),
                     )),
                 // ignore: deprecated_member_use
                 TextButton(
@@ -307,7 +307,7 @@ class _ToDoListPageState extends State<ToDoListPage> with RouteAware {
                     },
                     child: Text(
                       '確認',
-                      style: TextStyle(fontSize: ScreenAdapter.size(13)),
+                      style: TextStyle(fontSize: ScreenAdapter.size(13),color: Colors.green),
                     )),
               ],
             ),
@@ -357,7 +357,7 @@ class _ToDoListPageState extends State<ToDoListPage> with RouteAware {
                     },
                     child: Text(
                       'キャンセル',
-                      style: TextStyle(fontSize: ScreenAdapter.size(13)),
+                      style: TextStyle(fontSize: ScreenAdapter.size(13),color: Colors.green),
                     )),
                 // ignore: deprecated_member_use
                 TextButton(
@@ -366,7 +366,7 @@ class _ToDoListPageState extends State<ToDoListPage> with RouteAware {
                     },
                     child: Text(
                       '確認',
-                      style: TextStyle(fontSize: ScreenAdapter.size(13)),
+                      style: TextStyle(fontSize: ScreenAdapter.size(13),color: Colors.green),
                     )),
               ],
             ),
@@ -397,7 +397,7 @@ class _ToDoListPageState extends State<ToDoListPage> with RouteAware {
         resizeToAvoidBottomInset: false,
         appBar: PreferredSize(
           child: AppBar(
-              backgroundColor: Color(0xFF8ddf67),
+              backgroundColor: Colors.green,
               centerTitle: true,
               title: Text("アジェンダ"),
               actions: <Widget>[
@@ -442,7 +442,14 @@ class _ToDoListPageState extends State<ToDoListPage> with RouteAware {
                                           ScreenAdapter.height(0),
                                           ScreenAdapter.width(30),
                                           ScreenAdapter.height(0)),
-                                      child: TextField(
+                                      child:
+                                      Theme(
+                                        data:Theme.of(context).copyWith(
+                                                    colorScheme: ThemeData().colorScheme.copyWith(
+                                                          primary:Colors.green,
+                                                    ),
+                                                  ),
+                                            child: TextField(
                                         style: TextStyle(color: Colors.black87),
                                         controller: textController,
                                         decoration: InputDecoration(
@@ -450,21 +457,28 @@ class _ToDoListPageState extends State<ToDoListPage> with RouteAware {
                                             labelText: "タスク名称",
                                             enabledBorder: UnderlineInputBorder(
                                               borderSide: BorderSide(
-                                                  color: Colors.blue),
+                                                  color: Colors.green),
                                             ),
                                             focusedBorder: UnderlineInputBorder(
                                               borderSide: BorderSide(
-                                                  color: Colors.blue),
+                                                  color: Colors.green),
                                             )),
                                       ),
-                                    ),
+                                    )),
                                     Padding(
                                         padding: EdgeInsets.fromLTRB(
                                             ScreenAdapter.width(30),
                                             ScreenAdapter.height(0),
                                             ScreenAdapter.width(30),
                                             ScreenAdapter.height(0)),
-                                        child: TextField(
+                                        child: 
+                                        Theme(
+                                        data:Theme.of(context).copyWith(
+                                                    colorScheme: ThemeData().colorScheme.copyWith(
+                                                          primary:Colors.green,
+                                                    ),
+                                                  ),
+                                            child:TextField(
                                             decoration: new InputDecoration(
                                               icon: Icon(Icons.access_time),
                                               hintText: "時間選択",
@@ -472,14 +486,20 @@ class _ToDoListPageState extends State<ToDoListPage> with RouteAware {
                                             controller: timeController,
                                             onTap: () async {
                                               await _showTimePicker();
-                                            })),
+                                            }))),
                                     Padding(
                                         padding: EdgeInsets.fromLTRB(
                                             ScreenAdapter.width(30),
                                             ScreenAdapter.height(0),
                                             ScreenAdapter.width(30),
                                             ScreenAdapter.height(0)),
-                                        child: TextField(
+                                        child:Theme(
+                                        data:Theme.of(context).copyWith(
+                                                    colorScheme: ThemeData().colorScheme.copyWith(
+                                                          primary:Colors.green,
+                                                    ),
+                                                  ),
+                                            child:TextField(
                                             decoration: new InputDecoration(
                                               icon: Icon(Icons
                                                   .calendar_today_outlined),
@@ -488,7 +508,7 @@ class _ToDoListPageState extends State<ToDoListPage> with RouteAware {
                                             controller: dateController,
                                             onTap: () {
                                               _showDatePicker();
-                                            })),
+                                            }))),
                                     Container(
                                       height: btnHeight,
                                       margin: EdgeInsets.fromLTRB(
@@ -515,7 +535,7 @@ class _ToDoListPageState extends State<ToDoListPage> with RouteAware {
                                                       fontSize:
                                                           ScreenAdapter.size(
                                                               15),
-                                                      color: Colors.blue),
+                                                      color: Colors.green),
                                                 ),
                                               ),
                                               TextButton(
@@ -562,7 +582,7 @@ class _ToDoListPageState extends State<ToDoListPage> with RouteAware {
                                                         fontSize:
                                                             ScreenAdapter.size(
                                                                 15),
-                                                        color: Colors.blue),
+                                                        color: Colors.green),
                                                   )),
                                             ],
                                           ),

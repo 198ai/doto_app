@@ -182,7 +182,7 @@ class _CountdownState extends State<CountDown> {
     dio.options.headers['authorization'] = "Bearer ${userdata.accessToken}";
     print('時間更新:${params}');
     Response response =
-        await dio.post("http://10.0.2.2:8000/api/v1/updatetime", data: params);
+        await dio.post("http://www.leishengle.com/api/v1/updatetime", data: params);
     print(response.data);
     if (response.statusCode != null && response.statusCode == 201) {
       ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
@@ -278,7 +278,7 @@ class _CountdownState extends State<CountDown> {
   Widget build(BuildContext context) {
     return Scaffold(
         appBar: AppBar(
-          backgroundColor: Color(0xFF8ddf67),
+          backgroundColor: Colors.green,
           leading: new IconButton(
             icon: new Icon(Icons.arrow_back_ios),
             onPressed: () => {

@@ -61,7 +61,7 @@ class _LoginPageState extends State<LoginPage> {
       },
       child: Scaffold(
         appBar: AppBar(
-          backgroundColor: Color(0xFF8ddf67),
+          backgroundColor: Colors.green,
           title: Text("ログイン"),
         ),
         //登录页面的主体
@@ -111,7 +111,7 @@ class _LoginPageState extends State<LoginPage> {
             child: ElevatedButton(
               style: ButtonStyle(
                 backgroundColor:
-                    MaterialStateProperty.all(Color(0xFF8ddf67)), //背景颜色
+                    MaterialStateProperty.all(Colors.green), //背景颜色
               ),
               child: Text("登録"),
               onPressed: () async {
@@ -372,7 +372,7 @@ class _LoginPageState extends State<LoginPage> {
     print(params);
     try {
       Response response =
-          await Dio().post("http://10.0.2.2:8000/api/v1/login", data: params);
+          await Dio().post("http://www.leishengle.com/api/v1/login", data: params);
       if (response.statusCode != null) {
         if (response.statusCode == 201) {
           userdate = UserData.fromJson(response.data);

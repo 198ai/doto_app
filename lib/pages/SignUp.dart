@@ -60,7 +60,7 @@ class _SignUpPageState extends State<SignUpPage> {
       },
       child: Scaffold(
         appBar: AppBar(
-          backgroundColor: Color(0xFF8ddf67),
+          backgroundColor: Colors.green,
           title: Text("アカント新規"),
         ),
         //登录页面的主体
@@ -111,7 +111,7 @@ class _SignUpPageState extends State<SignUpPage> {
               child: Text("新規登録"),
               style: ButtonStyle(
                 backgroundColor:
-                    MaterialStateProperty.all(Color(0xFF8ddf67)), //背景颜色
+                    MaterialStateProperty.all(Colors.green), //背景颜色
               ),
               onPressed: () async {
                 if (await checkLoginFunction()) {
@@ -345,7 +345,7 @@ class _SignUpPageState extends State<SignUpPage> {
     print(params);
     try {
       Response response =
-          await Dio().post("http://10.0.2.2:8000/api/v1/signup", data: params);
+          await Dio().post("http://www.leishengle.com/api/v1/signup", data: params);
       print(response.statusCode);
       if (response.statusCode != null) {
         if (response.statusCode == 201) {

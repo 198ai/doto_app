@@ -110,7 +110,7 @@ class _CalendarPageState extends State<CalendarPage> {
       ///请求header的配置
       dio.options.headers['authorization'] = "Bearer ${userdata.accessToken}";
       try{
-        Response response = await dio.post("http://10.0.2.2:8000/api/v1/deletemyevents",data: jsonEncode(calendarlist));
+        Response response = await dio.post("http://www.leishengle.com/api/v1/deletemyevents",data: jsonEncode(calendarlist));
         print("本地数据" + "${jsonEncode(calendarlist)}");
         print("返回数据；$response");
       }catch(onError) {
@@ -137,7 +137,7 @@ class _CalendarPageState extends State<CalendarPage> {
     //print("Bearer ${userdata.accessToken}");
     ///请求header的配置
     dio.options.headers['authorization'] = "Bearer ${userdata.accessToken}";
-    Response response = await dio.post("http://10.0.2.2:8000/api/v1/myevents",
+    Response response = await dio.post("http://www.leishengle.com/api/v1/myevents",
         data: jsonEncode(calendarlist));
     print("本地数据" + "$calendarlist");
     print("返回数据；$response");
@@ -153,7 +153,7 @@ class _CalendarPageState extends State<CalendarPage> {
     dio.options.headers['authorization'] = "Bearer ${userdata.accessToken}";
     try {
       Response response =
-          await dio.get("http://10.0.2.2:8000/api/v1/sendmyevents");
+          await dio.get("http://www.leishengle.com/api/v1/sendmyevents");
       List<MyEvents> list = [];
       DateTime date;
       Map<DateTime, List<MyEvents>> newMap = {};
@@ -214,7 +214,7 @@ class _CalendarPageState extends State<CalendarPage> {
                     },
                     child: Text(
                       'キャンセル',
-                      style: TextStyle(fontSize: ScreenAdapter.size(16)),
+                      style: TextStyle(fontSize: ScreenAdapter.size(16),color: Colors.green),
                     )),
                 // ignore: deprecated_member_use
                 TextButton(
@@ -223,7 +223,7 @@ class _CalendarPageState extends State<CalendarPage> {
                     },
                     child: Text(
                       '確認',
-                      style: TextStyle(fontSize: ScreenAdapter.size(16)),
+                      style: TextStyle(fontSize: ScreenAdapter.size(16),color: Colors.green),
                     )),
               ],
             ),
@@ -267,7 +267,13 @@ class _CalendarPageState extends State<CalendarPage> {
 
   Widget buildTextField(
       {String? hint, required TextEditingController controller}) {
-    return TextField(
+    return Theme(
+    data:Theme.of(context).copyWith(
+                colorScheme: ThemeData().colorScheme.copyWith(
+                      primary:Colors.green,
+                ),
+              ),
+        child: TextField(
       controller: controller,
       textCapitalization: TextCapitalization.words,
       decoration: InputDecoration(
@@ -284,7 +290,7 @@ class _CalendarPageState extends State<CalendarPage> {
             10.0,
           ),
         ),
-      ),
+      ),),
     );
   }
 
@@ -307,7 +313,12 @@ class _CalendarPageState extends State<CalendarPage> {
 
                         await _showDatePicker();
                       },
-                      child: Text('アラーム設定'),
+                      child: Text('アラーム設定',
+                      style: TextStyle(
+                            fontSize:
+                                ScreenAdapter.size(
+                                    15),
+                            color: Colors.green)),
                     ),
                   ],
                 ),
@@ -334,7 +345,7 @@ class _CalendarPageState extends State<CalendarPage> {
                 actions: [
                   TextButton(
                     onPressed: () => Navigator.pop(context),
-                    child: const Text('キャンセル'),
+                    child: const Text('キャンセル',style: TextStyle(color: Colors.green)),
                   ),
                   TextButton(
                     onPressed: () async {
@@ -413,7 +424,7 @@ class _CalendarPageState extends State<CalendarPage> {
                         return;
                       }
                     },
-                    child: const Text('確認'),
+                    child: const Text('確認',style: TextStyle(color: Colors.green)),
                   ),
                 ],
               );
@@ -424,7 +435,7 @@ class _CalendarPageState extends State<CalendarPage> {
   Widget build(BuildContext context) {
     return Scaffold(
         appBar: AppBar(
-            backgroundColor: Color(0xFF8ddf67),
+            backgroundColor: Colors.green,
             centerTitle: true,
             title: Text("カレンダー"),
             actions: <Widget>[
@@ -484,7 +495,7 @@ class _CalendarPageState extends State<CalendarPage> {
                         topLeft: Radius.circular(10),
                         topRight: Radius.circular(10))),
                 // formatButtonTextStyle:
-                //     TextStyle(color: Colors.pink, fontSize: 16.0),
+                //     TextStyle(color: Colors.green, fontSize: 16.0),
                 // formatButtonDecoration: BoxDecoration(
                 //   color: Colors.black,
                 //   borderRadius: BorderRadius.all(
@@ -506,24 +517,24 @@ class _CalendarPageState extends State<CalendarPage> {
               // Calendar Days Styling
               daysOfWeekStyle: const DaysOfWeekStyle(
                 // Weekend days color (Sat,Sun)
-                weekendStyle: TextStyle(color: Colors.pink),
+                weekendStyle: TextStyle(color: Colors.green),
               ),
               // Calendar Dates styling
               calendarStyle: const CalendarStyle(
                 // Weekend dates color (Sat & Sun Column)
-                weekendTextStyle: TextStyle(color: Colors.pink),
+                weekendTextStyle: TextStyle(color: Colors.green),
                 // highlighted color for today
                 todayDecoration: BoxDecoration(
-                  color: Colors.blue,
+                  color: Colors.green,
                   shape: BoxShape.circle,
                 ),
                 // highlighted color for selected day
                 selectedDecoration: BoxDecoration(
-                  color: Colors.blue,
+                  color: Colors.green,
                   shape: BoxShape.circle,
                 ),
                 markerDecoration:
-                    BoxDecoration(color: Colors.pink, shape: BoxShape.circle),
+                    BoxDecoration(color: Colors.green, shape: BoxShape.circle),
               ),
               selectedDayPredicate: (currentSelectedDate) {
                 // as per the documentation 'selectedDayPredicate' needs to determine

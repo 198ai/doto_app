@@ -19,7 +19,6 @@ class _TabsState extends State<Tabs> {
 
   @override
   void initState() {
-    // TODO: implement initState
     super.initState();
     this._titleName = this. _title[this._currentIndex];
   }
@@ -39,7 +38,7 @@ class _TabsState extends State<Tabs> {
           });
         },
         type: BottomNavigationBarType.fixed,
-        fixedColor: Colors.red,
+        fixedColor: Colors.green,
         items: [
           BottomNavigationBarItem(
               icon: Icon(Icons.assignment_outlined), label: "アジェンダ"),

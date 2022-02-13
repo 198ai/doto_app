@@ -68,7 +68,7 @@ class _HasDonePageState extends State<HasDonePage> {
     return Scaffold(
         appBar: PreferredSize(
           child: AppBar(
-             backgroundColor: Color(0xFF8ddf67),
+             backgroundColor: Colors.green,
               centerTitle: true, title: Text("完成アジェンダ"), actions: <Widget>[]),
           preferredSize: Size.fromHeight(ScreenAdapter.height(61)),
         ),
