@@ -89,6 +89,7 @@ class _MyAppState extends State<MyApp> {
         designSize: Size(428, 926),
         builder: () => MaterialApp(
             home: Tabs(),
+            //home: Splash2(),
             navigatorObservers: [MyApp.routeObserver], //添加路由观察者
             debugShowCheckedModeBanner: false,
             initialRoute: '/',

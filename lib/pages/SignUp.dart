@@ -61,7 +61,7 @@ class _SignUpPageState extends State<SignUpPage> {
       child: Scaffold(
         appBar: AppBar(
           backgroundColor: Colors.green,
-          title: Text("アカント新規"),
+          title: Text("アカウント新規"),
         ),
         //登录页面的主体
         body: buildLoginWidget(),
