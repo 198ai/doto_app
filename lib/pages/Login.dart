@@ -122,20 +122,20 @@ class _LoginPageState extends State<LoginPage> {
             ),
           ),
           Row(mainAxisAlignment: MainAxisAlignment.spaceEvenly, children: [
-            TextButton(
-              style: ButtonStyle(
-                //定义文本的样式 这里设置的颜色是不起作用的
-                textStyle: MaterialStateProperty.all(
-                    TextStyle(fontSize: 13, fontWeight: FontWeight.bold)),
-                foregroundColor: MaterialStateProperty.all(Colors.black),
-              ),
-              child: Text("パスワードを忘れた"),
-              onPressed: () async {
-                if (await checkLoginFunction()) {
-                  Navigator.pushNamed(context, '/');
-                }
-              },
-            ),
+            // TextButton(
+            //   style: ButtonStyle(
+            //     //定义文本的样式 这里设置的颜色是不起作用的
+            //     textStyle: MaterialStateProperty.all(
+            //         TextStyle(fontSize: 13, fontWeight: FontWeight.bold)),
+            //     foregroundColor: MaterialStateProperty.all(Colors.black),
+            //   ),
+            //   child: Text("パスワードを忘れた"),
+            //   onPressed: () async {
+            //     if (await checkLoginFunction()) {
+            //       Navigator.pushNamed(context, '/');
+            //     }
+            //   },
+            // ),
             TextButton(
               child: Text("アカウント新規へ"),
               style: ButtonStyle(
@@ -165,7 +165,14 @@ class _LoginPageState extends State<LoginPage> {
           isForward: false,
           //抖动控制器
           shakeAnimationController: _userPasswordAnimation,
-          child: new TextField(
+          child:
+          Theme(
+    data:Theme.of(context).copyWith(
+                colorScheme: ThemeData().colorScheme.copyWith(
+                      primary:Colors.green,
+                ),
+              ),
+        child: TextField(
             focusNode: _passwordFocusNode,
             controller: _passwordController,
             onSubmitted: (String value) {
@@ -200,7 +207,7 @@ class _LoginPageState extends State<LoginPage> {
                   )),
             ),
           ),
-        );
+        ));
       },
     );
   }
@@ -217,7 +224,14 @@ class _LoginPageState extends State<LoginPage> {
           isForward: false,
           //抖动控制器
           shakeAnimationController: _userEmailAnimation,
-          child: new TextField(
+          child: 
+          Theme(
+    data:Theme.of(context).copyWith(
+                colorScheme: ThemeData().colorScheme.copyWith(
+                      primary:Colors.green,
+                ),
+              ),
+        child:  TextField(
             focusNode: _emailFocusNode,
             controller: _emailController,
             onSubmitted: (String value) {
@@ -238,7 +252,7 @@ class _LoginPageState extends State<LoginPage> {
               ),
             ),
           ),
-        );
+        ));
       },
     );
   }
@@ -257,7 +271,14 @@ class _LoginPageState extends State<LoginPage> {
           isForward: false,
           //抖动控制器
           shakeAnimationController: _userNameAnimation,
-          child: new TextField(
+          child:
+          Theme(
+    data:Theme.of(context).copyWith(
+                colorScheme: ThemeData().colorScheme.copyWith(
+                      primary:Colors.green,
+                ),
+              ),
+        child: TextField(
             //焦点控制
             focusNode: _userNameFocusNode,
             //文本控制器
@@ -285,7 +306,7 @@ class _LoginPageState extends State<LoginPage> {
               ),
             ),
           ),
-        );
+        ));
       },
     );
   }

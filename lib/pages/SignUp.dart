@@ -110,8 +110,7 @@ class _SignUpPageState extends State<SignUpPage> {
             child: ElevatedButton(
               child: Text("新規登録"),
               style: ButtonStyle(
-                backgroundColor:
-                    MaterialStateProperty.all(Colors.green), //背景颜色
+                backgroundColor: MaterialStateProperty.all(Colors.green), //背景颜色
               ),
               onPressed: () async {
                 if (await checkLoginFunction()) {
@@ -130,49 +129,55 @@ class _SignUpPageState extends State<SignUpPage> {
       stream: _userPasswordStream.stream,
       builder: (BuildContext context, AsyncSnapshot<dynamic> snapshot) {
         return ShakeAnimationWidget(
-          //微左右的抖动
-          shakeAnimationType: ShakeAnimationType.LeftRightShake,
-          //设置不开启抖动
-          isForward: false,
-          //抖动控制器
-          shakeAnimationController: _userPasswordAnimation,
-          child: new TextField(
-            focusNode: _passwordFocusNode,
-            controller: _passwordController,
-            onSubmitted: (String value) {
-              if (checkUserPassword()) {
-                loginFunction();
-              } else {
-                FocusScope.of(context).requestFocus(_passwordFocusNode);
-              }
-            },
-            //隐藏输入的文本
-            obscureText: !_isShow,
-            //最大可输入1行
-            maxLines: 1,
-            //边框样式设置
-
-            decoration: InputDecoration(
-              labelText: "パスワード",
-              errorText: snapshot.data,
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.all(Radius.circular(10)),
+            //微左右的抖动
+            shakeAnimationType: ShakeAnimationType.LeftRightShake,
+            //设置不开启抖动
+            isForward: false,
+            //抖动控制器
+            shakeAnimationController: _userPasswordAnimation,
+            child: Theme(
+              data: Theme.of(context).copyWith(
+                colorScheme: ThemeData().colorScheme.copyWith(
+                      primary: Colors.green,
+                    ),
               ),
-              suffix: GestureDetector(
-                  onTap: () {
-                    setState(() {
-                      _isShow = !_isShow;
-                    });
-                  },
-                  child: Icon(
-                     !_isShow
-                        ? Icons.visibility_off
-                        : Icons.remove_red_eye_sharp,
-                    color: Colors.grey,
-                  )),
-            ),
-          ),
-        );
+              child: TextField(
+                focusNode: _passwordFocusNode,
+                controller: _passwordController,
+                onSubmitted: (String value) {
+                  if (checkUserPassword()) {
+                    loginFunction();
+                  } else {
+                    FocusScope.of(context).requestFocus(_passwordFocusNode);
+                  }
+                },
+                //隐藏输入的文本
+                obscureText: !_isShow,
+                //最大可输入1行
+                maxLines: 1,
+                //边框样式设置
+
+                decoration: InputDecoration(
+                  labelText: "パスワード",
+                  errorText: snapshot.data,
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.all(Radius.circular(10)),
+                  ),
+                  suffix: GestureDetector(
+                      onTap: () {
+                        setState(() {
+                          _isShow = !_isShow;
+                        });
+                      },
+                      child: Icon(
+                        !_isShow
+                            ? Icons.visibility_off
+                            : Icons.remove_red_eye_sharp,
+                        color: Colors.grey,
+                      )),
+                ),
+              ),
+            ));
       },
     );
   }
@@ -183,35 +188,41 @@ class _SignUpPageState extends State<SignUpPage> {
       stream: _userEmailStream.stream,
       builder: (BuildContext context, AsyncSnapshot<dynamic> snapshot) {
         return ShakeAnimationWidget(
-          //微左右的抖动
-          shakeAnimationType: ShakeAnimationType.LeftRightShake,
-          //设置不开启抖动
-          isForward: false,
-          //抖动控制器
-          shakeAnimationController: _userEmailAnimation,
-          child: new TextField(
-            focusNode: _emailFocusNode,
-            controller: _emailController,
-            onSubmitted: (String value) {
-              if (checkUserPassword()) {
-                loginFunction();
-              } else {
-                FocusScope.of(context).requestFocus(_emailFocusNode);
-              }
-            },
-
-            //最大可输入1行
-            maxLines: 1,
-            //边框样式设置
-            decoration: InputDecoration(
-              labelText: "メールアドレス",
-              errorText: snapshot.data,
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.all(Radius.circular(10)),
+            //微左右的抖动
+            shakeAnimationType: ShakeAnimationType.LeftRightShake,
+            //设置不开启抖动
+            isForward: false,
+            //抖动控制器
+            shakeAnimationController: _userEmailAnimation,
+            child: Theme(
+              data: Theme.of(context).copyWith(
+                colorScheme: ThemeData().colorScheme.copyWith(
+                      primary: Colors.green,
+                    ),
               ),
-            ),
-          ),
-        );
+              child: TextField(
+                focusNode: _emailFocusNode,
+                controller: _emailController,
+                onSubmitted: (String value) {
+                  if (checkUserPassword()) {
+                    loginFunction();
+                  } else {
+                    FocusScope.of(context).requestFocus(_emailFocusNode);
+                  }
+                },
+
+                //最大可输入1行
+                maxLines: 1,
+                //边框样式设置
+                decoration: InputDecoration(
+                  labelText: "メールアドレス",
+                  errorText: snapshot.data,
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.all(Radius.circular(10)),
+                  ),
+                ),
+              ),
+            ));
       },
     );
   }
@@ -224,41 +235,47 @@ class _SignUpPageState extends State<SignUpPage> {
       stream: _userNameStream.stream,
       builder: (BuildContext context, AsyncSnapshot<String> snapshot) {
         return ShakeAnimationWidget(
-          //微左右的抖动
-          shakeAnimationType: ShakeAnimationType.LeftRightShake,
-          //设置不开启抖动
-          isForward: false,
-          //抖动控制器
-          shakeAnimationController: _userNameAnimation,
-          child: new TextField(
-            //焦点控制
-            focusNode: _userNameFocusNode,
-            //文本控制器
-            controller: _userNameController,
-            //键盘回车键点击回调
-            onSubmitted: (String value) {
-              //点击校验，如果有内容输入 输入焦点跳入下一个输入框
-              if (checkUserName()) {
-                _userNameFocusNode.unfocus();
-                FocusScope.of(context).requestFocus(_passwordFocusNode);
-              } else {
-                FocusScope.of(context).requestFocus(_userNameFocusNode);
-              }
-            },
-            //边框样式设置
-            decoration: InputDecoration(
-              //红色的错误提示文本
-              errorText: snapshot.data,
-              labelText: "ユーザ名",
-              //设置上下左右 都有边框
-              //设置四个角的弧度
-              border: OutlineInputBorder(
-                //设置边框四个角的弧度
-                borderRadius: BorderRadius.all(Radius.circular(10)),
+            //微左右的抖动
+            shakeAnimationType: ShakeAnimationType.LeftRightShake,
+            //设置不开启抖动
+            isForward: false,
+            //抖动控制器
+            shakeAnimationController: _userNameAnimation,
+            child: Theme(
+              data: Theme.of(context).copyWith(
+                colorScheme: ThemeData().colorScheme.copyWith(
+                      primary: Colors.green,
+                    ),
               ),
-            ),
-          ),
-        );
+              child: TextField(
+                //焦点控制
+                focusNode: _userNameFocusNode,
+                //文本控制器
+                controller: _userNameController,
+                //键盘回车键点击回调
+                onSubmitted: (String value) {
+                  //点击校验，如果有内容输入 输入焦点跳入下一个输入框
+                  if (checkUserName()) {
+                    _userNameFocusNode.unfocus();
+                    FocusScope.of(context).requestFocus(_passwordFocusNode);
+                  } else {
+                    FocusScope.of(context).requestFocus(_userNameFocusNode);
+                  }
+                },
+                //边框样式设置
+                decoration: InputDecoration(
+                  //红色的错误提示文本
+                  errorText: snapshot.data,
+                  labelText: "ユーザ名",
+                  //设置上下左右 都有边框
+                  //设置四个角的弧度
+                  border: OutlineInputBorder(
+                    //设置边框四个角的弧度
+                    borderRadius: BorderRadius.all(Radius.circular(10)),
+                  ),
+                ),
+              ),
+            ));
       },
     );
   }
@@ -344,8 +361,8 @@ class _SignUpPageState extends State<SignUpPage> {
     };
     print(params);
     try {
-      Response response =
-          await Dio().post("http://www.leishengle.com/api/v1/signup", data: params);
+      Response response = await Dio()
+          .post("http://www.leishengle.com/api/v1/signup", data: params);
       print(response.statusCode);
       if (response.statusCode != null) {
         if (response.statusCode == 201) {
