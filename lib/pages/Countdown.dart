@@ -296,11 +296,11 @@ class _CountdownState extends State<CountDown> {
           Column(
             children: [
               Container(
-                  margin: EdgeInsets.only(top: ScreenAdapter.height(150)),
+                  margin: EdgeInsets.only(top: ScreenAdapter.height(150),right:ScreenAdapter.width(10),left:ScreenAdapter.width(10),),
                   alignment: Alignment.topCenter,
                   child: Text(constructTime(seconds),
                       style: TextStyle(
-                          fontSize: ScreenAdapter.size(100),
+                          fontSize: ScreenAdapter.size(90),
                           color: Colors.black87))),
               Container(
                 margin: EdgeInsets.only(top: ScreenAdapter.height(180)),
