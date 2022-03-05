@@ -53,7 +53,7 @@ class _drawerEX extends State<drawerEX> {
     ///请求header的配置
     dio.options.headers['authorization'] = "Bearer ${userdata.accessToken}";
     try {
-      Response response = await dio.get("http://www.leishengle.com/api/v1/logout");
+      Response response = await dio.get("http://10.0.2.2:8000/api/v1/logout");
       print(response.statusCode);
       if (response.statusCode != null) {
         if (response.statusCode == 201) {

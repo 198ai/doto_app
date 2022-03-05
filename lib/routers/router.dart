@@ -1,5 +1,7 @@
 import 'package:doto_app/pages/Countdown.dart';
+import 'package:doto_app/pages/ForgotPassword.dart';
 import 'package:doto_app/pages/HasDone.dart';
+import 'package:doto_app/pages/ResetPassword.dart';
 import 'package:doto_app/pages/SignUp.dart';
 import 'package:doto_app/pages/tabs/ToDoList.dart';
 import 'package:flutter/material.dart';
@@ -14,6 +16,8 @@ final Map<String,Function> routes = {
   '/login': (context) => LoginPage(),
   '/countdown': (context) =>CountDown(),
   '/signup':(context)=>SignUpPage(),
+  '/forgotpassword':(context)=>ForgotPassword(),
+  '/resetPassword':(context)=>ResetPassword(),
 };
 
 

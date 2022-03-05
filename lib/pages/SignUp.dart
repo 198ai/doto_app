@@ -204,8 +204,9 @@ class _SignUpPageState extends State<SignUpPage> {
                 focusNode: _emailFocusNode,
                 controller: _emailController,
                 onSubmitted: (String value) {
-                  if (checkUserPassword()) {
-                    loginFunction();
+                  if (checkEmail()) {
+                      _emailFocusNode.unfocus();
+                    FocusScope.of(context).requestFocus(_passwordFocusNode);
                   } else {
                     FocusScope.of(context).requestFocus(_emailFocusNode);
                   }
@@ -257,7 +258,7 @@ class _SignUpPageState extends State<SignUpPage> {
                   //点击校验，如果有内容输入 输入焦点跳入下一个输入框
                   if (checkUserName()) {
                     _userNameFocusNode.unfocus();
-                    FocusScope.of(context).requestFocus(_passwordFocusNode);
+                    FocusScope.of(context).requestFocus(_emailFocusNode);
                   } else {
                     FocusScope.of(context).requestFocus(_userNameFocusNode);
                   }
@@ -282,7 +283,7 @@ class _SignUpPageState extends State<SignUpPage> {
 
   Future<bool> checkLoginFunction() async {
     hindKeyBoarder();
-    if (checkUserName() & checkUserPassword() & checkemailPassword()) {
+    if (checkUserName() & checkUserPassword() & checkEmail()) {
       await loginFunction();
     }
     if (successed) {
@@ -323,7 +324,7 @@ class _SignUpPageState extends State<SignUpPage> {
     }
   }
 
-  bool checkemailPassword() {
+  bool checkEmail() {
     String userEmail = _emailController.text;
     if (userEmail.length == 0) {
       _userEmailStream.add("メールアドレスを入力してください");
@@ -362,7 +363,7 @@ class _SignUpPageState extends State<SignUpPage> {
     print(params);
     try {
       Response response = await Dio()
-          .post("http://www.leishengle.com/api/v1/signup", data: params);
+          .post("http://10.0.2.2:8000/api/v1/signup", data: params);
       print(response.statusCode);
       if (response.statusCode != null) {
         if (response.statusCode == 201) {
