@@ -114,11 +114,12 @@ class _SignUpPageState extends State<SignUpPage> {
                 backgroundColor: MaterialStateProperty.all(Colors.green), //背景颜色
               ),
               onPressed: () async {
-                if (await checkLoginFunction()) {
-                   Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                              builder: (context) => Tabs(tabSelected: 0)));
+               await checkLoginFunction();
+                if (successed) {
+                  Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                          builder: (context) => Tabs(tabSelected: 0)));
                 }
               },
             ),
@@ -148,9 +149,9 @@ class _SignUpPageState extends State<SignUpPage> {
               child: TextField(
                 focusNode: _passwordFocusNode,
                 controller: _passwordController,
-                onSubmitted: (String value) {
+                onSubmitted: (String value) async {
                   if (checkUserPassword()) {
-                    loginFunction();
+                    checkLoginFunction();
                   } else {
                     FocusScope.of(context).requestFocus(_passwordFocusNode);
                   }
@@ -209,7 +210,7 @@ class _SignUpPageState extends State<SignUpPage> {
                 controller: _emailController,
                 onSubmitted: (String value) {
                   if (checkEmail()) {
-                      _emailFocusNode.unfocus();
+                    _emailFocusNode.unfocus();
                     FocusScope.of(context).requestFocus(_passwordFocusNode);
                   } else {
                     FocusScope.of(context).requestFocus(_emailFocusNode);
@@ -287,8 +288,12 @@ class _SignUpPageState extends State<SignUpPage> {
 
   Future<bool> checkLoginFunction() async {
     hindKeyBoarder();
+    print(checkUserName());
+    print(checkUserPassword());
+    print(checkEmail());
     if (checkUserName() & checkUserPassword() & checkEmail()) {
       await loginFunction();
+      return true;
     }
     if (successed) {
       return true;
@@ -339,11 +344,12 @@ class _SignUpPageState extends State<SignUpPage> {
           "^([a-z0-9A-Z]+[-|\\.]?)+[a-z0-9A-Z]@([a-z0-9A-Z]+(-[a-z0-9A-Z]+)?\\.)+[a-zA-Z]{2,}\$";
       if (RegExp(regexEmail).hasMatch(_emailController.text)) {
         _userEmailStream.add("");
+        return true;
       } else {
         _userEmailStream.add("正しいメールアドレスを入力してください");
         _userEmailAnimation.start();
+        return false;
       }
-      return true;
     }
   }
 
@@ -378,32 +384,28 @@ class _SignUpPageState extends State<SignUpPage> {
             prefs.setString("userdata", json.encode(data));
             successed = true;
             print(prefs.getString("userdata"));
-          } else {
-            setState(() {
-              show = true;
-              mes = '未知なエラーが発生しました';
-            });
           }
+          ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+            content: Text("アカウント新規しました"),
+            duration: Duration(seconds: 3),
+          ));
         }
+      }
+    } on DioError catch (e) {
+      if (e.response!.statusCode == 401) {
+        setState(() {
+          show = true;
+          mes = "ユーザ名かメールアドレスは既に使われています";
+        });
+      } else if (e.response!.statusCode == 500) {
+        setState(() {
+          show = true;
+          mes = 'サーバーと繋がっていません';
+        });
       } else {
         setState(() {
           show = true;
           mes = '未知なエラーが発生しました';
-        });
-      }
-    } on DioError catch (e) {
-      if (e.response!.statusCode == 302 || e.response!.statusCode == 422) {
-        setState(() {
-          show = true;
-          mes = "ユーザ名かパスワードは既に使われています";
-        });
-
-        print("ユーザ名かパスワードは既に使われています");
-      } else if (e.response!.statusCode == 500) {
-      } else {
-        setState(() {
-          show = true;
-          mes = 'サーバーと繋がっていません';
         });
       }
       throw (e);

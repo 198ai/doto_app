@@ -62,24 +62,23 @@ class _ForgotPasswordState extends State<ForgotPassword> {
           SizedBox(
             height: 10,
           ),
-           TextButton(
-              style: ButtonStyle(
-                //定义文本的样式 这里设置的颜色是不起作用的
-                textStyle: MaterialStateProperty.all(
-                    TextStyle(fontSize: 13, fontWeight: FontWeight.bold)),
-                foregroundColor: MaterialStateProperty.all(Colors.black),
-              ),
-              child: Text("認証コードを持っている"),
-              onPressed: () async {
-                  //Navigator.pushNamed(context, '/resetPassword');
-                   Navigator.of(context).push(MaterialPageRoute(
-                      //传值
-                      builder: (context) => ResetPassword(
-                            email:_emailController.text,
-                      )
-                    ));
-              },
+          TextButton(
+            style: ButtonStyle(
+              //定义文本的样式 这里设置的颜色是不起作用的
+              textStyle: MaterialStateProperty.all(
+                  TextStyle(fontSize: 13, fontWeight: FontWeight.bold)),
+              foregroundColor: MaterialStateProperty.all(Colors.black),
             ),
+            child: Text("認証コードを持っている"),
+            onPressed: () async {
+              //Navigator.pushNamed(context, '/resetPassword');
+              Navigator.of(context).push(MaterialPageRoute(
+                  //传值
+                  builder: (context) => ResetPassword(
+                        email: _emailController.text,
+                      )));
+            },
+          ),
           //登录按钮
           Container(
             width: double.infinity,
@@ -94,12 +93,11 @@ class _ForgotPasswordState extends State<ForgotPassword> {
                   await forgotPassword();
                 }
                 if (checked) {
-                   Navigator.of(context).push(MaterialPageRoute(
+                  Navigator.of(context).push(MaterialPageRoute(
                       //传值
                       builder: (context) => ResetPassword(
-                            email:_emailController.text,
-                      )
-                    ));
+                            email: _emailController.text,
+                          )));
                 }
               },
             ),
@@ -116,7 +114,8 @@ class _ForgotPasswordState extends State<ForgotPassword> {
       _userEmailAnimation.start();
       return false;
     } else {
-      String regexEmail = "^([a-z0-9A-Z]+[-|\\.]?)+[a-z0-9A-Z]@([a-z0-9A-Z]+(-[a-z0-9A-Z]+)?\\.)+[a-zA-Z]{2,}\$";
+      String regexEmail =
+          "^([a-z0-9A-Z]+[-|\\.]?)+[a-z0-9A-Z]@([a-z0-9A-Z]+(-[a-z0-9A-Z]+)?\\.)+[a-zA-Z]{2,}\$";
       if (RegExp(regexEmail).hasMatch(_emailController.text)) {
         _userEmailStream.add("");
       } else {
@@ -171,13 +170,15 @@ class _ForgotPasswordState extends State<ForgotPassword> {
       "email": "${_emailController.text}",
     };
     try {
-      Response response = await dio
-          .post("http://www.leishengle.com/api/v1/forgotpassword", data: params);
+      Response response = await dio.post(
+          "http://www.leishengle.com/api/v1/forgotpassword",
+          data: params);
 
       if (response.statusCode != null) {
         if (response.statusCode == 201) {
           //成功改成true
           checked = true;
+          print(response.data);
           ScaffoldMessenger.of(context).showSnackBar(SnackBar(
             content: Text(response.data),
             duration: Duration(seconds: 3),
@@ -185,6 +186,7 @@ class _ForgotPasswordState extends State<ForgotPassword> {
         }
       }
     } on DioError catch (e) {
+      print(e.request);
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(
         backgroundColor: Colors.deepOrange,
         content: Text(e.response.data),

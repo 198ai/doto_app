@@ -116,10 +116,10 @@ class _LoginPageState extends State<LoginPage> {
               child: Text("登録"),
               onPressed: () async {
                 if (await checkLoginFunction()) {
-                   Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                              builder: (context) => Tabs(tabSelected: 0)));
+                  Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                          builder: (context) => Tabs(tabSelected: 0)));
                 }
               },
             ),
@@ -134,7 +134,7 @@ class _LoginPageState extends State<LoginPage> {
               ),
               child: Text("パスワードを忘れた"),
               onPressed: () async {
-                  Navigator.pushNamed(context, '/forgotpassword');
+                Navigator.pushNamed(context, '/forgotpassword');
               },
             ),
             TextButton(
@@ -234,7 +234,7 @@ class _LoginPageState extends State<LoginPage> {
                 focusNode: _emailFocusNode,
                 controller: _emailController,
                 onSubmitted: (String value) {
-                   if (checkEmail()) {
+                  if (checkEmail()) {
                     _emailFocusNode.unfocus();
                     FocusScope.of(context).requestFocus(_passwordFocusNode);
                   } else {
@@ -389,12 +389,10 @@ class _LoginPageState extends State<LoginPage> {
       "email": "${_emailController.text}",
       "password": "${_passwordController.text}"
     };
-    print(params);
     try {
-      Response response =
-          await Dio().post("http://www.leishengle.com/api/v1/login", data:params);
+      Response response = await Dio().post("http://www.leishengle.com/api/v1/login", data: params);
       // Response response =
-      //     await Dio().post("http://www.leishengle.com/api/v1/login", data:params);
+      //     await Dio().post("http://10.0.2.2:8000/api/v1/login", data:params);
       if (response.statusCode != null) {
         if (response.statusCode == 201) {
           userdate = UserData.fromJson(response.data);
@@ -404,22 +402,15 @@ class _LoginPageState extends State<LoginPage> {
             prefs.setString("userdata", json.encode(data));
             successed = true;
             print(prefs.getString("userdata"));
-          } else {
-            setState(() {
-              show = true;
-              mes = '未知なエラーが発生しました';
-            });
           }
+          ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+            content: Text("ログインしました"),
+            duration: Duration(seconds: 3),
+          ));
         }
-      } else {
-        setState(() {
-          show = true;
-          mes = '未知なエラーが発生しました';
-        });
       }
     } on DioError catch (e) {
       if (e.response!.statusCode == 302 || e.response!.statusCode == 401) {
-       
         setState(() {
           show = true;
           mes = "ユーザ名かパスワードは間違っています";

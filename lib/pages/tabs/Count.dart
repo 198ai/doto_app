@@ -65,7 +65,6 @@ class _CountPage extends State<CountPage> {
     dio.options.headers['authorization'] = "Bearer ${userdata.accessToken}";
     try {
       Response response = await dio.get("http://www.leishengle.com/api/v1/getgraph");
-
       if (response.statusCode == 201) {
         //data2 = json.decode(jsonString2);
         //data2 =  json.decode(response.data);
