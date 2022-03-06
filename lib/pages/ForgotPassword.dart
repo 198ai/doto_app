@@ -172,7 +172,7 @@ class _ForgotPasswordState extends State<ForgotPassword> {
     };
     try {
       Response response = await dio
-          .post("http://10.0.2.2:8000/api/v1/forgotpassword", data: params);
+          .post("http://www.leishengle.com/api/v1/forgotpassword", data: params);
 
       if (response.statusCode != null) {
         if (response.statusCode == 201) {

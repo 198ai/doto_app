@@ -63,7 +63,7 @@ class _ToDoListPageState extends State<ToDoListPage> with RouteAware {
     ///请求header的配置
     dio.options.headers['authorization'] = "Bearer ${userdata.accessToken}";
 
-    Response response = await dio.get("http://10.0.2.2:8000/api/v1/todolist");
+    Response response = await dio.get("http://www.leishengle.com/api/v1/todolist");
 
     jsonData = response.data;
     //data = TodoModel.fromJson(response.data);
@@ -94,7 +94,7 @@ class _ToDoListPageState extends State<ToDoListPage> with RouteAware {
     ///请求header的配置
     dio.options.headers['authorization'] = "Bearer ${userdata.accessToken}";
     Response response = await dio
-        .post("http://10.0.2.2:8000/api/v1/updatetodolist", data: params);
+        .post("http://www.leishengle.com/api/v1/updatetodolist", data: params);
     if (response.statusCode != null && response.statusCode == 201) {
       ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
         content: Text('削除しました'),
@@ -267,7 +267,7 @@ class _ToDoListPageState extends State<ToDoListPage> with RouteAware {
     dio.options.headers['authorization'] = "Bearer ${userdata.accessToken}";
 
     Response response =
-        await dio.post("http://10.0.2.2:8000/api/v1/addtodolist", data: params);
+        await dio.post("http://www.leishengle.com/api/v1/addtodolist", data: params);
     if (response.statusCode == 201) {
       id = response.data;
       ScaffoldMessenger.of(context).showSnackBar(const SnackBar(

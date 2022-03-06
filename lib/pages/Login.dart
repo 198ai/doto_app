@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:convert';
 
 import 'package:doto_app/model/userData.dart';
+import 'package:doto_app/pages/tabs/Tabs.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -79,10 +80,10 @@ class _LoginPageState extends State<LoginPage> {
       child: Column(
         children: [
           //用户名输入框
-          buildUserNameWidget(),
-          SizedBox(
-            height: 20,
-          ),
+          // buildUserNameWidget(),
+          // SizedBox(
+          //   height: 20,
+          // ),
           //用户密码输入框
           buildUserEmailWidget(),
           SizedBox(
@@ -115,7 +116,10 @@ class _LoginPageState extends State<LoginPage> {
               child: Text("登録"),
               onPressed: () async {
                 if (await checkLoginFunction()) {
-                  Navigator.pushNamed(context, '/');
+                   Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                              builder: (context) => Tabs(tabSelected: 0)));
                 }
               },
             ),
@@ -308,7 +312,7 @@ class _LoginPageState extends State<LoginPage> {
 
   Future<bool> checkLoginFunction() async {
     hindKeyBoarder();
-    if (checkUserName() & checkUserPassword() & checkEmail()) {
+    if (checkUserPassword() & checkEmail()) {
       await loginFunction();
     }
     if (successed) {
@@ -335,7 +339,7 @@ class _LoginPageState extends State<LoginPage> {
 
   bool checkUserPassword() {
     String userPassrowe = _passwordController.text;
-    if (userPassrowe.length < 5 && userPassrowe.length != 0) {
+    if (userPassrowe.length < 6 && userPassrowe.length != 0) {
       _userPasswordStream.add("パスワードは6文字以上を入力してください");
       _userPasswordAnimation.start();
       return false;
@@ -388,9 +392,9 @@ class _LoginPageState extends State<LoginPage> {
     print(params);
     try {
       Response response =
-          await Dio().post("http://10.0.2.2:8000/api/v1/login", data:params);
+          await Dio().post("http://www.leishengle.com/api/v1/login", data:params);
       // Response response =
-      //     await Dio().post("http://10.0.2.2:8000/api/v1/login", data:params);
+      //     await Dio().post("http://www.leishengle.com/api/v1/login", data:params);
       if (response.statusCode != null) {
         if (response.statusCode == 201) {
           userdate = UserData.fromJson(response.data);

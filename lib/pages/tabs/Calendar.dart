@@ -110,7 +110,7 @@ class _CalendarPageState extends State<CalendarPage> {
       ///请求header的配置
       dio.options.headers['authorization'] = "Bearer ${userdata.accessToken}";
       try{
-        Response response = await dio.post("http://10.0.2.2:8000/api/v1/deletemyevents",data: jsonEncode(calendarlist));
+        Response response = await dio.post("http://www.leishengle.com/api/v1/deletemyevents",data: jsonEncode(calendarlist));
         print("本地数据" + "${jsonEncode(calendarlist)}");
         print("返回数据；$response");
       }catch(onError) {
@@ -137,7 +137,7 @@ class _CalendarPageState extends State<CalendarPage> {
     //print("Bearer ${userdata.accessToken}");
     ///请求header的配置
     dio.options.headers['authorization'] = "Bearer ${userdata.accessToken}";
-    Response response = await dio.post("http://10.0.2.2:8000/api/v1/myevents",
+    Response response = await dio.post("http://www.leishengle.com/api/v1/myevents",
         data: jsonEncode(calendarlist));
     print("本地数据" + "$calendarlist");
     print("返回数据；$response");
@@ -153,7 +153,7 @@ class _CalendarPageState extends State<CalendarPage> {
     dio.options.headers['authorization'] = "Bearer ${userdata.accessToken}";
     try {
       Response response =
-          await dio.get("http://10.0.2.2:8000/api/v1/sendmyevents");
+          await dio.get("http://www.leishengle.com/api/v1/sendmyevents");
       List<MyEvents> list = [];
       DateTime date;
       Map<DateTime, List<MyEvents>> newMap = {};

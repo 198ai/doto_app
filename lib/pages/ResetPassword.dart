@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:convert';
 
 import 'package:doto_app/model/userData.dart';
+import 'package:doto_app/pages/tabs/Tabs.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -21,6 +22,7 @@ class ResetPassword extends StatefulWidget {
 class _ResetPasswordState extends State<ResetPassword> {
   bool _isShow = false;
   late SharedPreferences prefs;
+  late UserData userdate;
   //用户名输入框的焦点控制
   FocusNode _codeFocusNode = new FocusNode();
   FocusNode _passwordFocusNode = new FocusNode();
@@ -98,7 +100,10 @@ class _ResetPasswordState extends State<ResetPassword> {
               ),
               onPressed: () async {
                 if (await checkLoginFunction()) {
-                  Navigator.pushNamed(context, '/');
+                   Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                              builder: (context) => Tabs(tabSelected: 0)));
                 }
               },
             ),
@@ -315,11 +320,19 @@ class _ResetPasswordState extends State<ResetPassword> {
     };
     try {
       Response response = await Dio()
-          .post("http://10.0.2.2:8000/api/v1/resetPassword", data: params);
+          .post("http://www.leishengle.com/api/v1/resetPassword", data: params);
       if (response.statusCode != null) {
+         userdate = UserData.fromJson(response.data);
+          var data = userdate.toJson();
+          if (userdate.accessToken != "") {
+            prefs = await SharedPreferences.getInstance();
+            prefs.setString("userdata", json.encode(data));
+            successed = true;
+            print(prefs.getString("userdata"));
+          }
         if (response.statusCode == 201) {
           ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-            content: Text(response.data),
+            content: Text("パスワードをリセットしました"),
             duration: Duration(seconds: 3),
           ));
         }
@@ -327,7 +340,8 @@ class _ResetPasswordState extends State<ResetPassword> {
     } on DioError catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(
           backgroundColor: Colors.deepOrange,
-          content: Text(e.response.data), duration: Duration(seconds: 3)));
+          content: Text(e.response.data),
+          duration: Duration(seconds: 3)));
       throw (e);
     }
   }

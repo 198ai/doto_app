@@ -1,3 +1,4 @@
+import 'package:doto_app/pages/ChangePassword.dart';
 import 'package:doto_app/pages/Countdown.dart';
 import 'package:doto_app/pages/ForgotPassword.dart';
 import 'package:doto_app/pages/HasDone.dart';
@@ -18,6 +19,7 @@ final Map<String,Function> routes = {
   '/signup':(context)=>SignUpPage(),
   '/forgotpassword':(context)=>ForgotPassword(),
   '/resetPassword':(context)=>ResetPassword(),
+  '/changePassword':(context)=>ChangePassword(),
 };
 
 
