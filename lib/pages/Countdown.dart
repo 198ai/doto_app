@@ -181,8 +181,8 @@ class _CountdownState extends State<CountDown> {
     ///请求header的配置
     dio.options.headers['authorization'] = "Bearer ${userdata.accessToken}";
     print('時間更新:${params}');
-    Response response =
-        await dio.post("http://www.leishengle.com/api/v1/updatetime", data: params);
+    Response response = await dio
+        .post("http://www.leishengle.com/api/v1/updatetime", data: params);
     print(response.data);
     if (response.statusCode != null && response.statusCode == 201) {
       ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
@@ -219,55 +219,6 @@ class _CountdownState extends State<CountDown> {
     }
   }
 
-  // //統計画面のデータ設定
-  // makeCountData(int differTimes) async {
-  //   //SharedPreferences list = await SharedPreferences.getInstance();
-  //   Contents localcontents = Contents(events: "", times: 0);
-  //   bool newdata = false;
-  //   //記録時間取得
-  //   //イベント名前取得
-  //   if (getCountDate.isNotEmpty && eventsNames.isNotEmpty) {
-  //     getCountDate.forEach((element) {
-  //       //今日の記録タスクがある場合
-  //       if (element.date == formatToday) {
-  //         for (var e in element.contents) {
-  //           //今日重複やったタスク
-  //           if (eventsNames.contains(todos[widget.index].title)) {
-  //             if (e.events == todos[widget.index].title) {
-  //               var newTimes = differTimes + e.times;
-  //               e.times = newTimes;
-  //             }
-  //           } else if (!eventsNames.contains(todos[widget.index].title)) {
-  //             //今日はじめてやったタスク
-  //             eventsNames.add(todos[widget.index].title);
-  //             newdata = true;
-  //             localcontents = Contents(
-  //                 events: todos[widget.index].title, times: differTimes);
-  //           }
-  //         }
-  //         if (newdata) {
-  //           element.contents.add(localcontents);
-  //           newdata = false;
-  //         }
-  //       }
-  //     });
-  //   } else {
-  //     eventsNames.add(todos[widget.index].title);
-  //     contents
-  //         .add(Contents(events: todos[widget.index].title, times: differTimes));
-  //     data = ChartJsonData(date: formatToday, contents: contents);
-  //     getCountDate.add(data);
-  //     List<String> countData =
-  //         getCountDate.map((f) => json.encode(f.toJson())).toList();
-  //     //list.setString("counts", json.encode(countData));
-  //   }
-  //   List<String> countData =
-  //       getCountDate.map((f) => json.encode(f.toJson())).toList();
-  //   //list.setString("counts", json.encode(countData));
-  //   //list.remove("counts");
-  //   print("更改后的信息$countData");
-  // }
-
   @override
   void dispose() {
     super.dispose();
@@ -296,7 +247,11 @@ class _CountdownState extends State<CountDown> {
           Column(
             children: [
               Container(
-                  margin: EdgeInsets.only(top: ScreenAdapter.height(150),right:ScreenAdapter.width(10),left:ScreenAdapter.width(10),),
+                  margin: EdgeInsets.only(
+                    top: ScreenAdapter.height(150),
+                    right: ScreenAdapter.width(10),
+                    left: ScreenAdapter.width(10),
+                  ),
                   alignment: Alignment.topCenter,
                   child: Text(constructTime(seconds),
                       style: TextStyle(
@@ -334,7 +289,12 @@ class _CountdownState extends State<CountDown> {
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    Text('お疲れ様でした！'),
+                    Text(
+                      'お疲れ様でした！',
+                      style: TextStyle(
+                          fontSize: ScreenAdapter.size(15),
+                          color: Colors.green),
+                    ),
                   ],
                 ),
                 actions: [
@@ -346,7 +306,12 @@ class _CountdownState extends State<CountDown> {
                           MaterialPageRoute(
                               builder: (context) => Tabs(tabSelected: 0)));
                     },
-                    child: const Text('確認'),
+                    child: Text(
+                      '確認',
+                      style: TextStyle(
+                          fontSize: ScreenAdapter.size(15),
+                          color: Colors.green),
+                    ),
                   ),
                 ],
               );

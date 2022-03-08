@@ -6,6 +6,8 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import '../pages/tabs/Tabs.dart';
+
 class drawerEX extends StatefulWidget {
   drawerEX({Key? key}) : super(key: key);
   _drawerEX createState() => _drawerEX();
@@ -53,7 +55,8 @@ class _drawerEX extends State<drawerEX> {
     ///请求header的配置
     dio.options.headers['authorization'] = "Bearer ${userdata.accessToken}";
     try {
-      Response response = await dio.get("http://www.leishengle.com/api/v1/logout");
+      Response response =
+          await dio.get("http://www.leishengle.com/api/v1/logout");
       print(response.statusCode);
       if (response.statusCode != null) {
         if (response.statusCode == 201) {
@@ -126,7 +129,7 @@ class _drawerEX extends State<drawerEX> {
                       builder: (BuildContext context, AsyncSnapshot snapshot) {
                         return TextButton(
                             onPressed: () {
-                              if(!login){
+                              if (!login) {
                                 Navigator.pushNamed(context, '/login');
                               }
                             },
@@ -171,7 +174,7 @@ class _drawerEX extends State<drawerEX> {
                   color: Colors.white,
                 )),
             onTap: () {
-             Navigator.pushNamed(context, '/changePassword');
+              Navigator.pushNamed(context, '/changePassword');
             },
             title: Text(
               "パスワードを変更",
@@ -205,9 +208,10 @@ class _drawerEX extends State<drawerEX> {
                                 onPressed: () {
                                   Navigator.pop(context);
                                 },
-                                child: const Text('キャンセル', 
-                                style: TextStyle(
-                                        color: Colors.green,)),
+                                child: const Text('キャンセル',
+                                    style: TextStyle(
+                                      color: Colors.green,
+                                    )),
                               ),
                               TextButton(
                                 onPressed: () async {
@@ -217,11 +221,16 @@ class _drawerEX extends State<drawerEX> {
                                   });
                                   prefs = await SharedPreferences.getInstance();
                                   prefs.remove("userdata");
-                                  Navigator.pop(context);
+                                  Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                          builder: (context) =>
+                                              Tabs(tabSelected: 0)));
                                 },
-                                child: const Text('確認' ,
-                                style: TextStyle(
-                                        color: Colors.green,)),
+                                child: const Text('確認',
+                                    style: TextStyle(
+                                      color: Colors.green,
+                                    )),
                               ),
                             ],
                           );

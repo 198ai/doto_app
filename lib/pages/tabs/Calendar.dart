@@ -94,30 +94,30 @@ class _CalendarPageState extends State<CalendarPage> {
   }
 
   Future deleteMyEvents(MyEvents events, DateTime selectedCalendarDate) async {
-      var date = DateFormat('yyyy-MM-dd').format(selectedCalendarDate);
-      Map calendar = {};
-      List calendarlist = [];
-      List eventslist = [];
-      eventslist.add(events.toJson());
+    var date = DateFormat('yyyy-MM-dd').format(selectedCalendarDate);
+    Map calendar = {};
+    List calendarlist = [];
+    List eventslist = [];
+    eventslist.add(events.toJson());
 
-      calendar["calendar"] = date.toString();
-      calendar["events"] = eventslist;
-      calendarlist.add(calendar);
-      print(calendarlist);
-      Dio dio = new Dio();
-      dio.options.headers['content-Type'] = 'application/json';
-      //print("Bearer ${userdata.accessToken}");
-      ///请求header的配置
-      dio.options.headers['authorization'] = "Bearer ${userdata.accessToken}";
-      try{
-        Response response = await dio.post("http://www.leishengle.com/api/v1/deletemyevents",data: jsonEncode(calendarlist));
-        print("本地数据" + "${jsonEncode(calendarlist)}");
-        print("返回数据；$response");
-      }catch(onError) {
+    calendar["calendar"] = date.toString();
+    calendar["events"] = eventslist;
+    calendarlist.add(calendar);
+    print(calendarlist);
+    Dio dio = new Dio();
+    dio.options.headers['content-Type'] = 'application/json';
+    //print("Bearer ${userdata.accessToken}");
+    ///请求header的配置
+    dio.options.headers['authorization'] = "Bearer ${userdata.accessToken}";
+    try {
+      Response response = await dio.post(
+          "http://www.leishengle.com/api/v1/deletemyevents",
+          data: jsonEncode(calendarlist));
+      print("本地数据" + "${jsonEncode(calendarlist)}");
+      print("返回数据；$response");
+    } catch (onError) {
       debugPrint("error:${onError.toString()}");
     }
-     
-      
   }
 
   Future sendEvents(Map<DateTime, List<MyEvents>> myEvents) async {
@@ -137,7 +137,8 @@ class _CalendarPageState extends State<CalendarPage> {
     //print("Bearer ${userdata.accessToken}");
     ///请求header的配置
     dio.options.headers['authorization'] = "Bearer ${userdata.accessToken}";
-    Response response = await dio.post("http://www.leishengle.com/api/v1/myevents",
+    Response response = await dio.post(
+        "http://www.leishengle.com/api/v1/myevents",
         data: jsonEncode(calendarlist));
     print("本地数据" + "$calendarlist");
     print("返回数据；$response");
@@ -214,7 +215,9 @@ class _CalendarPageState extends State<CalendarPage> {
                     },
                     child: Text(
                       'キャンセル',
-                      style: TextStyle(fontSize: ScreenAdapter.size(16),color: Colors.green),
+                      style: TextStyle(
+                          fontSize: ScreenAdapter.size(16),
+                          color: Colors.green),
                     )),
                 // ignore: deprecated_member_use
                 TextButton(
@@ -223,7 +226,9 @@ class _CalendarPageState extends State<CalendarPage> {
                     },
                     child: Text(
                       '確認',
-                      style: TextStyle(fontSize: ScreenAdapter.size(16),color: Colors.green),
+                      style: TextStyle(
+                          fontSize: ScreenAdapter.size(16),
+                          color: Colors.green),
                     )),
               ],
             ),
@@ -268,30 +273,62 @@ class _CalendarPageState extends State<CalendarPage> {
   Widget buildTextField(
       {String? hint, required TextEditingController controller}) {
     return Theme(
-    data:Theme.of(context).copyWith(
-                colorScheme: ThemeData().colorScheme.copyWith(
-                      primary:Colors.green,
-                ),
-              ),
-        child: TextField(
-      controller: controller,
-      textCapitalization: TextCapitalization.words,
-      decoration: InputDecoration(
-        labelText: hint ?? '',
-        focusedBorder: OutlineInputBorder(
-          borderSide: BorderSide(color: Colors.black, width: 1.5),
-          borderRadius: BorderRadius.circular(
-            10.0,
+      data: Theme.of(context).copyWith(
+        colorScheme: ThemeData().colorScheme.copyWith(
+              primary: Colors.green,
+            ),
+      ),
+      child: TextField(
+        controller: controller,
+        textCapitalization: TextCapitalization.words,
+        decoration: InputDecoration(
+          labelText: hint ?? '',
+          focusedBorder: OutlineInputBorder(
+            borderSide: BorderSide(color: Colors.black, width: 1.5),
+            borderRadius: BorderRadius.circular(
+              10.0,
+            ),
+          ),
+          enabledBorder: OutlineInputBorder(
+            borderSide: BorderSide(color: Colors.black, width: 1.5),
+            borderRadius: BorderRadius.circular(
+              10.0,
+            ),
           ),
         ),
-        enabledBorder: OutlineInputBorder(
-          borderSide: BorderSide(color: Colors.black, width: 1.5),
-          borderRadius: BorderRadius.circular(
-            10.0,
-          ),
-        ),
-      ),),
+      ),
     );
+  }
+
+  checkLocked() {
+    return showDialog(
+        context: context,
+        builder: (context) => StatefulBuilder(
+                //在这里为了区分，在构建builder的时候将setState方法命名为了setBottomSheetState。
+                builder: (context1, showDialogState) {
+              return AlertDialog(
+                content: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text('登録してください'),
+                  ],
+                ),
+                actions: [
+                  TextButton(
+                    onPressed: () {
+                      Navigator.pop(context);
+                    },
+                    child: Text(
+                      '確認',
+                      style: TextStyle(
+                          fontSize: ScreenAdapter.size(15),
+                          color: Colors.green),
+                    ),
+                  ),
+                ],
+              );
+            }));
   }
 
   _showAddEventDialog() async {
@@ -314,11 +351,9 @@ class _CalendarPageState extends State<CalendarPage> {
                         await _showDatePicker();
                       },
                       child: Text('アラーム設定',
-                      style: TextStyle(
-                            fontSize:
-                                ScreenAdapter.size(
-                                    15),
-                            color: Colors.green)),
+                          style: TextStyle(
+                              fontSize: ScreenAdapter.size(15),
+                              color: Colors.green)),
                     ),
                   ],
                 ),
@@ -345,7 +380,8 @@ class _CalendarPageState extends State<CalendarPage> {
                 actions: [
                   TextButton(
                     onPressed: () => Navigator.pop(context),
-                    child: const Text('キャンセル',style: TextStyle(color: Colors.green)),
+                    child: const Text('キャンセル',
+                        style: TextStyle(color: Colors.green)),
                   ),
                   TextButton(
                     onPressed: () async {
@@ -425,7 +461,8 @@ class _CalendarPageState extends State<CalendarPage> {
                         return;
                       }
                     },
-                    child: const Text('確認',style: TextStyle(color: Colors.green)),
+                    child:
+                        const Text('確認', style: TextStyle(color: Colors.green)),
                   ),
                 ],
               );
@@ -445,7 +482,11 @@ class _CalendarPageState extends State<CalendarPage> {
                   highlightColor: Colors.transparent,
                   icon: Icon(Icons.add),
                   onPressed: () {
-                    _showAddEventDialog();
+                    if(userdata.name !=""){
+                      _showAddEventDialog();
+                    }else{
+                      checkLocked();
+                    }
                   }),
             ]),
         body: SingleChildScrollView(

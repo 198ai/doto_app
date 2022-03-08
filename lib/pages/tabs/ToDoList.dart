@@ -21,7 +21,8 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:vibration/vibration.dart';
 
 import '../Start.dart';
-
+import 'Tabs.dart';
+//打字哈哈哈哈哈哈哈哈哈哈哈哈
 class ToDoListPage extends StatefulWidget {
   int time;
   ToDoListPage({Key? key, this.time = 0}) : super(key: key);
@@ -410,6 +411,7 @@ class _ToDoListPageState extends State<ToDoListPage> with RouteAware {
                     dateController.text = "";
                     timeController.text = "";
                     //足すボダン押した時、ポップアップが出ます
+                    if(userName !=""){
                     showDialog(
                         barrierDismissible: false,
                         context: context,
@@ -577,12 +579,12 @@ class _ToDoListPageState extends State<ToDoListPage> with RouteAware {
                                                     //});
                                                   },
                                                   child: Text(
-                                                    "チャレンジする",
+                                                    "チャレンジする", 
                                                     style: TextStyle(
-                                                        fontSize:
-                                                            ScreenAdapter.size(
-                                                                15),
-                                                        color: Colors.green),
+                                                      fontSize:
+                                                          ScreenAdapter.size(
+                                                              15),
+                                                    color: Colors.green),
                                                   )),
                                             ],
                                           ),
@@ -594,7 +596,36 @@ class _ToDoListPageState extends State<ToDoListPage> with RouteAware {
                               ),
                             ),
                           );
-                        });
+                        }
+                    );}else{
+                      showDialog(
+                      context: context,
+                      builder: (context) => StatefulBuilder(
+                              //在这里为了区分，在构建builder的时候将setState方法命名为了setBottomSheetState。
+                              builder: (context1, showDialogState) {
+                            return AlertDialog(
+                              content: Column(
+                                crossAxisAlignment: CrossAxisAlignment.stretch,
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Text('登録してください'),
+                                ],
+                              ),
+                              actions: [
+                                TextButton(
+                                  onPressed: () {
+                                    Navigator.pop(context);
+                                  },
+                                  child: Text('確認',style: TextStyle(
+                                                      fontSize:
+                                                          ScreenAdapter.size(
+                                                              15),
+                                                    color: Colors.green),),
+                                ),
+                              ],
+                            );
+                          }));
+                    }
                   },
                 ),
               ]),
