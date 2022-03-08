@@ -10,6 +10,7 @@ import 'package:doto_app/model/myevents.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:splashscreen/splashscreen.dart';
 import 'routers/router.dart';
+import 'services/ScreenAdapter.dart';
 
 final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
     FlutterLocalNotificationsPlugin();
@@ -88,8 +89,8 @@ class _MyAppState extends State<MyApp> {
     return ScreenUtilInit(
         designSize: Size(428, 926),
         builder: () => MaterialApp(
-            home: Tabs(),
-            //home: Splash2(),
+            //home: Tabs(),
+            home: Splash2(),
             navigatorObservers: [MyApp.routeObserver], //添加路由观察者
             debugShowCheckedModeBanner: false,
             initialRoute: '/',
@@ -102,7 +103,7 @@ class Splash2 extends StatelessWidget {
     return SplashScreen(
       seconds: 3,
       navigateAfterSeconds: new Tabs(),
-      title: new Text('美らじぇんだ\n目標達成までちゃ～まじゅん！',textScaleFactor: 1.8,textAlign: TextAlign.center,style:TextStyle(fontSize: 13,fontWeight:FontWeight.bold) ,),
+      title: new Text('美らじぇんだ\n目標達成までちゃ～まじゅん！',textScaleFactor: 1.8,textAlign: TextAlign.center,style:TextStyle(fontSize:ScreenAdapter.size(15),fontWeight:FontWeight.bold) ,),
       image: Image.asset("images/ic_launcher.png"),
         loadingText: Text("Loading"),
       photoSize: 40.0,

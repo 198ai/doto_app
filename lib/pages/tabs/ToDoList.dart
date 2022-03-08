@@ -677,24 +677,24 @@ class _ToDoListPageState extends State<ToDoListPage> with RouteAware {
                   ],
                 ),
               ),
-              PopupMenuItem(
-                value: 1,
-                child: Row(
-                  children: <Widget>[
-                    Icon(Icons.check),
-                    Text("完成"),
-                  ],
-                ),
-              ),
-              PopupMenuItem(
-                value: 2,
-                child: Row(
-                  children: <Widget>[
-                    Icon(Icons.assignment_turned_in_outlined),
-                    Text("完成へ"),
-                  ],
-                ),
-              ), // Me// Menu Item
+              // PopupMenuItem(
+              //   value: 1,
+              //   child: Row(
+              //     children: <Widget>[
+              //       Icon(Icons.check),
+              //       Text("完成"),
+              //     ],
+              //   ),
+              // ),
+              // PopupMenuItem(
+              //   value: 2,
+              //   child: Row(
+              //     children: <Widget>[
+              //       Icon(Icons.assignment_turned_in_outlined),
+              //       Text("完成へ"),
+              //     ],
+              //   ),
+              // ), // Me// Menu Item
             ],
           );
           if (selected == 0) {
