@@ -65,7 +65,7 @@ class _ChangePasswordState extends State<ChangePassword> {
       child: Scaffold(
         appBar: AppBar(
           backgroundColor: Colors.green,
-          title: Text("パスワー変更"),
+          title: Text("パスワード変更"),
         ),
         body: buildLoginWidget(),
       ),

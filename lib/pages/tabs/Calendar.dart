@@ -458,7 +458,6 @@ class _CalendarPageState extends State<CalendarPage> {
                         dateController.clear();
                         visible = false;
                         Navigator.pop(context);
-                        return;
                       }
                     },
                     child:
