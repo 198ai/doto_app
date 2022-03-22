@@ -152,7 +152,7 @@ class _ForgotPasswordState extends State<ForgotPassword> {
                 //边框样式设置
                 decoration: InputDecoration(
                   labelText: "メールアドレス",
-                  errorText: snapshot.data,
+                  errorText: snapshot.data==""?null:snapshot.data,
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.all(Radius.circular(10)),
                   ),

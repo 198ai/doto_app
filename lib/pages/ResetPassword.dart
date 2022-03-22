@@ -141,7 +141,7 @@ class _ResetPasswordState extends State<ResetPassword> {
                 maxLines: 1,
                 decoration: InputDecoration(
                   labelText: "パスワード",
-                  errorText: snapshot.data,
+                  errorText: snapshot.data==""?null:snapshot.data,
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.all(Radius.circular(10)),
                   ),
@@ -192,7 +192,7 @@ class _ResetPasswordState extends State<ResetPassword> {
                 maxLines: 1,
                 decoration: InputDecoration(
                   labelText: "メールアドレス",
-                  errorText: snapshot.data,
+                  errorText: snapshot.data==""?null:snapshot.data,
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.all(Radius.circular(10)),
                   ),
@@ -229,7 +229,7 @@ class _ResetPasswordState extends State<ResetPassword> {
                   }
                 },
                 decoration: InputDecoration(
-                  errorText: snapshot.data,
+                  errorText: snapshot.data==""?null:snapshot.data,
                   labelText: "認証コード",
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.all(Radius.circular(10)),
