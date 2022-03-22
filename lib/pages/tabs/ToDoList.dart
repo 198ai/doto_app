@@ -103,6 +103,7 @@ class _ToDoListPageState extends State<ToDoListPage> with RouteAware {
       ));
     } else {
       ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+        backgroundColor: Colors.deepOrange,
         content: Text('削除失敗しました'),
         duration: Duration(seconds: 1),
       ));
@@ -277,6 +278,7 @@ class _ToDoListPageState extends State<ToDoListPage> with RouteAware {
       ));
     }else {
       ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+        backgroundColor: Colors.deepOrange,
         content: Text('アジェンダ追加失敗'),
         duration: Duration(seconds: 1),
       ));
@@ -543,15 +545,16 @@ class _ToDoListPageState extends State<ToDoListPage> with RouteAware {
                                               TextButton(
                                                   onPressed: () async {
                                                     //setState((){
-                                                      if (textController.text == "" &&
+                                                      if (textController.text == "" ||
                                                           dateController.text ==
-                                                              "" &&
+                                                              "" ||
                                                           timeController.text ==
                                                               "") {
                                                         ScaffoldMessenger.of(
                                                                 context)
                                                             .showSnackBar(
                                                           const SnackBar(
+                                                            backgroundColor: Colors.deepOrange,
                                                             content: Text(
                                                                 '全ての内容を入力してください'),
                                                             duration: Duration(

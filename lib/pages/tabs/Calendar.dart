@@ -390,7 +390,7 @@ class _CalendarPageState extends State<CalendarPage> {
                       int localAlarmId = alarmId;
                       //现在最大ID取得
 
-                      if (titleController.text.isEmpty &&
+                      if (titleController.text.isEmpty ||
                           descpController.text.isEmpty) {
                         ScaffoldMessenger.of(context).showSnackBar(
                           const SnackBar(
