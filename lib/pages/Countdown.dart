@@ -235,7 +235,6 @@ class _CountdownState extends State<CountDown> {
             onPressed: () => {
               stopTimer(),
               cancelTimer(),
-              alarm.stop(),
               Navigator.push(context,
                   MaterialPageRoute(builder: (context) => Tabs(tabSelected: 0)))
             },
