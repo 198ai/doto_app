@@ -66,12 +66,9 @@ class _CountPage extends State<CountPage> {
     try {
       Response response = await dio.get("http://www.leishengle.com/api/v1/getgraph");
       if (response.statusCode == 201) {
-        //data2 = json.decode(jsonString2);
-        //data2 =  json.decode(response.data);
         print(response);
         response.data.forEach((e) {
           print(e);
-          //chartJsonData.add(ChartJsonData.fromJson(json.decode(e)));
           chartJsonData.add(ChartJsonData.fromJson(e));
         });
         chartJsonData.forEach((element) {
@@ -224,7 +221,6 @@ class _CountPage extends State<CountPage> {
         appBar: AppBar(
           backgroundColor: Colors.green,
           centerTitle: true,
-          //title: Text(_strTitle, style: TextStyle(color: commonStrColor)), //AIForce Equipment App
           title: Text('統計'),
           automaticallyImplyLeading: false,
         ),
@@ -250,7 +246,6 @@ class _CountPage extends State<CountPage> {
                                   "累計総時間:",
                                   style: TextStyle(
                                       fontSize: ScreenAdapter.size(25),
-                                      // fontStyle: FontStyle.italic,
                                       color: Colors.green,
                                       fontWeight: FontWeight.bold),
                                 ),
@@ -259,7 +254,6 @@ class _CountPage extends State<CountPage> {
                                   "${constructTime(totalTimes)}",
                                   style: TextStyle(
                                       fontSize: ScreenAdapter.size(25),
-                                      // fontStyle: FontStyle.italic,
                                       color: Colors.black,
                                       fontWeight: FontWeight.bold),
                                 ),
@@ -629,21 +623,5 @@ class _CountPage extends State<CountPage> {
       }
     }
     setState(() {});
-  }
-
-  _onSelectionChanged(charts.SelectionModel model) {
-    final selectedDatum = model.selectedDatum;
-    // print(selectedDatum.length);
-    if (selectedDatum.first.datum) {
-      //print(model.selectedSeries[0].measureFn(model.selectedDatum[0].index));
-      //chartAmountText = selectedDatum[0].datum.totalSpend.toString().split('.');
-    }
-  }
-
-  _onSelectionUpdated(charts.SelectionModel model) {
-    // print('In _onSelectionUpdated');
-    // if (selectedDatum.length > 0) {
-    //   print(selectedDatum[0].datum.category);
-    // }
   }
 }

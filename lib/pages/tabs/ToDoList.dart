@@ -245,7 +245,6 @@ class _ToDoListPageState extends State<ToDoListPage> with RouteAware {
     //输入框失去焦点
     _dateFocusNode.unfocus();
     _timeFocusNode.unfocus();
-
     //隐藏键盘
     SystemChannels.textInput.invokeMethod('TextInput.hide');
   }
