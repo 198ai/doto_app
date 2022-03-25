@@ -399,8 +399,8 @@ class _CalendarPageState extends State<CalendarPage> {
                             duration: Duration(seconds: 3),
                           ),
                         );
-                        //Navigator.pop(context);
-                        return;
+                        Navigator.pop(context);
+                        //return;
                       } else {
                         setState(() {
                           //localAlarmId =dateController.text == "" ? 0 : alarmId;
@@ -458,6 +458,7 @@ class _CalendarPageState extends State<CalendarPage> {
                         dateController.clear();
                         visible = false;
                         Navigator.pop(context);
+                        //return;
                       }
                     },
                     child:

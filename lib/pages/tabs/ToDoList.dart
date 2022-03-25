@@ -558,8 +558,8 @@ class _ToDoListPageState extends State<ToDoListPage> with RouteAware {
                                                                 seconds: 3),
                                                           ),
                                                         );
-                                                        //Navigator.pop(context);
-                                                        return;
+                                                        Navigator.pop(context);
+                                                       //return;
                                                       } else {
                                                       await addtodolist(
                                                           textController.text,
@@ -573,8 +573,7 @@ class _ToDoListPageState extends State<ToDoListPage> with RouteAware {
                                                             inSeconds
                                                                 .toString(),
                                                             enddate.toString());
-                                                        Navigator.of(context)
-                                                            .pop();
+                                                        Navigator.pop(context);
                                                       }
                                                     //});
                                                   },
