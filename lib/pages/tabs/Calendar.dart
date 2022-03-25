@@ -676,7 +676,7 @@ void scheduleAlarm(
   var androidPlatformChannelSpecifics = AndroidNotificationDetails(
     'alarm_notif',
     'alarm_notif',
-    'Channel for Alarm notification',
+    channelDescription:'Channel for Alarm notification',
     icon: 'ic_launcher',
     sound: RawResourceAndroidNotificationSound('clock'),
     playSound: true,
@@ -689,7 +689,7 @@ void scheduleAlarm(
       presentBadge: true,
       presentSound: true);
   var platformChannelSpecifics = NotificationDetails(
-      androidPlatformChannelSpecifics, iOSPlatformChannelSpecifics);
+      android:androidPlatformChannelSpecifics, iOS:iOSPlatformChannelSpecifics);
   await flutterLocalNotificationsPlugin.schedule(
     id,
     'リマインド!',
