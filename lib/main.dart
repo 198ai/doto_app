@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:doto_app/pages/tabs/Tabs.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:intl/date_symbol_data_local.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
@@ -32,8 +33,8 @@ void main() async {
       debugPrint('notification payload: ' + payload);
     }
   });
-
-  initializeDateFormatting().then((_) => runApp(MyApp()));
+  runApp(MyApp());
+  //initializeDateFormatting().then((_) => runApp(MyApp()));
 }
 
 class MyApp extends StatefulWidget {
@@ -89,7 +90,16 @@ class _MyAppState extends State<MyApp> {
     return ScreenUtilInit(
         designSize: Size(428, 926),
         builder: () => MaterialApp(
-            //home: Tabs(),
+           localizationsDelegates: [
+              GlobalMaterialLocalizations.delegate,
+              GlobalWidgetsLocalizations.delegate,
+              GlobalCupertinoLocalizations.delegate,
+            ],
+            supportedLocales: [
+              const Locale('en'),
+              const Locale('ja')
+            ],
+          //   //home: Tabs(),
             home: Splash2(),
             navigatorObservers: [MyApp.routeObserver], //添加路由观察者
             debugShowCheckedModeBanner: false,

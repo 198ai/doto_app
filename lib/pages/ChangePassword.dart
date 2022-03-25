@@ -147,7 +147,7 @@ class _ChangePasswordState extends State<ChangePassword> {
                 maxLines: 1,
                 decoration: InputDecoration(
                   labelText: "旧パスワード",
-                  errorText: snapshot.data,
+                  errorText: snapshot.data==""?null:snapshot.data,
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.all(Radius.circular(10)),
                   ),
@@ -199,7 +199,7 @@ class _ChangePasswordState extends State<ChangePassword> {
                 maxLines: 1,
                 decoration: InputDecoration(
                   labelText: "メールアドレス",
-                  errorText: snapshot.data,
+                  errorText: snapshot.data==""?null:snapshot.data,
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.all(Radius.circular(10)),
                   ),
@@ -237,7 +237,7 @@ class _ChangePasswordState extends State<ChangePassword> {
                 },
                 obscureText: !_isNewShow,
                 decoration: InputDecoration(
-                  errorText: snapshot.data,
+                  errorText: snapshot.data==""?null:snapshot.data,
                   labelText: "新パスワード",
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.all(Radius.circular(10)),

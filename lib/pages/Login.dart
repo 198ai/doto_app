@@ -189,7 +189,7 @@ class _LoginPageState extends State<LoginPage> {
                 //边框样式设置
                 decoration: InputDecoration(
                   labelText: "パスワード",
-                  errorText: snapshot.data,
+                  errorText: snapshot.data==""?null:snapshot.data,
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.all(Radius.circular(10)),
                   ),
@@ -246,7 +246,7 @@ class _LoginPageState extends State<LoginPage> {
                 //边框样式设置
                 decoration: InputDecoration(
                   labelText: "メールアドレス",
-                  errorText: snapshot.data,
+                  errorText: snapshot.data==""?null:snapshot.data,
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.all(Radius.circular(10)),
                   ),
@@ -332,7 +332,7 @@ class _LoginPageState extends State<LoginPage> {
       return false;
     } else {
       //清除错误提示
-      _userNameStream.add("");
+      _userNameStream.done;
       return true;
     }
   }

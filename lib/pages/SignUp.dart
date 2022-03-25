@@ -164,7 +164,7 @@ class _SignUpPageState extends State<SignUpPage> {
 
                 decoration: InputDecoration(
                   labelText: "パスワード",
-                  errorText: snapshot.data,
+                  errorText: snapshot.data==""?null:snapshot.data,
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.all(Radius.circular(10)),
                   ),
@@ -222,7 +222,7 @@ class _SignUpPageState extends State<SignUpPage> {
                 //边框样式设置
                 decoration: InputDecoration(
                   labelText: "メールアドレス",
-                  errorText: snapshot.data,
+                  errorText: snapshot.data==""?null:snapshot.data,
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.all(Radius.circular(10)),
                   ),
@@ -271,7 +271,7 @@ class _SignUpPageState extends State<SignUpPage> {
                 //边框样式设置
                 decoration: InputDecoration(
                   //红色的错误提示文本
-                  errorText: snapshot.data,
+                  errorText: snapshot.data==""?null:snapshot.data,
                   labelText: "ユーザ名",
                   //设置上下左右 都有边框
                   //设置四个角的弧度
@@ -319,7 +319,7 @@ class _SignUpPageState extends State<SignUpPage> {
 
   bool checkUserPassword() {
     String userPassrowe = _passwordController.text;
-    if (userPassrowe.length < 5 && userPassrowe.length != 0) {
+    if (userPassrowe.length < 6 && userPassrowe.length != 0) {
       _userPasswordStream.add("パスワードは6文字以上を入力してください");
       _userPasswordAnimation.start();
       return false;
