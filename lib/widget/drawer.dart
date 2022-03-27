@@ -1,11 +1,15 @@
+import 'dart:async';
 import 'dart:convert';
 
+import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:dio/dio.dart';
 import 'package:doto_app/model/userData.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import 'dart:developer' as developer;
 import '../pages/tabs/Tabs.dart';
 
 class drawerEX extends StatefulWidget {
@@ -20,9 +24,16 @@ class _drawerEX extends State<drawerEX> {
   late String userEmail;
   bool login = false;
   late SharedPreferences prefs;
+
+  ConnectivityResult _connectionStatus = ConnectivityResult.none;
+  final Connectivity _connectivity = Connectivity();
+  late StreamSubscription<ConnectivityResult> _connectivitySubscription;
   @override
   void initState() {
     super.initState();
+    initConnectivity();
+    _connectivitySubscription =
+        _connectivity.onConnectivityChanged.listen(_updateConnectionStatus);
     Future(() async {
       SharedPreferences retult = await SharedPreferences.getInstance();
       if (retult.getString("userdata") != null) {
@@ -33,6 +44,32 @@ class _drawerEX extends State<drawerEX> {
       }
       userName = userdata.name == "" ? "" : userdata.name;
       userEmail = userdata.email == "" ? "" : userdata.email;
+    });
+  }
+  @override
+  void dispose() {
+    _connectivitySubscription.cancel();
+    super.dispose();
+  }
+  // Platform messages are asynchronous, so we initialize in an async method.
+  Future<void> initConnectivity() async {
+    late ConnectivityResult result;
+    // Platform messages may fail, so we use a try/catch PlatformException.
+    try {
+      result = await _connectivity.checkConnectivity();
+    } on PlatformException catch (e) {
+      developer.log('Couldn\'t check connectivity status', error: e);
+      return;
+    }
+    if (!mounted) {
+      return Future.value(null);
+    }
+    return _updateConnectionStatus(result);
+  }
+
+  Future<void> _updateConnectionStatus(ConnectivityResult result) async {
+    setState(() {
+      _connectionStatus = result;
     });
   }
 
@@ -174,7 +211,15 @@ class _drawerEX extends State<drawerEX> {
                   color: Colors.white,
                 )),
             onTap: () {
-              Navigator.pushNamed(context, '/changePassword');
+              if (_connectionStatus.toString() == "ConnectivityResult.none") {
+                ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+                  backgroundColor: Colors.deepOrange,
+                  content: Text('ネットワークに繋がっていません'),
+                  duration: Duration(seconds: 3),
+                ));
+              } else {
+                Navigator.pushNamed(context, '/changePassword');
+              }
             },
             title: Text(
               "パスワードを変更",
@@ -190,51 +235,60 @@ class _drawerEX extends State<drawerEX> {
                   backgroundColor: Colors.green,
                   child: Icon(Icons.logout, color: Colors.white)),
               onTap: () {
-                showDialog(
-                    context: context,
-                    builder: (context) => StatefulBuilder(
-                            //在这里为了区分，在构建builder的时候将setState方法命名为了setBottomSheetState。
-                            builder: (context1, showDialogState) {
-                          return AlertDialog(
-                            content: Column(
-                              crossAxisAlignment: CrossAxisAlignment.stretch,
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                Text('ログアウトしますか？'),
+                if (_connectionStatus.toString() == "ConnectivityResult.none") {
+                  ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+                    backgroundColor: Colors.deepOrange,
+                    content: Text('ネットワークに繋がっていません'),
+                    duration: Duration(seconds: 3),
+                  ));
+                } else {
+                  showDialog(
+                      context: context,
+                      builder: (context) => StatefulBuilder(
+                              //在这里为了区分，在构建builder的时候将setState方法命名为了setBottomSheetState。
+                              builder: (context1, showDialogState) {
+                            return AlertDialog(
+                              content: Column(
+                                crossAxisAlignment: CrossAxisAlignment.stretch,
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Text('ログアウトしますか？'),
+                                ],
+                              ),
+                              actions: [
+                                TextButton(
+                                  onPressed: () {
+                                    Navigator.pop(context);
+                                  },
+                                  child: const Text('キャンセル',
+                                      style: TextStyle(
+                                        color: Colors.green,
+                                      )),
+                                ),
+                                TextButton(
+                                  onPressed: () async {
+                                    await logOut();
+                                    setState(() {
+                                      login = false;
+                                    });
+                                    prefs =
+                                        await SharedPreferences.getInstance();
+                                    prefs.remove("userdata");
+                                    Navigator.push(
+                                        context,
+                                        MaterialPageRoute(
+                                            builder: (context) =>
+                                                Tabs(tabSelected: 0)));
+                                  },
+                                  child: const Text('確認',
+                                      style: TextStyle(
+                                        color: Colors.green,
+                                      )),
+                                ),
                               ],
-                            ),
-                            actions: [
-                              TextButton(
-                                onPressed: () {
-                                  Navigator.pop(context);
-                                },
-                                child: const Text('キャンセル',
-                                    style: TextStyle(
-                                      color: Colors.green,
-                                    )),
-                              ),
-                              TextButton(
-                                onPressed: () async {
-                                  await logOut();
-                                  setState(() {
-                                    login = false;
-                                  });
-                                  prefs = await SharedPreferences.getInstance();
-                                  prefs.remove("userdata");
-                                  Navigator.push(
-                                      context,
-                                      MaterialPageRoute(
-                                          builder: (context) =>
-                                              Tabs(tabSelected: 0)));
-                                },
-                                child: const Text('確認',
-                                    style: TextStyle(
-                                      color: Colors.green,
-                                    )),
-                              ),
-                            ],
-                          );
-                        }));
+                            );
+                          }));
+                }
               },
               title: Text(
                 "ログアウト",

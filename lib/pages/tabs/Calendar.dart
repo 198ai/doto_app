@@ -1,5 +1,7 @@
+import 'dart:async';
 import 'dart:collection';
 
+import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:date_format/date_format.dart';
 import 'package:dio/dio.dart';
 import 'package:doto_app/main.dart';
@@ -10,9 +12,11 @@ import 'package:doto_app/model/userData.dart';
 import 'package:doto_app/services/ScreenAdapter.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:syncfusion_flutter_calendar/calendar.dart';
 import 'package:intl/intl.dart';
+import 'dart:developer' as developer;
 import 'package:doto_app/pages/tabs/Calendar.dart';
 import 'package:table_calendar/table_calendar.dart';
 import 'dart:convert';
@@ -44,6 +48,9 @@ class _CalendarPageState extends State<CalendarPage> {
   late Map<DateTime, List<MyEvents>> _events; //ローカルに保存用
   late SharedPreferences prefs;
   List<MyEvents> list = [];
+  ConnectivityResult _connectionStatus = ConnectivityResult.none;
+  final Connectivity _connectivity = Connectivity();
+  late StreamSubscription<ConnectivityResult> _connectivitySubscription;
   List storge = [];
   int getHashCode(DateTime key) {
     return key.day * 1000000 + key.month * 10000 + key.year;
@@ -54,6 +61,9 @@ class _CalendarPageState extends State<CalendarPage> {
     selectedCalendarDate = _focusedCalendarDate;
     mySelectedEvents = {};
     _events = {};
+    initConnectivity();
+    _connectivitySubscription =
+        _connectivity.onConnectivityChanged.listen(_updateConnectionStatus);
     super.initState();
     Future(() async {
       prefs = await SharedPreferences.getInstance();
@@ -75,7 +85,15 @@ class _CalendarPageState extends State<CalendarPage> {
       //prefs.remove("events");
 
       //print(prefs.getString("events").toString());
-      userData();
+      if (_connectionStatus.toString() == "ConnectivityResult.none") {
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+        backgroundColor: Colors.deepOrange,
+        content: Text('ネットワークに繋がっていません'),
+        duration: Duration(seconds: 3),
+      ));
+      }else{
+        userData();
+      }
     });
   }
 
@@ -94,6 +112,14 @@ class _CalendarPageState extends State<CalendarPage> {
   }
 
   Future deleteMyEvents(MyEvents events, DateTime selectedCalendarDate) async {
+    if (_connectionStatus.toString() == "ConnectivityResult.none") {
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+        backgroundColor: Colors.deepOrange,
+        content: Text('ネットワークに繋がっていません'),
+        duration: Duration(seconds: 3),
+      ));
+      return;
+    }
     var date = DateFormat('yyyy-MM-dd').format(selectedCalendarDate);
     Map calendar = {};
     List calendarlist = [];
@@ -120,6 +146,14 @@ class _CalendarPageState extends State<CalendarPage> {
   }
 
   Future sendEvents(Map<DateTime, List<MyEvents>> myEvents) async {
+    if (_connectionStatus.toString() == "ConnectivityResult.none") {
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+        backgroundColor: Colors.deepOrange,
+        content: Text('ネットワークに繋がっていません'),
+        duration: Duration(seconds: 3),
+      ));
+      return;
+    }
     //更新数据
     //整理数据
     List calendarlist = [];
@@ -243,12 +277,33 @@ class _CalendarPageState extends State<CalendarPage> {
   String _convertTwoDigits(int number) {
     return number >= 10 ? "$number" : "0$number";
   }
+  // Platform messages are asynchronous, so we initialize in an async method.
+  Future<void> initConnectivity() async {
+    late ConnectivityResult result;
+    // Platform messages may fail, so we use a try/catch PlatformException.
+    try {
+      result = await _connectivity.checkConnectivity();
+    } on PlatformException catch (e) {
+      developer.log('Couldn\'t check connectivity status', error: e);
+      return;
+    }
+    if (!mounted) {
+      return Future.value(null);
+    }
+    return _updateConnectionStatus(result);
+  }
 
+  Future<void> _updateConnectionStatus(ConnectivityResult result) async {
+    setState(() {
+      _connectionStatus = result;
+    });
+  }
   @override
   void dispose() {
     titleController.dispose();
     descpController.dispose();
     dateController.dispose();
+    _connectivitySubscription.cancel();
     super.dispose();
   }
 

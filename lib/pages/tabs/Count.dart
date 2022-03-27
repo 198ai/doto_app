@@ -1,12 +1,16 @@
+import 'dart:async';
 import 'dart:convert';
 
+import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:date_format/date_format.dart';
 import 'package:dio/dio.dart';
+import 'dart:developer' as developer;
 import 'package:doto_app/model/chartJsonData.dart';
 import 'package:doto_app/model/userData.dart';
 import 'package:doto_app/services/ScreenAdapter.dart';
 import 'package:flutter/material.dart';
 import 'package:charts_flutter/flutter.dart' as charts;
+import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:syncfusion_flutter_charts/charts.dart';
@@ -56,15 +60,20 @@ class _CountPage extends State<CountPage> {
   Color onSelected3 = Colors.black87;
   late UserData userdata;
 
+  ConnectivityResult _connectionStatus = ConnectivityResult.none;
+  final Connectivity _connectivity = Connectivity();
+  late StreamSubscription<ConnectivityResult> _connectivitySubscription;
   Future getEvents() async {
     //整理数据
     //print(mySelectedEvents);
     Dio dio = new Dio();
     dio.options.headers['content-Type'] = 'application/json';
+
     ///请求header的配置
     dio.options.headers['authorization'] = "Bearer ${userdata.accessToken}";
     try {
-      Response response = await dio.get("http://www.leishengle.com/api/v1/getgraph");
+      Response response =
+          await dio.get("http://www.leishengle.com/api/v1/getgraph");
       if (response.statusCode == 201) {
         print(response);
         response.data.forEach((e) {
@@ -78,9 +87,9 @@ class _CountPage extends State<CountPage> {
         });
         setState(() {});
         ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-        content: Text('グラフ更新しました'),
-        duration: Duration(seconds: 1),
-      ));
+          content: Text('グラフ更新しました'),
+          duration: Duration(seconds: 1),
+        ));
       }
     } catch (onError) {
       debugPrint("error:${onError.toString()}");
@@ -97,10 +106,17 @@ class _CountPage extends State<CountPage> {
       await getEvents();
     }
   }
-
+  @override
+  void dispose() {
+    _connectivitySubscription.cancel();
+    super.dispose();
+  }
   @override
   void initState() {
     super.initState();
+    initConnectivity();
+    _connectivitySubscription =
+        _connectivity.onConnectivityChanged.listen(_updateConnectionStatus);
     String jsonString2 = "";
     hasdate = formatDate(DateTime.now(), [
       'yyyy',
@@ -110,17 +126,45 @@ class _CountPage extends State<CountPage> {
       'dd',
     ]).toString();
     Future(() async {
-     await userData();
+      await userData();
       SharedPreferences list = await SharedPreferences.getInstance();
       list.getString("counts") == null
           ? jsonString2 = ""
           : jsonString2 = list.getString("counts");
-      gettimes();
-      dataChange();
-      setState(() {});
+      if (_connectionStatus.toString() == "ConnectivityResult.none") {
+        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+          backgroundColor: Colors.deepOrange,
+          content: Text('ネットワークに繋がっていません'),
+          duration: Duration(seconds: 3),
+        ));
+      } else {
+        gettimes();
+        dataChange();
+        setState(() {});
+      }
     });
   }
+// Platform messages are asynchronous, so we initialize in an async method.
+  Future<void> initConnectivity() async {
+    late ConnectivityResult result;
+    // Platform messages may fail, so we use a try/catch PlatformException.
+    try {
+      result = await _connectivity.checkConnectivity();
+    } on PlatformException catch (e) {
+      developer.log('Couldn\'t check connectivity status', error: e);
+      return;
+    }
+    if (!mounted) {
+      return Future.value(null);
+    }
+    return _updateConnectionStatus(result);
+  }
 
+  Future<void> _updateConnectionStatus(ConnectivityResult result) async {
+    setState(() {
+      _connectionStatus = result;
+    });
+  }
   gettimes() {
     if (hasdate2 == "") {
       chartJsonData.forEach((element) {

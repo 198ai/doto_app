@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:convert';
 
+import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:doto_app/model/userData.dart';
 import 'package:doto_app/pages/tabs/Tabs.dart';
 import 'package:flutter/material.dart';
@@ -9,6 +10,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../services/ScreenAdapter.dart';
 import '../widget/JdText.dart';
 import '../widget/JdButton.dart';
+import 'dart:developer' as developer;
 import 'package:dio/dio.dart';
 import 'package:shake_animation_widget/shake_animation_widget.dart';
 
@@ -42,13 +44,47 @@ class _SignUpPageState extends State<SignUpPage> {
   StreamController<String> _userPasswordStream = new StreamController();
   StreamController<String> _userEmailStream = new StreamController();
 
+  ConnectivityResult _connectionStatus = ConnectivityResult.none;
+  final Connectivity _connectivity = Connectivity();
+  late StreamSubscription<ConnectivityResult> _connectivitySubscription;
   @override
   void initState() {
     // TODO: implement initState
     super.initState();
+    initConnectivity();
+    _connectivitySubscription =
+        _connectivity.onConnectivityChanged.listen(_updateConnectionStatus);
     setState(() {
       mes = "";
       show = false;
+    });
+  }
+
+  @override
+  void dispose() {
+    _connectivitySubscription.cancel();
+    super.dispose();
+  }
+
+  // Platform messages are asynchronous, so we initialize in an async method.
+  Future<void> initConnectivity() async {
+    late ConnectivityResult result;
+    // Platform messages may fail, so we use a try/catch PlatformException.
+    try {
+      result = await _connectivity.checkConnectivity();
+    } on PlatformException catch (e) {
+      developer.log('Couldn\'t check connectivity status', error: e);
+      return;
+    }
+    if (!mounted) {
+      return Future.value(null);
+    }
+    return _updateConnectionStatus(result);
+  }
+
+  Future<void> _updateConnectionStatus(ConnectivityResult result) async {
+    setState(() {
+      _connectionStatus = result;
     });
   }
 
@@ -114,12 +150,21 @@ class _SignUpPageState extends State<SignUpPage> {
                 backgroundColor: MaterialStateProperty.all(Colors.green), //背景颜色
               ),
               onPressed: () async {
-               await checkLoginFunction();
-                if (successed) {
-                  Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                          builder: (context) => Tabs(tabSelected: 0)));
+                if (_connectionStatus.toString() == "ConnectivityResult.none") {
+                  ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+                    backgroundColor: Colors.deepOrange,
+                    content: Text('ネットワークに繋がっていません'),
+                    duration: Duration(seconds: 3),
+                  ));
+                  return;
+                } else {
+                  await checkLoginFunction();
+                  if (successed) {
+                    Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                            builder: (context) => Tabs(tabSelected: 0)));
+                  }
                 }
               },
             ),
@@ -164,7 +209,7 @@ class _SignUpPageState extends State<SignUpPage> {
 
                 decoration: InputDecoration(
                   labelText: "パスワード",
-                  errorText: snapshot.data==""?null:snapshot.data,
+                  errorText: snapshot.data == "" ? null : snapshot.data,
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.all(Radius.circular(10)),
                   ),
@@ -222,7 +267,7 @@ class _SignUpPageState extends State<SignUpPage> {
                 //边框样式设置
                 decoration: InputDecoration(
                   labelText: "メールアドレス",
-                  errorText: snapshot.data==""?null:snapshot.data,
+                  errorText: snapshot.data == "" ? null : snapshot.data,
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.all(Radius.circular(10)),
                   ),
@@ -271,7 +316,7 @@ class _SignUpPageState extends State<SignUpPage> {
                 //边框样式设置
                 decoration: InputDecoration(
                   //红色的错误提示文本
-                  errorText: snapshot.data==""?null:snapshot.data,
+                  errorText: snapshot.data == "" ? null : snapshot.data,
                   labelText: "ユーザ名",
                   //设置上下左右 都有边框
                   //设置四个角的弧度

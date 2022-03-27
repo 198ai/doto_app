@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:convert';
 
+import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:doto_app/model/userData.dart';
 import 'package:doto_app/pages/tabs/Tabs.dart';
 import 'package:flutter/material.dart';
@@ -10,6 +11,7 @@ import '../services/ScreenAdapter.dart';
 import '../widget/JdText.dart';
 import '../widget/JdButton.dart';
 import 'package:dio/dio.dart';
+import 'dart:developer' as developer;
 import 'package:shake_animation_widget/shake_animation_widget.dart';
 
 class ResetPassword extends StatefulWidget {
@@ -43,14 +45,47 @@ class _ResetPasswordState extends State<ResetPassword> {
   StreamController<String> _codeStream = new StreamController();
   StreamController<String> _userPasswordStream = new StreamController();
   StreamController<String> _userEmailStream = new StreamController();
+  ConnectivityResult _connectionStatus = ConnectivityResult.none;
+  final Connectivity _connectivity = Connectivity();
+  late StreamSubscription<ConnectivityResult> _connectivitySubscription;
+
+  @override
+  void dispose() {
+    _connectivitySubscription.cancel();
+    super.dispose();
+  }
 
   @override
   void initState() {
     super.initState();
+    initConnectivity();
+    _connectivitySubscription =
+        _connectivity.onConnectivityChanged.listen(_updateConnectionStatus);
     setState(() {
       mes = "";
       show = false;
       widget.email != "" ? _emailController.text = widget.email : null;
+    });
+  }
+
+  Future<void> initConnectivity() async {
+    late ConnectivityResult result;
+    // Platform messages may fail, so we use a try/catch PlatformException.
+    try {
+      result = await _connectivity.checkConnectivity();
+    } on PlatformException catch (e) {
+      developer.log('Couldn\'t check connectivity status', error: e);
+      return;
+    }
+    if (!mounted) {
+      return Future.value(null);
+    }
+    return _updateConnectionStatus(result);
+  }
+
+  Future<void> _updateConnectionStatus(ConnectivityResult result) async {
+    setState(() {
+      _connectionStatus = result;
     });
   }
 
@@ -99,11 +134,19 @@ class _ResetPasswordState extends State<ResetPassword> {
                 backgroundColor: MaterialStateProperty.all(Colors.green), //背景颜色
               ),
               onPressed: () async {
-                if (await checkLoginFunction()) {
-                   Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                              builder: (context) => Tabs(tabSelected: 0)));
+                if (_connectionStatus.toString() == "ConnectivityResult.none") {
+                  ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+                    backgroundColor: Colors.deepOrange,
+                    content: Text('ネットワークに繋がっていません'),
+                    duration: Duration(seconds: 3),
+                  ));
+                } else {
+                  if (await checkLoginFunction()) {
+                    Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                            builder: (context) => Tabs(tabSelected: 0)));
+                  }
                 }
               },
             ),
@@ -141,7 +184,7 @@ class _ResetPasswordState extends State<ResetPassword> {
                 maxLines: 1,
                 decoration: InputDecoration(
                   labelText: "パスワード",
-                  errorText: snapshot.data==""?null:snapshot.data,
+                  errorText: snapshot.data == "" ? null : snapshot.data,
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.all(Radius.circular(10)),
                   ),
@@ -192,7 +235,7 @@ class _ResetPasswordState extends State<ResetPassword> {
                 maxLines: 1,
                 decoration: InputDecoration(
                   labelText: "メールアドレス",
-                  errorText: snapshot.data==""?null:snapshot.data,
+                  errorText: snapshot.data == "" ? null : snapshot.data,
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.all(Radius.circular(10)),
                   ),
@@ -229,7 +272,7 @@ class _ResetPasswordState extends State<ResetPassword> {
                   }
                 },
                 decoration: InputDecoration(
-                  errorText: snapshot.data==""?null:snapshot.data,
+                  errorText: snapshot.data == "" ? null : snapshot.data,
                   labelText: "認証コード",
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.all(Radius.circular(10)),
@@ -322,14 +365,14 @@ class _ResetPasswordState extends State<ResetPassword> {
       Response response = await Dio()
           .post("http://www.leishengle.com/api/v1/resetPassword", data: params);
       if (response.statusCode != null) {
-         userdate = UserData.fromJson(response.data);
-          var data = userdate.toJson();
-          if (userdate.accessToken != "") {
-            prefs = await SharedPreferences.getInstance();
-            prefs.setString("userdata", json.encode(data));
-            successed = true;
-            print(prefs.getString("userdata"));
-          }
+        userdate = UserData.fromJson(response.data);
+        var data = userdate.toJson();
+        if (userdate.accessToken != "") {
+          prefs = await SharedPreferences.getInstance();
+          prefs.setString("userdata", json.encode(data));
+          successed = true;
+          print(prefs.getString("userdata"));
+        }
         if (response.statusCode == 201) {
           ScaffoldMessenger.of(context).showSnackBar(SnackBar(
             content: Text("パスワードをリセットしました"),

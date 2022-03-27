@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:convert';
 
+import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:doto_app/model/userData.dart';
 import 'package:doto_app/pages/tabs/Tabs.dart';
 import 'package:flutter/material.dart';
@@ -10,6 +11,7 @@ import '../services/ScreenAdapter.dart';
 import '../widget/JdText.dart';
 import '../widget/JdButton.dart';
 import 'package:dio/dio.dart';
+import 'dart:developer' as developer;
 import 'package:shake_animation_widget/shake_animation_widget.dart';
 
 class LoginPage extends StatefulWidget {
@@ -43,16 +45,48 @@ class _LoginPageState extends State<LoginPage> {
   StreamController<String> _userPasswordStream = new StreamController();
   StreamController<String> _userEmailStream = new StreamController();
 
+  ConnectivityResult _connectionStatus = ConnectivityResult.none;
+  final Connectivity _connectivity = Connectivity();
+  late StreamSubscription<ConnectivityResult> _connectivitySubscription;
   @override
   void initState() {
     // TODO: implement initState
     super.initState();
+    initConnectivity();
+    _connectivitySubscription =
+        _connectivity.onConnectivityChanged.listen(_updateConnectionStatus);
     setState(() {
       mes = "";
       show = false;
     });
   }
+  @override
+  void dispose() {
+    _connectivitySubscription.cancel();
+    super.dispose();
+  }
 
+  Future<void> initConnectivity() async {
+    late ConnectivityResult result;
+    // Platform messages may fail, so we use a try/catch PlatformException.
+    try {
+      result = await _connectivity.checkConnectivity();
+    } on PlatformException catch (e) {
+      developer.log('Couldn\'t check connectivity status', error: e);
+      return;
+    }
+    if (!mounted) {
+      return Future.value(null);
+    }
+    return _updateConnectionStatus(result);
+  }
+
+  Future<void> _updateConnectionStatus(ConnectivityResult result) async {
+    setState(() {
+      _connectionStatus = result;
+    });
+  }
+  
   @override
   Widget build(BuildContext context) {
     //手势识别点击空白隐藏键盘
@@ -115,13 +149,21 @@ class _LoginPageState extends State<LoginPage> {
               ),
               child: Text("登録"),
               onPressed: () async {
-                if (await checkLoginFunction()) {
-                  Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                          builder: (context) => Tabs(tabSelected: 0)));
-                }
-              },
+                 if (_connectionStatus.toString() == "ConnectivityResult.none") {
+                  ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+                    backgroundColor: Colors.deepOrange,
+                    content: Text('ネットワークに繋がっていません'),
+                    duration: Duration(seconds: 3),
+                  ));
+                  return;
+                }else{
+                  if (await checkLoginFunction()) {
+                    Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                            builder: (context) => Tabs(tabSelected: 0)));
+                  }
+              }}
             ),
           ),
           Row(mainAxisAlignment: MainAxisAlignment.spaceEvenly, children: [

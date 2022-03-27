@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:convert';
 
+import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:doto_app/model/userData.dart';
 import 'package:doto_app/pages/tabs/Tabs.dart';
 import 'package:flutter/material.dart';
@@ -9,6 +10,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../services/ScreenAdapter.dart';
 import '../widget/JdText.dart';
 import '../widget/JdButton.dart';
+import 'dart:developer' as developer;
 import 'package:dio/dio.dart';
 import 'package:shake_animation_widget/shake_animation_widget.dart';
 
@@ -46,14 +48,26 @@ class _ChangePasswordState extends State<ChangePassword> {
   StreamController<String> _userPasswordStream = new StreamController();
   StreamController<String> _userEmailStream = new StreamController();
 
+  ConnectivityResult _connectionStatus = ConnectivityResult.none;
+  final Connectivity _connectivity = Connectivity();
+  late StreamSubscription<ConnectivityResult> _connectivitySubscription;
   @override
   void initState() {
     super.initState();
+    initConnectivity();
+    _connectivitySubscription =
+        _connectivity.onConnectivityChanged.listen(_updateConnectionStatus);
     setState(() {
       mes = "";
       show = false;
       widget.email != "" ? _emailController.text = widget.email : null;
     });
+  }
+
+  @override
+  void dispose() {
+    _connectivitySubscription.cancel();
+    super.dispose();
   }
 
   @override
@@ -101,14 +115,22 @@ class _ChangePasswordState extends State<ChangePassword> {
                 backgroundColor: MaterialStateProperty.all(Colors.green), //背景颜色
               ),
               onPressed: () async {
-                if (await checkLoginFunction()) {
-                  await changePassword();
-                }
-                if(successed){
-                   Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                              builder: (context) => Tabs(tabSelected: 0)));
+                if (_connectionStatus.toString() == "ConnectivityResult.none") {
+                  ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+                    backgroundColor: Colors.deepOrange,
+                    content: Text('ネットワークに繋がっていません'),
+                    duration: Duration(seconds: 3),
+                  ));
+                } else {
+                  if (await checkLoginFunction()) {
+                    await changePassword();
+                  }
+                  if (successed) {
+                    Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                            builder: (context) => Tabs(tabSelected: 0)));
+                  }
                 }
               },
             ),
@@ -116,6 +138,28 @@ class _ChangePasswordState extends State<ChangePassword> {
         ],
       ),
     ));
+  }
+
+// Platform messages are asynchronous, so we initialize in an async method.
+  Future<void> initConnectivity() async {
+    late ConnectivityResult result;
+    // Platform messages may fail, so we use a try/catch PlatformException.
+    try {
+      result = await _connectivity.checkConnectivity();
+    } on PlatformException catch (e) {
+      developer.log('Couldn\'t check connectivity status', error: e);
+      return;
+    }
+    if (!mounted) {
+      return Future.value(null);
+    }
+    return _updateConnectionStatus(result);
+  }
+
+  Future<void> _updateConnectionStatus(ConnectivityResult result) async {
+    setState(() {
+      _connectionStatus = result;
+    });
   }
 
   StreamBuilder<String> buildUserPasswordWidget() {
@@ -147,7 +191,7 @@ class _ChangePasswordState extends State<ChangePassword> {
                 maxLines: 1,
                 decoration: InputDecoration(
                   labelText: "旧パスワード",
-                  errorText: snapshot.data==""?null:snapshot.data,
+                  errorText: snapshot.data == "" ? null : snapshot.data,
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.all(Radius.circular(10)),
                   ),
@@ -199,7 +243,7 @@ class _ChangePasswordState extends State<ChangePassword> {
                 maxLines: 1,
                 decoration: InputDecoration(
                   labelText: "メールアドレス",
-                  errorText: snapshot.data==""?null:snapshot.data,
+                  errorText: snapshot.data == "" ? null : snapshot.data,
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.all(Radius.circular(10)),
                   ),
@@ -237,7 +281,7 @@ class _ChangePasswordState extends State<ChangePassword> {
                 },
                 obscureText: !_isNewShow,
                 decoration: InputDecoration(
-                  errorText: snapshot.data==""?null:snapshot.data,
+                  errorText: snapshot.data == "" ? null : snapshot.data,
                   labelText: "新パスワード",
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.all(Radius.circular(10)),
@@ -337,8 +381,9 @@ class _ChangePasswordState extends State<ChangePassword> {
       "newpassword": "${_newPasswordController.text}"
     };
     try {
-      Response response = await Dio()
-          .post("http://www.leishengle.com/api/v1/changePassword", data: params);
+      Response response = await Dio().post(
+          "http://www.leishengle.com/api/v1/changePassword",
+          data: params);
       if (response.statusCode != null) {
         if (response.statusCode == 201) {
           userdate = UserData.fromJson(response.data);

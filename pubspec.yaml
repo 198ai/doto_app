@@ -42,6 +42,7 @@ dependencies:
   dio: ^3.0.10
   date_format: ^2.0.4
   flutter_local_notifications: ^9.4.0
+  connectivity_plus: ^2.2.1
    # 抖动动画  向上弹出动画
   shake_animation_widget: ^2.1.2
   rxdart: ^0.24.1 
