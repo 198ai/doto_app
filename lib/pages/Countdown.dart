@@ -1,8 +1,11 @@
 import 'dart:async';
 import 'dart:convert';
 
+import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:date_format/date_format.dart';
 import 'package:dio/dio.dart';
+
+import 'dart:developer' as developer;
 import 'package:doto_app/model/chartJsonData.dart';
 import 'package:doto_app/model/ringtonePlayer.dart';
 import 'package:doto_app/model/tasklist.dart';
@@ -10,6 +13,7 @@ import 'package:doto_app/model/userData.dart';
 import 'package:doto_app/pages/tabs/Tabs.dart';
 import 'package:doto_app/pages/tabs/ToDoList.dart';
 import 'package:doto_app/services/ScreenAdapter.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_ringtone_player/flutter_ringtone_player.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -52,6 +56,9 @@ class _CountdownState extends State<CountDown> {
   List<String> eventsNames = [];
   late UserData userdata;
   late var formatToday;
+  ConnectivityResult _connectionStatus = ConnectivityResult.none;
+  final Connectivity _connectivity = Connectivity();
+  late StreamSubscription<ConnectivityResult> _connectivitySubscription;
   //时间格式化，根据总秒数转换为对应的 hh:mm:ss 格式
   String constructTime(int seconds) {
     int hour = seconds ~/ 3600;
@@ -72,6 +79,9 @@ class _CountdownState extends State<CountDown> {
   @override
   void initState() {
     super.initState();
+    initConnectivity();
+    _connectivitySubscription =
+        _connectivity.onConnectivityChanged.listen(_updateConnectionStatus);
     startTimer();
     //data = ChartJsonData(date: "", contents: contents);
     //日付取得
@@ -222,6 +232,7 @@ class _CountdownState extends State<CountDown> {
   @override
   void dispose() {
     super.dispose();
+    _connectivitySubscription.cancel();
     cancelTimer();
   }
 
@@ -265,12 +276,45 @@ class _CountdownState extends State<CountDown> {
                             fontSize: ScreenAdapter.size(70),
                             color: Colors.black87)),
                     onPressed: () async {
-                      stopTimer();
+                      if (_connectionStatus.toString() ==
+                          "ConnectivityResult.none") {
+                        ScaffoldMessenger.of(context)
+                            .showSnackBar(const SnackBar(
+                          backgroundColor: Colors.deepOrange,
+                          content: Text('ネットワークに繋がっていません'),
+                          duration: Duration(seconds: 3),
+                        ));
+                        return;
+                      } else {
+                        stopTimer();
+                      }
                     }),
               )
             ],
           )
         ]));
+  }
+
+  // Platform messages are asynchronous, so we initialize in an async method.
+  Future<void> initConnectivity() async {
+    late ConnectivityResult result;
+    // Platform messages may fail, so we use a try/catch PlatformException.
+    try {
+      result = await _connectivity.checkConnectivity();
+    } on PlatformException catch (e) {
+      developer.log('Couldn\'t check connectivity status', error: e);
+      return;
+    }
+    if (!mounted) {
+      return Future.value(null);
+    }
+    return _updateConnectionStatus(result);
+  }
+
+  Future<void> _updateConnectionStatus(ConnectivityResult result) async {
+    setState(() {
+      _connectionStatus = result;
+    });
   }
 
   _showADialog() {

@@ -68,6 +68,7 @@ class _ToDoListPageState extends State<ToDoListPage> with RouteAware {
       ));
       return;
     }
+
     ///本地存储的数据先更新给API，同步数据
     ///然后更新本地数据
     SharedPreferences retult = await SharedPreferences.getInstance();
@@ -908,19 +909,30 @@ class _ToDoListPageState extends State<ToDoListPage> with RouteAware {
                                 fontWeight: FontWeight.bold),
                           ),
                           onPressed: () async {
-                            //Navigator.pushNamed(context, '/start');
-                            Navigator.of(context).push(MaterialPageRoute(
-                                //传值
-                                builder: (context) => CountDown(
-                                      date: int.parse(item.date),
-                                      time: int.parse(item.time),
-                                      title: todos[index].title,
-                                      index: index,
-                                      id: todos[index].id,
-                                    )
-                                //没传值
-                                //builder: (context)=>Detail()
-                                ));
+                            if (_connectionStatus.toString() ==
+                                "ConnectivityResult.none") {
+                              ScaffoldMessenger.of(context)
+                                  .showSnackBar(const SnackBar(
+                                backgroundColor: Colors.deepOrange,
+                                content: Text('ネットワークに繋がっていません'),
+                                duration: Duration(seconds: 3),
+                              ));
+                              return;
+                            } else {
+                              //Navigator.pushNamed(context, '/start');
+                              Navigator.of(context).push(MaterialPageRoute(
+                                  //传值
+                                  builder: (context) => CountDown(
+                                        date: int.parse(item.date),
+                                        time: int.parse(item.time),
+                                        title: todos[index].title,
+                                        index: index,
+                                        id: todos[index].id,
+                                      )
+                                  //没传值
+                                  //builder: (context)=>Detail()
+                                  ));
+                            }
                           },
                         ),
                       ),
