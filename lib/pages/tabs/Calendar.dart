@@ -136,8 +136,14 @@ class _CalendarPageState extends State<CalendarPage> {
           duration: Duration(seconds: 1),
         ));
       }
-    } catch (onError) {
-      debugPrint("error:${onError.toString()}");
+    } on DioError catch (e) {
+      //400是错误，后台写法需要修改
+      if(e.response.statusCode==400){
+        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+          content: Text('メモ削除成功'),
+          duration: Duration(seconds: 1),
+        ));
+      }
     }
   }
 
