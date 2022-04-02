@@ -661,9 +661,6 @@ class _ToDoListPageState extends State<ToDoListPage> with RouteAware {
                                                                             3),
                                                                   ),
                                                                 );
-                                                                Navigator.pop(
-                                                                    context);
-                                                                //return;
                                                               } else {
                                                                 await addtodolist(
                                                                   textController
