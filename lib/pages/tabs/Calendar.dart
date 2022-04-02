@@ -10,6 +10,7 @@ import 'package:doto_app/model/eventsToJoson.dart';
 import 'package:doto_app/model/myevents.dart';
 import 'package:doto_app/model/userData.dart';
 import 'package:doto_app/services/ScreenAdapter.dart';
+import 'package:doto_app/widget/drawer.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -500,11 +501,16 @@ class _CalendarPageState extends State<CalendarPage> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
+    return WillPopScope(
+        onWillPop: () async{
+          return false;
+        },
+        child:Scaffold(
         appBar: AppBar(
             backgroundColor: Colors.green,
             centerTitle: true,
             title: Text("カレンダー"),
+            automaticallyImplyLeading: false,
             actions: <Widget>[
               IconButton(
                   splashColor: Colors.transparent,
@@ -689,7 +695,7 @@ class _CalendarPageState extends State<CalendarPage> {
                     },
                     icon: Icon(Icons.delete)),
               )))
-        ])));
+        ]))));
   }
 
   Widget _buildEventsMarker(DateTime date, List events) {

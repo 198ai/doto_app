@@ -48,6 +48,8 @@ class _ToDoListPageState extends State<ToDoListPage> with RouteAware {
   late UserData userdata;
   late String userName;
   late String userEmail;
+
+  GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
   ConnectivityResult _connectionStatus = ConnectivityResult.none;
   final Connectivity _connectivity = Connectivity();
   late StreamSubscription<ConnectivityResult> _connectivitySubscription;
@@ -442,297 +444,315 @@ class _ToDoListPageState extends State<ToDoListPage> with RouteAware {
 //画面のHTML
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-        resizeToAvoidBottomInset: false,
-        appBar: PreferredSize(
-          child: AppBar(
-              backgroundColor: Colors.green,
-              centerTitle: true,
-              title: Text("アジェンダ"),
-              actions: <Widget>[
-                IconButton(
-                    splashColor: Colors.transparent,
-                    highlightColor: Colors.transparent,
-                    icon: Icon(Icons.add),
-                    onPressed: () {
-                      textController.text = "";
-                      dateController.text = "";
-                      timeController.text = "";
-                      //足すボダン押した時、ポップアップが出ます
-                      if (_connectionStatus == ConnectivityResult.none) {
-                        ScaffoldMessenger.of(context)
-                            .showSnackBar(const SnackBar(
-                          backgroundColor: Colors.deepOrange,
-                          content: Text('ネットワークに繋がっていません'),
-                          duration: Duration(seconds: 1),
-                        ));
-                      } else {
-                        if (userName != "") {
-                          showDialog(
-                              barrierDismissible: false,
-                              context: context,
-                              builder: (context) {
-                                return Dialog(
-                                  child: Container(
-                                    color: Colors.white,
-                                    width: ScreenAdapter.width(250),
-                                    height: ScreenAdapter.height(430),
-                                    child: Center(
-                                      child: SingleChildScrollView(
-                                          child: Column(
-                                        children: [
-                                          Padding(
-                                            padding: EdgeInsets.fromLTRB(
-                                                ScreenAdapter.width(30),
-                                                ScreenAdapter.height(30),
-                                                ScreenAdapter.width(30),
-                                                ScreenAdapter.height(30)),
-                                            child: Column(
-                                              children: [
-                                                Text("新たな挑戦を始めるね！"),
-                                                Text("＾-＾素晴らしい！")
-                                              ],
-                                            ),
-                                          ),
-                                          Padding(
-                                              padding: EdgeInsets.fromLTRB(
-                                                  ScreenAdapter.width(30),
-                                                  ScreenAdapter.height(0),
-                                                  ScreenAdapter.width(30),
-                                                  ScreenAdapter.height(0)),
-                                              child: Theme(
-                                                data:
-                                                    Theme.of(context).copyWith(
-                                                  colorScheme: ThemeData()
-                                                      .colorScheme
-                                                      .copyWith(
-                                                        primary: Colors.green,
-                                                      ),
-                                                ),
-                                                child: TextField(
-                                                  style: TextStyle(
-                                                      color: Colors.black87),
-                                                  controller: textController,
-                                                  decoration: InputDecoration(
-                                                      icon: Icon(Icons
-                                                          .article_outlined),
-                                                      labelText: "タスク名称",
-                                                      enabledBorder:
-                                                          UnderlineInputBorder(
-                                                        borderSide: BorderSide(
-                                                            color:
-                                                                Colors.green),
-                                                      ),
-                                                      focusedBorder:
-                                                          UnderlineInputBorder(
-                                                        borderSide: BorderSide(
-                                                            color:
-                                                                Colors.green),
-                                                      )),
-                                                ),
-                                              )),
-                                          Padding(
-                                              padding: EdgeInsets.fromLTRB(
-                                                  ScreenAdapter.width(30),
-                                                  ScreenAdapter.height(0),
-                                                  ScreenAdapter.width(30),
-                                                  ScreenAdapter.height(0)),
-                                              child: Theme(
-                                                  data: Theme.of(context)
-                                                      .copyWith(
-                                                    colorScheme: ThemeData()
-                                                        .colorScheme
-                                                        .copyWith(
-                                                          primary: Colors.green,
-                                                        ),
-                                                  ),
-                                                  child: TextField(
-                                                      decoration:
-                                                          new InputDecoration(
-                                                        icon: Icon(
-                                                            Icons.access_time),
-                                                        hintText: "時間選択",
-                                                      ),
-                                                      controller:
-                                                          timeController,
-                                                      onTap: () async {
-                                                        await _showTimePicker();
-                                                      }))),
-                                          Padding(
-                                              padding: EdgeInsets.fromLTRB(
-                                                  ScreenAdapter.width(30),
-                                                  ScreenAdapter.height(0),
-                                                  ScreenAdapter.width(30),
-                                                  ScreenAdapter.height(0)),
-                                              child: Theme(
-                                                  data: Theme.of(context)
-                                                      .copyWith(
-                                                    colorScheme: ThemeData()
-                                                        .colorScheme
-                                                        .copyWith(
-                                                          primary: Colors.green,
-                                                        ),
-                                                  ),
-                                                  child: TextField(
-                                                      decoration:
-                                                          new InputDecoration(
-                                                        icon: Icon(Icons
-                                                            .calendar_today_outlined),
-                                                        hintText: "完成予定日選択",
-                                                      ),
-                                                      controller:
-                                                          dateController,
-                                                      onTap: () {
-                                                        _showDatePicker();
-                                                      }))),
-                                          Container(
-                                            height: btnHeight,
-                                            margin: EdgeInsets.fromLTRB(
-                                                ScreenAdapter.width(30),
-                                                ScreenAdapter.height(0),
-                                                ScreenAdapter.width(30),
-                                                ScreenAdapter.height(0)),
-                                            child: Column(
-                                              children: [
-                                                Row(
-                                                  mainAxisAlignment:
-                                                      MainAxisAlignment
-                                                          .spaceEvenly,
+    return WillPopScope(
+        onWillPop: () async{
+          scaffoldKey.currentState!.isDrawerOpen?
+          Navigator.pop(context):scaffoldKey.currentState!.openDrawer();
+          return false;
+        },
+        child: Scaffold(
+            key: scaffoldKey,
+            resizeToAvoidBottomInset: false,
+            appBar: PreferredSize(
+              child: AppBar(
+                  backgroundColor: Colors.green,
+                  centerTitle: true,
+                  title: Text("アジェンダ"),
+                  actions: <Widget>[
+                    IconButton(
+                        splashColor: Colors.transparent,
+                        highlightColor: Colors.transparent,
+                        icon: Icon(Icons.add),
+                        onPressed: () {
+                          textController.text = "";
+                          dateController.text = "";
+                          timeController.text = "";
+                          //足すボダン押した時、ポップアップが出ます
+                          if (_connectionStatus == ConnectivityResult.none) {
+                            ScaffoldMessenger.of(context)
+                                .showSnackBar(const SnackBar(
+                              backgroundColor: Colors.deepOrange,
+                              content: Text('ネットワークに繋がっていません'),
+                              duration: Duration(seconds: 1),
+                            ));
+                          } else {
+                            if (userName != "") {
+                              showDialog(
+                                  barrierDismissible: false,
+                                  context: context,
+                                  builder: (context) {
+                                    return Dialog(
+                                      child: Container(
+                                        color: Colors.white,
+                                        width: ScreenAdapter.width(250),
+                                        height: ScreenAdapter.height(430),
+                                        child: Center(
+                                          child: SingleChildScrollView(
+                                              child: Column(
+                                            children: [
+                                              Padding(
+                                                padding: EdgeInsets.fromLTRB(
+                                                    ScreenAdapter.width(30),
+                                                    ScreenAdapter.height(30),
+                                                    ScreenAdapter.width(30),
+                                                    ScreenAdapter.height(30)),
+                                                child: Column(
                                                   children: [
-                                                    TextButton(
-                                                      onPressed: () {
-                                                        textController.text =
-                                                            "";
-                                                        dateController.text =
-                                                            "";
-                                                        timeController.text =
-                                                            "";
-                                                        Navigator.of(context)
-                                                            .pop();
-                                                      },
-                                                      child: Text(
-                                                        "サボる",
-                                                        style: TextStyle(
-                                                            fontSize:
-                                                                ScreenAdapter
-                                                                    .size(15),
-                                                            color:
-                                                                Colors.green),
-                                                      ),
-                                                    ),
-                                                    TextButton(
-                                                        onPressed: () async {
-                                                          //setState((){
-                                                          if (textController.text == "" ||
-                                                              dateController
-                                                                      .text ==
-                                                                  "" ||
-                                                              timeController
-                                                                      .text ==
-                                                                  "") {
-                                                            ScaffoldMessenger
-                                                                    .of(context)
-                                                                .showSnackBar(
-                                                              const SnackBar(
-                                                                backgroundColor:
-                                                                    Colors
-                                                                        .deepOrange,
-                                                                content: Text(
-                                                                    '全ての内容を入力してください'),
-                                                                duration:
-                                                                    Duration(
-                                                                        seconds:
-                                                                            3),
-                                                              ),
-                                                            );
-                                                            Navigator.pop(
-                                                                context);
-                                                            //return;
-                                                          } else {
-                                                            await addtodolist(
-                                                              textController
-                                                                  .text,
-                                                              days.toString(),
-                                                              inSeconds
-                                                                  .toString(),
-                                                              enddate
-                                                                  .toString(),
-                                                            );
-                                                            _editParentText(
-                                                                textController
-                                                                    .text,
-                                                                days.toString(),
-                                                                inSeconds
-                                                                    .toString(),
-                                                                enddate
-                                                                    .toString());
-                                                            Navigator.pop(
-                                                                context);
-                                                          }
-                                                        },
-                                                        child: Text(
-                                                          "チャレンジする",
-                                                          style: TextStyle(
-                                                              fontSize:
-                                                                  ScreenAdapter
-                                                                      .size(15),
-                                                              color:
-                                                                  Colors.green),
-                                                        )),
+                                                    Text("新たな挑戦を始めるね！"),
+                                                    Text("＾-＾素晴らしい！")
                                                   ],
                                                 ),
-                                              ],
-                                            ),
-                                          )
-                                        ],
-                                      )),
-                                    ),
-                                  ),
-                                );
-                              });
-                        } else {
-                          showDialog(
-                              context: context,
-                              builder: (context) => StatefulBuilder(
-                                      //在这里为了区分，在构建builder的时候将setState方法命名为了setBottomSheetState。
-                                      builder: (context1, showDialogState) {
-                                    return AlertDialog(
-                                      content: Column(
-                                        crossAxisAlignment:
-                                            CrossAxisAlignment.stretch,
-                                        mainAxisSize: MainAxisSize.min,
-                                        children: [
-                                          Text('登録してください'),
-                                        ],
-                                      ),
-                                      actions: [
-                                        TextButton(
-                                          onPressed: () {
-                                            Navigator.pop(context);
-                                          },
-                                          child: Text(
-                                            '確認',
-                                            style: TextStyle(
-                                                fontSize:
-                                                    ScreenAdapter.size(15),
-                                                color: Colors.green),
-                                          ),
+                                              ),
+                                              Padding(
+                                                  padding: EdgeInsets.fromLTRB(
+                                                      ScreenAdapter.width(30),
+                                                      ScreenAdapter.height(0),
+                                                      ScreenAdapter.width(30),
+                                                      ScreenAdapter.height(0)),
+                                                  child: Theme(
+                                                    data: Theme.of(context)
+                                                        .copyWith(
+                                                      colorScheme: ThemeData()
+                                                          .colorScheme
+                                                          .copyWith(
+                                                            primary:
+                                                                Colors.green,
+                                                          ),
+                                                    ),
+                                                    child: TextField(
+                                                      style: TextStyle(
+                                                          color:
+                                                              Colors.black87),
+                                                      controller:
+                                                          textController,
+                                                      decoration:
+                                                          InputDecoration(
+                                                              icon: Icon(Icons
+                                                                  .article_outlined),
+                                                              labelText:
+                                                                  "タスク名称",
+                                                              enabledBorder:
+                                                                  UnderlineInputBorder(
+                                                                borderSide: BorderSide(
+                                                                    color: Colors
+                                                                        .green),
+                                                              ),
+                                                              focusedBorder:
+                                                                  UnderlineInputBorder(
+                                                                borderSide: BorderSide(
+                                                                    color: Colors
+                                                                        .green),
+                                                              )),
+                                                    ),
+                                                  )),
+                                              Padding(
+                                                  padding: EdgeInsets.fromLTRB(
+                                                      ScreenAdapter.width(30),
+                                                      ScreenAdapter.height(0),
+                                                      ScreenAdapter.width(30),
+                                                      ScreenAdapter.height(0)),
+                                                  child: Theme(
+                                                      data: Theme.of(context)
+                                                          .copyWith(
+                                                        colorScheme: ThemeData()
+                                                            .colorScheme
+                                                            .copyWith(
+                                                              primary:
+                                                                  Colors.green,
+                                                            ),
+                                                      ),
+                                                      child: TextField(
+                                                          decoration:
+                                                              new InputDecoration(
+                                                            icon: Icon(Icons
+                                                                .access_time),
+                                                            hintText: "時間選択",
+                                                          ),
+                                                          controller:
+                                                              timeController,
+                                                          onTap: () async {
+                                                            await _showTimePicker();
+                                                          }))),
+                                              Padding(
+                                                  padding: EdgeInsets.fromLTRB(
+                                                      ScreenAdapter.width(30),
+                                                      ScreenAdapter.height(0),
+                                                      ScreenAdapter.width(30),
+                                                      ScreenAdapter.height(0)),
+                                                  child: Theme(
+                                                      data: Theme.of(context)
+                                                          .copyWith(
+                                                        colorScheme: ThemeData()
+                                                            .colorScheme
+                                                            .copyWith(
+                                                              primary:
+                                                                  Colors.green,
+                                                            ),
+                                                      ),
+                                                      child: TextField(
+                                                          decoration:
+                                                              new InputDecoration(
+                                                            icon: Icon(Icons
+                                                                .calendar_today_outlined),
+                                                            hintText: "完成予定日選択",
+                                                          ),
+                                                          controller:
+                                                              dateController,
+                                                          onTap: () {
+                                                            _showDatePicker();
+                                                          }))),
+                                              Container(
+                                                height: btnHeight,
+                                                margin: EdgeInsets.fromLTRB(
+                                                    ScreenAdapter.width(30),
+                                                    ScreenAdapter.height(0),
+                                                    ScreenAdapter.width(30),
+                                                    ScreenAdapter.height(0)),
+                                                child: Column(
+                                                  children: [
+                                                    Row(
+                                                      mainAxisAlignment:
+                                                          MainAxisAlignment
+                                                              .spaceEvenly,
+                                                      children: [
+                                                        TextButton(
+                                                          onPressed: () {
+                                                            textController
+                                                                .text = "";
+                                                            dateController
+                                                                .text = "";
+                                                            timeController
+                                                                .text = "";
+                                                            Navigator.of(
+                                                                    context)
+                                                                .pop();
+                                                          },
+                                                          child: Text(
+                                                            "サボる",
+                                                            style: TextStyle(
+                                                                fontSize:
+                                                                    ScreenAdapter
+                                                                        .size(
+                                                                            15),
+                                                                color: Colors
+                                                                    .green),
+                                                          ),
+                                                        ),
+                                                        TextButton(
+                                                            onPressed:
+                                                                () async {
+                                                              //setState((){
+                                                              if (textController.text == "" ||
+                                                                  dateController
+                                                                          .text ==
+                                                                      "" ||
+                                                                  timeController
+                                                                          .text ==
+                                                                      "") {
+                                                                ScaffoldMessenger.of(
+                                                                        context)
+                                                                    .showSnackBar(
+                                                                  const SnackBar(
+                                                                    backgroundColor:
+                                                                        Colors
+                                                                            .deepOrange,
+                                                                    content: Text(
+                                                                        '全ての内容を入力してください'),
+                                                                    duration: Duration(
+                                                                        seconds:
+                                                                            3),
+                                                                  ),
+                                                                );
+                                                                Navigator.pop(
+                                                                    context);
+                                                                //return;
+                                                              } else {
+                                                                await addtodolist(
+                                                                  textController
+                                                                      .text,
+                                                                  days.toString(),
+                                                                  inSeconds
+                                                                      .toString(),
+                                                                  enddate
+                                                                      .toString(),
+                                                                );
+                                                                _editParentText(
+                                                                    textController
+                                                                        .text,
+                                                                    days
+                                                                        .toString(),
+                                                                    inSeconds
+                                                                        .toString(),
+                                                                    enddate
+                                                                        .toString());
+                                                                Navigator.pop(
+                                                                    context);
+                                                              }
+                                                            },
+                                                            child: Text(
+                                                              "チャレンジする",
+                                                              style: TextStyle(
+                                                                  fontSize:
+                                                                      ScreenAdapter
+                                                                          .size(
+                                                                              15),
+                                                                  color: Colors
+                                                                      .green),
+                                                            )),
+                                                      ],
+                                                    ),
+                                                  ],
+                                                ),
+                                              )
+                                            ],
+                                          )),
                                         ),
-                                      ],
+                                      ),
                                     );
-                                  }));
-                        }
-                      }
-                      ;
-                    }),
-              ]),
-          preferredSize: Size.fromHeight(ScreenAdapter.height(61)),
-        ),
-        drawer: drawerEX(),
-        body: new Column(children: <Widget>[
-          SizedBox(height: ScreenAdapter.height(8)),
-          Expanded(child: _listView()),
-        ]));
+                                  });
+                            } else {
+                              showDialog(
+                                  context: context,
+                                  builder: (context) => StatefulBuilder(
+                                          //在这里为了区分，在构建builder的时候将setState方法命名为了setBottomSheetState。
+                                          builder: (context1, showDialogState) {
+                                        return AlertDialog(
+                                          content: Column(
+                                            crossAxisAlignment:
+                                                CrossAxisAlignment.stretch,
+                                            mainAxisSize: MainAxisSize.min,
+                                            children: [
+                                              Text('登録してください'),
+                                            ],
+                                          ),
+                                          actions: [
+                                            TextButton(
+                                              onPressed: () {
+                                                Navigator.pop(context);
+                                              },
+                                              child: Text(
+                                                '確認',
+                                                style: TextStyle(
+                                                    fontSize:
+                                                        ScreenAdapter.size(15),
+                                                    color: Colors.green),
+                                              ),
+                                            ),
+                                          ],
+                                        );
+                                      }));
+                            }
+                          }
+                          ;
+                        }),
+                  ]),
+              preferredSize: Size.fromHeight(ScreenAdapter.height(61)),
+            ),
+            drawer: drawerEX(),
+            body: new Column(children: <Widget>[
+              SizedBox(height: ScreenAdapter.height(8)),
+              Expanded(child: _listView()),
+            ])));
   }
 
   ListView _listView() {
@@ -901,7 +921,7 @@ class _ToDoListPageState extends State<ToDoListPage> with RouteAware {
                                   .showSnackBar(const SnackBar(
                                 backgroundColor: Colors.deepOrange,
                                 content: Text('ネットワークに繋がっていません'),
-                                duration: Duration(seconds:1),
+                                duration: Duration(seconds: 1),
                               ));
                               return;
                             } else {

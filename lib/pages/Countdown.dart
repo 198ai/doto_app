@@ -238,60 +238,66 @@ class _CountdownState extends State<CountDown> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-        appBar: AppBar(
-          backgroundColor: Colors.green,
-          leading: new IconButton(
-            icon: new Icon(Icons.arrow_back_ios),
-            onPressed: () => {
-              stopTimer(),
-              cancelTimer(),
-              Navigator.push(context,
-                  MaterialPageRoute(builder: (context) => Tabs(tabSelected: 0)))
-            },
-          ),
-          centerTitle: true,
-          title: Text('タイマー'),
-        ),
-        body: Stack(children: [
-          Column(
-            children: [
-              Container(
-                  margin: EdgeInsets.only(
-                    top: ScreenAdapter.height(150),
-                    right: ScreenAdapter.width(10),
-                    left: ScreenAdapter.width(10),
-                  ),
-                  alignment: Alignment.topCenter,
-                  child: Text(constructTime(seconds),
-                      style: TextStyle(
-                          fontSize: ScreenAdapter.size(90),
-                          color: Colors.black87))),
-              Container(
-                margin: EdgeInsets.only(top: ScreenAdapter.height(180)),
-                alignment: Alignment.topCenter,
-                child: TextButton(
-                    child: Text("停止",
-                        style: TextStyle(
-                            fontSize: ScreenAdapter.size(70),
-                            color: Colors.black87)),
-                    onPressed: () async {
-                      if (_connectionStatus == ConnectivityResult.none) {
-                        ScaffoldMessenger.of(context)
-                            .showSnackBar(const SnackBar(
-                          backgroundColor: Colors.deepOrange,
-                          content: Text('ネットワークに繋がっていません'),
-                          duration: Duration(seconds: 1),
-                        ));
-                        return;
-                      } else {
-                        stopTimer();
-                      }
-                    }),
+    return WillPopScope(
+        onWillPop: () async {
+          return false;
+        },
+        child: Scaffold(
+            appBar: AppBar(
+              backgroundColor: Colors.green,
+              leading: new IconButton(
+                icon: new Icon(Icons.arrow_back),
+                onPressed: () => {
+                  stopTimer(),
+                  cancelTimer(),
+                  Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                          builder: (context) => Tabs(tabSelected: 0)))
+                },
+              ),
+              centerTitle: true,
+              title: Text('タイマー'),
+            ),
+            body: Stack(children: [
+              Column(
+                children: [
+                  Container(
+                      margin: EdgeInsets.only(
+                        top: ScreenAdapter.height(150),
+                        right: ScreenAdapter.width(10),
+                        left: ScreenAdapter.width(10),
+                      ),
+                      alignment: Alignment.topCenter,
+                      child: Text(constructTime(seconds),
+                          style: TextStyle(
+                              fontSize: ScreenAdapter.size(90),
+                              color: Colors.black87))),
+                  Container(
+                    margin: EdgeInsets.only(top: ScreenAdapter.height(180)),
+                    alignment: Alignment.topCenter,
+                    child: TextButton(
+                        child: Text("停止",
+                            style: TextStyle(
+                                fontSize: ScreenAdapter.size(70),
+                                color: Colors.black87)),
+                        onPressed: () async {
+                          if (_connectionStatus == ConnectivityResult.none) {
+                            ScaffoldMessenger.of(context)
+                                .showSnackBar(const SnackBar(
+                              backgroundColor: Colors.deepOrange,
+                              content: Text('ネットワークに繋がっていません'),
+                              duration: Duration(seconds: 1),
+                            ));
+                            return;
+                          } else {
+                            stopTimer();
+                          }
+                        }),
+                  )
+                ],
               )
-            ],
-          )
-        ]));
+            ])));
   }
 
   // Platform messages are asynchronous, so we initialize in an async method.

@@ -246,7 +246,12 @@ class _CountPage extends State<CountPage> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
+    return WillPopScope(
+        onWillPop: () async {
+          return false;
+        },
+        child: 
+     Scaffold(
         appBar: AppBar(
           backgroundColor: Colors.green,
           centerTitle: true,
@@ -527,7 +532,7 @@ class _CountPage extends State<CountPage> {
               ],
             ),
           ),
-        ));
+        )));
   }
 
   changedate(setdate getdate, String button) {
