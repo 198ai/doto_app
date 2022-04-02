@@ -205,7 +205,7 @@ class _drawerEX extends State<drawerEX> {
             leading: CircleAvatar(
                 backgroundColor: Colors.green,
                 child: Icon(
-                  Icons.help_outline_sharp,
+                  Icons.login,
                   color: Colors.white,
                 )),
             onTap: () {
