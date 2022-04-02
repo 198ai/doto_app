@@ -124,8 +124,18 @@ class _CalendarPageState extends State<CalendarPage> {
       Response response = await dio.post(
           "http://www.leishengle.com/api/v1/deletemyevents",
           data: jsonEncode(calendarlist));
-      print("本地数据" + "${jsonEncode(calendarlist)}");
-      print("返回数据；$response");
+      if (response.statusCode == 201) {
+        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+          content: Text('メモ削除成功'),
+          duration: Duration(seconds: 1),
+        ));
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+          backgroundColor: Colors.deepOrange,
+          content: Text('メモ削除失敗'),
+          duration: Duration(seconds: 1),
+        ));
+      }
     } catch (onError) {
       debugPrint("error:${onError.toString()}");
     }
@@ -149,6 +159,18 @@ class _CalendarPageState extends State<CalendarPage> {
     Response response = await dio.post(
         "http://www.leishengle.com/api/v1/myevents",
         data: jsonEncode(calendarlist));
+    if (response.statusCode == 201) {
+        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+          content: Text('メモ追加成功'),
+          duration: Duration(seconds: 1),
+        ));
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+          backgroundColor: Colors.deepOrange,
+          content: Text('メモ追加失敗'),
+          duration: Duration(seconds: 1),
+        ));
+      }
   }
 
   Future getEvents() async {
@@ -441,7 +463,6 @@ class _CalendarPageState extends State<CalendarPage> {
                             duration: Duration(seconds: 1),
                           ),
                         );
-                        Navigator.pop(context);
                         //return;
                       } else {
                         setState(() {
@@ -513,200 +534,210 @@ class _CalendarPageState extends State<CalendarPage> {
   @override
   Widget build(BuildContext context) {
     return WillPopScope(
-        onWillPop: () async{
+        onWillPop: () async {
           return false;
         },
-        child:Scaffold(
-        appBar: AppBar(
-            backgroundColor: Colors.green,
-            centerTitle: true,
-            title: Text("カレンダー"),
-            automaticallyImplyLeading: false,
-            actions: <Widget>[
-              IconButton(
-                  splashColor: Colors.transparent,
-                  highlightColor: Colors.transparent,
-                  icon: Icon(Icons.add),
-                  onPressed: () {
-                    if (_connectionStatus == ConnectivityResult.none) {
-                      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-                        backgroundColor: Colors.deepOrange,
-                        content: Text('ネットワークに繋がっていません'),
-                        duration: Duration(seconds: 1),
-                      ));
-                    } else {
-                      if (userdata.name != "") {
-                        _showAddEventDialog();
-                      } else {
-                        checkLocked();
-                      }
-                    }
-                  }),
-            ]),
-        body: SingleChildScrollView(
-            child: Column(children: [
-          Card(
-            margin: EdgeInsets.all(
-              ScreenAdapter.height(20),
-            ),
-            elevation: 15.0,
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.all(
-                Radius.circular(10),
-              ),
-              //カレンダー外側の枠
-              side: BorderSide(
-                  color: Colors.white, width: ScreenAdapter.width(2)),
-            ),
-            child: TableCalendar(
-              locale: 'ja_JP',
-              //今日の時間
-              focusedDay: _focusedCalendarDate,
-              // 2000年から
-              firstDay: _initialCalendarDate,
-              // 3000年まで
-              lastDay: _lastCalendarDate,
-              calendarFormat: _calendarFormat,
-              weekendDays: [DateTime.sunday, 6],
-              startingDayOfWeek: StartingDayOfWeek.monday,
-              daysOfWeekHeight: ScreenAdapter.height(40),
-              rowHeight: ScreenAdapter.height(60),
-              //eventLoader: _listOfDayEvents,
-              eventLoader: _listOfDayEvents,
-              calendarBuilders: CalendarBuilders(
-                markerBuilder: (context, date, events) {
-                  if (events.isNotEmpty) {
-                    return _buildEventsMarker(date, events);
-                  }
-                },
-              ),
-              headerStyle: HeaderStyle(
-                titleCentered: true,
-                formatButtonVisible: false,
-                titleTextStyle: TextStyle(
-                    color: Colors.black, fontSize: ScreenAdapter.size(20)),
-                decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.only(
-                        topLeft: Radius.circular(10),
-                        topRight: Radius.circular(10))),
-                // formatButtonTextStyle:
-                //     TextStyle(color: Colors.green, fontSize: 16.0),
-                // formatButtonDecoration: BoxDecoration(
-                //   color: Colors.black,
-                //   borderRadius: BorderRadius.all(
-                //     Radius.circular(5.0),
-                //   ),
-                // ),
-                //矢印
-                leftChevronIcon: Icon(
-                  Icons.chevron_left,
-                  color: Colors.black,
-                  size: ScreenAdapter.size(28),
+        child: Scaffold(
+            appBar: AppBar(
+                backgroundColor: Colors.green,
+                centerTitle: true,
+                title: Text("カレンダー"),
+                automaticallyImplyLeading: false,
+                actions: <Widget>[
+                  IconButton(
+                      splashColor: Colors.transparent,
+                      highlightColor: Colors.transparent,
+                      icon: Icon(Icons.add),
+                      onPressed: () {
+                        if (_connectionStatus == ConnectivityResult.none) {
+                          ScaffoldMessenger.of(context)
+                              .showSnackBar(const SnackBar(
+                            backgroundColor: Colors.deepOrange,
+                            content: Text('ネットワークに繋がっていません'),
+                            duration: Duration(seconds: 1),
+                          ));
+                        } else {
+                          if (userdata.name != "") {
+                            _showAddEventDialog();
+                          } else {
+                            checkLocked();
+                          }
+                        }
+                      }),
+                ]),
+            body: SingleChildScrollView(
+                child: Column(children: [
+              Card(
+                margin: EdgeInsets.all(
+                  ScreenAdapter.height(20),
                 ),
-                rightChevronIcon: Icon(
-                  Icons.chevron_right,
-                  color: Colors.black,
-                  size: ScreenAdapter.size(28),
+                elevation: 15.0,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.all(
+                    Radius.circular(10),
+                  ),
+                  //カレンダー外側の枠
+                  side: BorderSide(
+                      color: Colors.white, width: ScreenAdapter.width(2)),
                 ),
-              ),
-              // Calendar Days Styling
-              daysOfWeekStyle: const DaysOfWeekStyle(
-                // Weekend days color (Sat,Sun)
-                weekendStyle: TextStyle(color: Colors.green),
-              ),
-              // Calendar Dates styling
-              calendarStyle: const CalendarStyle(
-                // Weekend dates color (Sat & Sun Column)
-                weekendTextStyle: TextStyle(color: Colors.green),
-                // highlighted color for today
-                todayDecoration: BoxDecoration(
-                  color: Colors.green,
-                  shape: BoxShape.circle,
-                ),
-                // highlighted color for selected day
-                selectedDecoration: BoxDecoration(
-                  color: Colors.green,
-                  shape: BoxShape.circle,
-                ),
-                markerDecoration:
-                    BoxDecoration(color: Colors.green, shape: BoxShape.circle),
-              ),
-              selectedDayPredicate: (currentSelectedDate) {
-                // as per the documentation 'selectedDayPredicate' needs to determine
-                // current selected day
-                return (isSameDay(selectedCalendarDate!, currentSelectedDate));
-              },
-              onPageChanged: (focusedDay) {
-                _focusedCalendarDate = focusedDay;
-              },
-              onFormatChanged: (format) {
-                if (_calendarFormat != format) {
-                  setState(() {
-                    _calendarFormat = format;
-                  });
-                }
-              },
-              onDaySelected: (selectedDay, focusedDay) {
-                // as per the documentation
-                if (!isSameDay(selectedCalendarDate, selectedDay)) {
-                  setState(() {
-                    selectedCalendarDate = selectedDay;
-                    _focusedCalendarDate = focusedDay;
-                  });
-                }
-              },
-            ),
-          ),
-          ..._listOfDayEvents(selectedCalendarDate!).map((myEvents) => Padding(
-              padding: EdgeInsets.all(ScreenAdapter.height(5)),
-              child: ListTile(
-                onTap: () {},
-                title: Padding(
-                  padding: EdgeInsets.only(bottom: ScreenAdapter.height(10)),
-                  child: Text('タイトル:　${myEvents.eventTitle}'),
-                ),
-                subtitle: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text('メモ:　${myEvents.eventDescp}'),
-                    myEvents.alarm == ""
-                        ? Text('')
-                        : Text('アラーム時間:　${myEvents.alarm}'),
-                  ],
-                ),
-                trailing: IconButton(
-                    onPressed: () async {
-                      var index = _listOfDayEvents(selectedCalendarDate!)
-                          .indexOf(myEvents);
-                      //var alramIndex = 0;
-                      var alramId = 0;
-                      if (_listOfDayEvents(selectedCalendarDate!)[index]
-                              .alarm !=
-                          "") {
-                        alramId = _listOfDayEvents(selectedCalendarDate!)[index]
-                            .alarmId;
-                      }
-                      //アラームの削除
-                      await flutterLocalNotificationsPlugin.cancel(alramId);
-                      await deleteMyEvents(
-                          _listOfDayEvents(selectedCalendarDate!)[index],
-                          selectedCalendarDate!);
-                      //更改对应状态
-                      setState(() {
-                        _listOfDayEvents(selectedCalendarDate!).removeAt(index);
-                      });
-
-                      if (_listOfDayEvents(selectedCalendarDate!).isEmpty) {
-                        //选中的日期里没有内容就删除日期
-                        var date = DateFormat('yyyy-MM-dd')
-                            .format(selectedCalendarDate!);
-                        mySelectedEvents.remove(DateTime.parse(date));
+                child: TableCalendar(
+                  locale: 'ja_JP',
+                  //今日の時間
+                  focusedDay: _focusedCalendarDate,
+                  // 2000年から
+                  firstDay: _initialCalendarDate,
+                  // 3000年まで
+                  lastDay: _lastCalendarDate,
+                  calendarFormat: _calendarFormat,
+                  weekendDays: [DateTime.sunday, 6],
+                  startingDayOfWeek: StartingDayOfWeek.monday,
+                  daysOfWeekHeight: ScreenAdapter.height(40),
+                  rowHeight: ScreenAdapter.height(60),
+                  //eventLoader: _listOfDayEvents,
+                  eventLoader: _listOfDayEvents,
+                  calendarBuilders: CalendarBuilders(
+                    markerBuilder: (context, date, events) {
+                      if (events.isNotEmpty) {
+                        return _buildEventsMarker(date, events);
                       }
                     },
-                    icon: Icon(Icons.delete)),
-              )))
-        ]))));
+                  ),
+                  headerStyle: HeaderStyle(
+                    titleCentered: true,
+                    formatButtonVisible: false,
+                    titleTextStyle: TextStyle(
+                        color: Colors.black, fontSize: ScreenAdapter.size(20)),
+                    decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.only(
+                            topLeft: Radius.circular(10),
+                            topRight: Radius.circular(10))),
+                    // formatButtonTextStyle:
+                    //     TextStyle(color: Colors.green, fontSize: 16.0),
+                    // formatButtonDecoration: BoxDecoration(
+                    //   color: Colors.black,
+                    //   borderRadius: BorderRadius.all(
+                    //     Radius.circular(5.0),
+                    //   ),
+                    // ),
+                    //矢印
+                    leftChevronIcon: Icon(
+                      Icons.chevron_left,
+                      color: Colors.black,
+                      size: ScreenAdapter.size(28),
+                    ),
+                    rightChevronIcon: Icon(
+                      Icons.chevron_right,
+                      color: Colors.black,
+                      size: ScreenAdapter.size(28),
+                    ),
+                  ),
+                  // Calendar Days Styling
+                  daysOfWeekStyle: const DaysOfWeekStyle(
+                    // Weekend days color (Sat,Sun)
+                    weekendStyle: TextStyle(color: Colors.green),
+                  ),
+                  // Calendar Dates styling
+                  calendarStyle: const CalendarStyle(
+                    // Weekend dates color (Sat & Sun Column)
+                    weekendTextStyle: TextStyle(color: Colors.green),
+                    // highlighted color for today
+                    todayDecoration: BoxDecoration(
+                      color: Colors.green,
+                      shape: BoxShape.circle,
+                    ),
+                    // highlighted color for selected day
+                    selectedDecoration: BoxDecoration(
+                      color: Colors.green,
+                      shape: BoxShape.circle,
+                    ),
+                    markerDecoration: BoxDecoration(
+                        color: Colors.green, shape: BoxShape.circle),
+                  ),
+                  selectedDayPredicate: (currentSelectedDate) {
+                    // as per the documentation 'selectedDayPredicate' needs to determine
+                    // current selected day
+                    return (isSameDay(
+                        selectedCalendarDate!, currentSelectedDate));
+                  },
+                  onPageChanged: (focusedDay) {
+                    _focusedCalendarDate = focusedDay;
+                  },
+                  onFormatChanged: (format) {
+                    if (_calendarFormat != format) {
+                      setState(() {
+                        _calendarFormat = format;
+                      });
+                    }
+                  },
+                  onDaySelected: (selectedDay, focusedDay) {
+                    // as per the documentation
+                    if (!isSameDay(selectedCalendarDate, selectedDay)) {
+                      setState(() {
+                        selectedCalendarDate = selectedDay;
+                        _focusedCalendarDate = focusedDay;
+                      });
+                    }
+                  },
+                ),
+              ),
+              ..._listOfDayEvents(selectedCalendarDate!)
+                  .map((myEvents) => Padding(
+                      padding: EdgeInsets.all(ScreenAdapter.height(5)),
+                      child: ListTile(
+                        onTap: () {},
+                        title: Padding(
+                          padding:
+                              EdgeInsets.only(bottom: ScreenAdapter.height(10)),
+                          child: Text('タイトル:　${myEvents.eventTitle}'),
+                        ),
+                        subtitle: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text('メモ:　${myEvents.eventDescp}'),
+                            myEvents.alarm == ""
+                                ? Text('')
+                                : Text('アラーム時間:　${myEvents.alarm}'),
+                          ],
+                        ),
+                        trailing: IconButton(
+                            onPressed: () async {
+                              var index =
+                                  _listOfDayEvents(selectedCalendarDate!)
+                                      .indexOf(myEvents);
+                              //var alramIndex = 0;
+                              var alramId = 0;
+                              if (_listOfDayEvents(selectedCalendarDate!)[index]
+                                      .alarm !=
+                                  "") {
+                                alramId = _listOfDayEvents(
+                                        selectedCalendarDate!)[index]
+                                    .alarmId;
+                              }
+                              //アラームの削除
+                              await flutterLocalNotificationsPlugin
+                                  .cancel(alramId);
+                              await deleteMyEvents(
+                                  _listOfDayEvents(
+                                      selectedCalendarDate!)[index],
+                                  selectedCalendarDate!);
+                              //更改对应状态
+                              setState(() {
+                                _listOfDayEvents(selectedCalendarDate!)
+                                    .removeAt(index);
+                              });
+
+                              if (_listOfDayEvents(selectedCalendarDate!)
+                                  .isEmpty) {
+                                //选中的日期里没有内容就删除日期
+                                var date = DateFormat('yyyy-MM-dd')
+                                    .format(selectedCalendarDate!);
+                                mySelectedEvents.remove(DateTime.parse(date));
+                              }
+                            },
+                            icon: Icon(Icons.delete)),
+                      )))
+            ]))));
   }
 
   Widget _buildEventsMarker(DateTime date, List events) {

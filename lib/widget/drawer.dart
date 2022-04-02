@@ -4,6 +4,7 @@ import 'dart:convert';
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:dio/dio.dart';
 import 'package:doto_app/model/userData.dart';
+import 'package:doto_app/services/ScreenAdapter.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -172,14 +173,17 @@ class _drawerEX extends State<drawerEX> {
                                 accountName: Text(
                                   !login ? "ユーザ未登録" : "ユーザ名: $userName",
                                   style: TextStyle(
-                                      color: Colors.black87,
-                                      fontWeight: FontWeight.bold),
+                                    fontSize: ScreenAdapter.size(14),
+                                    color: Colors.black87,
+                                    fontWeight: FontWeight.bold),
                                 ),
-                                accountEmail: Text(
+                                accountEmail:Text(
                                     !login
                                         ? "メールアドレス未登録"
                                         : "メールアドレス: $userEmail",
+                                    overflow: TextOverflow.ellipsis,
                                     style: TextStyle(
+                                        fontSize: ScreenAdapter.size(14),
                                         color: Colors.black87,
                                         fontWeight: FontWeight.bold)),
                                 currentAccountPicture: CircleAvatar(
