@@ -147,7 +147,7 @@ class _LoginPageState extends State<LoginPage> {
               style: ButtonStyle(
                 backgroundColor: MaterialStateProperty.all(Colors.green), //背景颜色
               ),
-              child: Text("登録"),
+              child: Text("ログイン"),
               onPressed: () async {
                  if (_connectionStatus ==ConnectivityResult.none) {
                   ScaffoldMessenger.of(context).showSnackBar(const SnackBar(

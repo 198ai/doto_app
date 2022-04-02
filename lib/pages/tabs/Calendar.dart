@@ -344,13 +344,24 @@ class _CalendarPageState extends State<CalendarPage> {
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    Text('登録してください'),
+                    Text('ログインへ'),
                   ],
                 ),
                 actions: [
                   TextButton(
                     onPressed: () {
                       Navigator.pop(context);
+                    },
+                    child: Text(
+                      'キャンセル',
+                      style: TextStyle(
+                          fontSize: ScreenAdapter.size(15),
+                          color: Colors.green),
+                    ),
+                  ),
+                  TextButton(
+                    onPressed: () {
+                      Navigator.pushNamed(context, '/login');
                     },
                     child: Text(
                       '確認',

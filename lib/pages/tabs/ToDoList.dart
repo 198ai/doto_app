@@ -163,7 +163,6 @@ class _ToDoListPageState extends State<ToDoListPage> with RouteAware {
     textController.addListener(_printLatestValue);
     timeController.addListener(_printTimeValue);
     dateController.addListener(() {
-      print(dateController.text);
     });
     //ローカルストレージから、値をLISTに渡す、初期化する
     Future(() async {
@@ -722,7 +721,7 @@ class _ToDoListPageState extends State<ToDoListPage> with RouteAware {
                                                 CrossAxisAlignment.stretch,
                                             mainAxisSize: MainAxisSize.min,
                                             children: [
-                                              Text('登録してください'),
+                                              Text('ログインへ'),
                                             ],
                                           ),
                                           actions: [
@@ -731,10 +730,20 @@ class _ToDoListPageState extends State<ToDoListPage> with RouteAware {
                                                 Navigator.pop(context);
                                               },
                                               child: Text(
+                                                'キャンセル',
+                                                style: TextStyle(
+                                                    fontSize: ScreenAdapter.size(15),
+                                                    color: Colors.green),
+                                              ),
+                                            ),
+                                            TextButton(
+                                              onPressed: () {
+                                                Navigator.pushNamed(context, '/login');
+                                              },
+                                              child: Text(
                                                 '確認',
                                                 style: TextStyle(
-                                                    fontSize:
-                                                        ScreenAdapter.size(15),
+                                                    fontSize: ScreenAdapter.size(15),
                                                     color: Colors.green),
                                               ),
                                             ),
