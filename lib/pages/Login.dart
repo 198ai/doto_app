@@ -149,11 +149,11 @@ class _LoginPageState extends State<LoginPage> {
               ),
               child: Text("登録"),
               onPressed: () async {
-                 if (_connectionStatus.toString() == "ConnectivityResult.none") {
+                 if (_connectionStatus ==ConnectivityResult.none) {
                   ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
                     backgroundColor: Colors.deepOrange,
                     content: Text('ネットワークに繋がっていません'),
-                    duration: Duration(seconds: 3),
+                    duration: Duration(seconds: 1),
                   ));
                   return;
                 }else{
@@ -447,7 +447,7 @@ class _LoginPageState extends State<LoginPage> {
           }
           ScaffoldMessenger.of(context).showSnackBar(SnackBar(
             content: Text("ログインしました"),
-            duration: Duration(seconds: 3),
+            duration: Duration(seconds: 1),
           ));
         }
       }

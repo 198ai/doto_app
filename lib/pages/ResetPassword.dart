@@ -84,9 +84,14 @@ class _ResetPasswordState extends State<ResetPassword> {
   }
 
   Future<void> _updateConnectionStatus(ConnectivityResult result) async {
-    setState(() {
       _connectionStatus = result;
-    });
+      if (_connectionStatus == ConnectivityResult.none) {
+        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+          backgroundColor: Colors.deepOrange,
+          content: Text('ネットワークに繋がっていません'),
+          duration: Duration(seconds: 1),
+        ));
+      }
   }
 
   @override
@@ -134,11 +139,11 @@ class _ResetPasswordState extends State<ResetPassword> {
                 backgroundColor: MaterialStateProperty.all(Colors.green), //背景颜色
               ),
               onPressed: () async {
-                if (_connectionStatus.toString() == "ConnectivityResult.none") {
+                if (_connectionStatus== ConnectivityResult.none) {
                   ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
                     backgroundColor: Colors.deepOrange,
                     content: Text('ネットワークに繋がっていません'),
-                    duration: Duration(seconds: 3),
+                    duration: Duration(seconds: 1),
                   ));
                 } else {
                   if (await checkLoginFunction()) {
@@ -376,7 +381,7 @@ class _ResetPasswordState extends State<ResetPassword> {
         if (response.statusCode == 201) {
           ScaffoldMessenger.of(context).showSnackBar(SnackBar(
             content: Text("パスワードをリセットしました"),
-            duration: Duration(seconds: 3),
+            duration: Duration(seconds: 1),
           ));
         }
       }

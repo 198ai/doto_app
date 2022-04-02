@@ -83,9 +83,14 @@ class _SignUpPageState extends State<SignUpPage> {
   }
 
   Future<void> _updateConnectionStatus(ConnectivityResult result) async {
-    setState(() {
-      _connectionStatus = result;
-    });
+    _connectionStatus = result;
+    if (_connectionStatus == ConnectivityResult.none) {
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+        backgroundColor: Colors.deepOrange,
+        content: Text('ネットワークに繋がっていません'),
+        duration: Duration(seconds: 1),
+      ));
+    }
   }
 
   @override
@@ -150,11 +155,11 @@ class _SignUpPageState extends State<SignUpPage> {
                 backgroundColor: MaterialStateProperty.all(Colors.green), //背景颜色
               ),
               onPressed: () async {
-                if (_connectionStatus.toString() == "ConnectivityResult.none") {
+                if (_connectionStatus== ConnectivityResult.none) {
                   ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
                     backgroundColor: Colors.deepOrange,
                     content: Text('ネットワークに繋がっていません'),
-                    duration: Duration(seconds: 3),
+                    duration: Duration(seconds: 1),
                   ));
                   return;
                 } else {
@@ -432,7 +437,7 @@ class _SignUpPageState extends State<SignUpPage> {
           }
           ScaffoldMessenger.of(context).showSnackBar(SnackBar(
             content: Text("アカウント新規しました"),
-            duration: Duration(seconds: 3),
+            duration: Duration(seconds: 1),
           ));
         }
       }

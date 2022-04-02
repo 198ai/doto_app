@@ -60,15 +60,6 @@ class _ToDoListPageState extends State<ToDoListPage> with RouteAware {
   }
 
   Future gettodolist() async {
-    if (_connectionStatus.toString() == "ConnectivityResult.none") {
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-        backgroundColor: Colors.deepOrange,
-        content: Text('ネットワークに繋がっていません'),
-        duration: Duration(seconds: 3),
-      ));
-      return;
-    }
-
     ///本地存储的数据先更新给API，同步数据
     ///然后更新本地数据
     SharedPreferences retult = await SharedPreferences.getInstance();
@@ -97,14 +88,6 @@ class _ToDoListPageState extends State<ToDoListPage> with RouteAware {
   Future deltodolist(int index) async {
     ///本地存储的数据先更新给API，同步数据
     ///然后更新本地数据
-    if (_connectionStatus.toString() == "ConnectivityResult.none") {
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-        backgroundColor: Colors.deepOrange,
-        content: Text('ネットワークに繋がっていません'),
-        duration: Duration(seconds: 3),
-      ));
-      return;
-    }
     Dio dio = new Dio();
     dio.options.headers['content-Type'] = 'application/json';
     var params = {
@@ -232,9 +215,14 @@ class _ToDoListPageState extends State<ToDoListPage> with RouteAware {
   }
 
   Future<void> _updateConnectionStatus(ConnectivityResult result) async {
-    setState(() {
-      _connectionStatus = result;
-    });
+    _connectionStatus = result;
+    if (_connectionStatus == ConnectivityResult.none) {
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+        backgroundColor: Colors.deepOrange,
+        content: Text('ネットワークに繋がっていません'),
+        duration: Duration(seconds: 1),
+      ));
+    }
   }
 
   //日付変更検査
@@ -471,13 +459,12 @@ class _ToDoListPageState extends State<ToDoListPage> with RouteAware {
                       dateController.text = "";
                       timeController.text = "";
                       //足すボダン押した時、ポップアップが出ます
-                      if (_connectionStatus.toString() ==
-                          "ConnectivityResult.none") {
+                      if (_connectionStatus == ConnectivityResult.none) {
                         ScaffoldMessenger.of(context)
                             .showSnackBar(const SnackBar(
                           backgroundColor: Colors.deepOrange,
                           content: Text('ネットワークに繋がっていません'),
-                          duration: Duration(seconds: 3),
+                          duration: Duration(seconds: 1),
                         ));
                       } else {
                         if (userName != "") {
@@ -909,13 +896,12 @@ class _ToDoListPageState extends State<ToDoListPage> with RouteAware {
                                 fontWeight: FontWeight.bold),
                           ),
                           onPressed: () async {
-                            if (_connectionStatus.toString() ==
-                                "ConnectivityResult.none") {
+                            if (_connectionStatus == ConnectivityResult.none) {
                               ScaffoldMessenger.of(context)
                                   .showSnackBar(const SnackBar(
                                 backgroundColor: Colors.deepOrange,
                                 content: Text('ネットワークに繋がっていません'),
-                                duration: Duration(seconds: 3),
+                                duration: Duration(seconds:1),
                               ));
                               return;
                             } else {

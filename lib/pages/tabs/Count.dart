@@ -131,17 +131,9 @@ class _CountPage extends State<CountPage> {
       list.getString("counts") == null
           ? jsonString2 = ""
           : jsonString2 = list.getString("counts");
-      if (_connectionStatus.toString() == "ConnectivityResult.none") {
-        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-          backgroundColor: Colors.deepOrange,
-          content: Text('ネットワークに繋がっていません'),
-          duration: Duration(seconds: 3),
-        ));
-      } else {
         gettimes();
         dataChange();
         setState(() {});
-      }
     });
   }
 // Platform messages are asynchronous, so we initialize in an async method.
@@ -161,9 +153,14 @@ class _CountPage extends State<CountPage> {
   }
 
   Future<void> _updateConnectionStatus(ConnectivityResult result) async {
-    setState(() {
       _connectionStatus = result;
-    });
+      if (_connectionStatus == ConnectivityResult.none) {
+        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+          backgroundColor: Colors.deepOrange,
+          content: Text('ネットワークに繋がっていません'),
+          duration: Duration(seconds:1),
+        ));
+      }
   }
   gettimes() {
     if (hasdate2 == "") {
@@ -245,18 +242,6 @@ class _CountPage extends State<CountPage> {
       }
     });
     dashboardResult.isEmpty ? visible = false : visible = true;
-  }
-
-  _getData() {
-    List<charts.Series<Contents, String>> series = [
-      charts.Series(
-          id: "Grades",
-          data: dashboardResult,
-          labelAccessorFn: (Contents row, _) => '${row.times}分',
-          domainFn: (Contents grades, _) => grades.events,
-          measureFn: (Contents grades, _) => grades.times)
-    ];
-    return series;
   }
 
   @override
@@ -349,7 +334,6 @@ class _CountPage extends State<CountPage> {
                                     splashColor: Colors.transparent,
                                     onPressed: () {
                                       changedate(selectdate, "back");
-                                      //times = 0;
                                       dashboardResult = [];
                                       selectedTotalTimes = 0;
                                       gettimes();
@@ -364,7 +348,6 @@ class _CountPage extends State<CountPage> {
                                     splashColor: Colors.transparent,
                                     onPressed: () {
                                       changedate(selectdate, "forward");
-                                      //times = 0;
                                       dashboardResult = [];
                                       selectedTotalTimes = 0;
                                       gettimes();

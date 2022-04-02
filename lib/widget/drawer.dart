@@ -68,9 +68,7 @@ class _drawerEX extends State<drawerEX> {
   }
 
   Future<void> _updateConnectionStatus(ConnectivityResult result) async {
-    setState(() {
       _connectionStatus = result;
-    });
   }
 
   user() async {
@@ -199,11 +197,7 @@ class _drawerEX extends State<drawerEX> {
                       })),
             ],
           ),
-          Divider(
-            height: 1,
-            color: Colors.black,
-          ),
-          ListTile(
+            ListTile(
             leading: CircleAvatar(
                 backgroundColor: Colors.green,
                 child: Icon(
@@ -211,18 +205,26 @@ class _drawerEX extends State<drawerEX> {
                   color: Colors.white,
                 )),
             onTap: () {
-              if (_connectionStatus.toString() == "ConnectivityResult.none") {
+              if (_connectionStatus== ConnectivityResult.none) {
                 ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
                   backgroundColor: Colors.deepOrange,
                   content: Text('ネットワークに繋がっていません'),
-                  duration: Duration(seconds: 3),
+                  duration: Duration(seconds: 1),
                 ));
               } else {
-                Navigator.pushNamed(context, '/changePassword');
+                if (!login) {
+                  Navigator.pushNamed(context, '/login');
+                }else{
+                  ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+                  backgroundColor: Colors.deepOrange,
+                  content: Text('既に登録しています。'),
+                  duration: Duration(seconds: 1),
+                ));
+                }
               }
             },
             title: Text(
-              "パスワードを変更",
+              "ログイン",
               style: TextStyle(fontWeight: FontWeight.bold),
             ),
           ),
@@ -235,11 +237,11 @@ class _drawerEX extends State<drawerEX> {
                   backgroundColor: Colors.green,
                   child: Icon(Icons.logout, color: Colors.white)),
               onTap: () {
-                if (_connectionStatus.toString() == "ConnectivityResult.none") {
+                if (_connectionStatus== ConnectivityResult.none) {
                   ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
                     backgroundColor: Colors.deepOrange,
                     content: Text('ネットワークに繋がっていません'),
-                    duration: Duration(seconds: 3),
+                    duration: Duration(seconds:1),
                   ));
                 } else {
                   showDialog(
@@ -294,6 +296,34 @@ class _drawerEX extends State<drawerEX> {
                 "ログアウト",
                 style: TextStyle(fontWeight: FontWeight.bold),
               )),
+              
+          Divider(
+            height: 1,
+            color: Colors.black,
+          ),
+              ListTile(
+            leading: CircleAvatar(
+                backgroundColor: Colors.green,
+                child: Icon(
+                  Icons.help_outline_sharp,
+                  color: Colors.white,
+                )),
+            onTap: () {
+              if (_connectionStatus==ConnectivityResult.none) {
+                ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+                  backgroundColor: Colors.deepOrange,
+                  content: Text('ネットワークに繋がっていません'),
+                  duration: Duration(seconds:1),
+                ));
+              } else {
+                Navigator.pushNamed(context, '/changePassword');
+              }
+            },
+            title: Text(
+              "パスワードを変更",
+              style: TextStyle(fontWeight: FontWeight.bold),
+            ),
+          ),
           Divider(
             height: 1,
             color: Colors.black,

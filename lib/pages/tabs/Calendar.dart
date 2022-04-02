@@ -85,15 +85,7 @@ class _CalendarPageState extends State<CalendarPage> {
       //prefs.remove("events");
 
       //print(prefs.getString("events").toString());
-      if (_connectionStatus.toString() == "ConnectivityResult.none") {
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-        backgroundColor: Colors.deepOrange,
-        content: Text('ネットワークに繋がっていません'),
-        duration: Duration(seconds: 3),
-      ));
-      }else{
-        userData();
-      }
+      userData();
     });
   }
 
@@ -112,14 +104,6 @@ class _CalendarPageState extends State<CalendarPage> {
   }
 
   Future deleteMyEvents(MyEvents events, DateTime selectedCalendarDate) async {
-    if (_connectionStatus.toString() == "ConnectivityResult.none") {
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-        backgroundColor: Colors.deepOrange,
-        content: Text('ネットワークに繋がっていません'),
-        duration: Duration(seconds: 3),
-      ));
-      return;
-    }
     var date = DateFormat('yyyy-MM-dd').format(selectedCalendarDate);
     Map calendar = {};
     List calendarlist = [];
@@ -132,6 +116,7 @@ class _CalendarPageState extends State<CalendarPage> {
     print(calendarlist);
     Dio dio = new Dio();
     dio.options.headers['content-Type'] = 'application/json';
+
     ///请求header的配置
     dio.options.headers['authorization'] = "Bearer ${userdata.accessToken}";
     try {
@@ -146,14 +131,6 @@ class _CalendarPageState extends State<CalendarPage> {
   }
 
   Future sendEvents(Map<DateTime, List<MyEvents>> myEvents) async {
-    if (_connectionStatus.toString() == "ConnectivityResult.none") {
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-        backgroundColor: Colors.deepOrange,
-        content: Text('ネットワークに繋がっていません'),
-        duration: Duration(seconds: 3),
-      ));
-      return;
-    }
     //更新数据
     //整理数据
     List calendarlist = [];
@@ -165,6 +142,7 @@ class _CalendarPageState extends State<CalendarPage> {
     });
     Dio dio = new Dio();
     dio.options.headers['content-Type'] = 'application/json';
+
     ///请求header的配置
     dio.options.headers['authorization'] = "Bearer ${userdata.accessToken}";
     Response response = await dio.post(
@@ -176,6 +154,7 @@ class _CalendarPageState extends State<CalendarPage> {
     //整理数据
     Dio dio = new Dio();
     dio.options.headers['content-Type'] = 'application/json';
+
     ///请求header的配置
     dio.options.headers['authorization'] = "Bearer ${userdata.accessToken}";
     try {
@@ -277,6 +256,7 @@ class _CalendarPageState extends State<CalendarPage> {
   String _convertTwoDigits(int number) {
     return number >= 10 ? "$number" : "0$number";
   }
+
   // Platform messages are asynchronous, so we initialize in an async method.
   Future<void> initConnectivity() async {
     late ConnectivityResult result;
@@ -294,10 +274,16 @@ class _CalendarPageState extends State<CalendarPage> {
   }
 
   Future<void> _updateConnectionStatus(ConnectivityResult result) async {
-    setState(() {
-      _connectionStatus = result;
-    });
+    _connectionStatus = result;
+    if (_connectionStatus == ConnectivityResult.none) {
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+        backgroundColor: Colors.deepOrange,
+        content: Text('ネットワークに繋がっていません'),
+        duration: Duration(seconds: 1),
+      ));
+    }
   }
+
   @override
   void dispose() {
     titleController.dispose();
@@ -440,7 +426,7 @@ class _CalendarPageState extends State<CalendarPage> {
                           const SnackBar(
                             backgroundColor: Colors.deepOrange,
                             content: Text('全ての内容を入力してください'),
-                            duration: Duration(seconds: 3),
+                            duration: Duration(seconds: 1),
                           ),
                         );
                         Navigator.pop(context);
@@ -525,10 +511,18 @@ class _CalendarPageState extends State<CalendarPage> {
                   highlightColor: Colors.transparent,
                   icon: Icon(Icons.add),
                   onPressed: () {
-                    if(userdata.name !=""){
-                      _showAddEventDialog();
-                    }else{
-                      checkLocked();
+                    if (_connectionStatus == ConnectivityResult.none) {
+                      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+                        backgroundColor: Colors.deepOrange,
+                        content: Text('ネットワークに繋がっていません'),
+                        duration: Duration(seconds: 1),
+                      ));
+                    } else {
+                      if (userdata.name != "") {
+                        _showAddEventDialog();
+                      } else {
+                        checkLocked();
+                      }
                     }
                   }),
             ]),
@@ -731,7 +725,7 @@ void scheduleAlarm(
   var androidPlatformChannelSpecifics = AndroidNotificationDetails(
     'alarm_notif',
     'alarm_notif',
-    channelDescription:'Channel for Alarm notification',
+    channelDescription: 'Channel for Alarm notification',
     icon: 'ic_launcher',
     sound: RawResourceAndroidNotificationSound('clock'),
     playSound: true,
@@ -744,7 +738,8 @@ void scheduleAlarm(
       presentBadge: true,
       presentSound: true);
   var platformChannelSpecifics = NotificationDetails(
-      android:androidPlatformChannelSpecifics, iOS:iOSPlatformChannelSpecifics);
+      android: androidPlatformChannelSpecifics,
+      iOS: iOSPlatformChannelSpecifics);
   await flutterLocalNotificationsPlugin.schedule(
     id,
     'リマインド!',

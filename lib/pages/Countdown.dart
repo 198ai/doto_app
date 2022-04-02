@@ -276,13 +276,12 @@ class _CountdownState extends State<CountDown> {
                             fontSize: ScreenAdapter.size(70),
                             color: Colors.black87)),
                     onPressed: () async {
-                      if (_connectionStatus.toString() ==
-                          "ConnectivityResult.none") {
+                      if (_connectionStatus == ConnectivityResult.none) {
                         ScaffoldMessenger.of(context)
                             .showSnackBar(const SnackBar(
                           backgroundColor: Colors.deepOrange,
                           content: Text('ネットワークに繋がっていません'),
-                          duration: Duration(seconds: 3),
+                          duration: Duration(seconds: 1),
                         ));
                         return;
                       } else {

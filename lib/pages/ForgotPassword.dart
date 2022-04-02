@@ -132,11 +132,11 @@ class _ForgotPasswordState extends State<ForgotPassword> {
                 backgroundColor: MaterialStateProperty.all(Colors.green), //背景颜色
               ),
               onPressed: () async {
-                if (_connectionStatus.toString() == "ConnectivityResult.none") {
+                if (_connectionStatus == ConnectivityResult.none) {
                   ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
                     backgroundColor: Colors.deepOrange,
                     content: Text('ネットワークに繋がっていません'),
-                    duration: Duration(seconds: 3),
+                    duration: Duration(seconds: 1),
                   ));
                 } else {
                   if (checkemailPassword()) {
@@ -232,7 +232,7 @@ class _ForgotPasswordState extends State<ForgotPassword> {
           print(response.data);
           ScaffoldMessenger.of(context).showSnackBar(SnackBar(
             content: Text(response.data),
-            duration: Duration(seconds: 3),
+            duration: Duration(seconds: 1),
           ));
         }
       }
@@ -241,7 +241,7 @@ class _ForgotPasswordState extends State<ForgotPassword> {
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(
         backgroundColor: Colors.deepOrange,
         content: Text(e.response.data),
-        duration: Duration(seconds: 3),
+        duration: Duration(seconds: 1),
       ));
     }
   }
