@@ -1,5 +1,6 @@
 import 'dart:convert';
 
+import 'package:dio/dio.dart';
 import 'package:doto_app/pages/tabs/Tabs.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
@@ -10,6 +11,7 @@ import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:doto_app/model/myevents.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:splashscreen/splashscreen.dart';
+import 'model/userData.dart';
 import 'routers/router.dart';
 import 'services/ScreenAdapter.dart';
 
@@ -48,28 +50,46 @@ class MyApp extends StatefulWidget {
 class _MyAppState extends State<MyApp> {
   //タイマー設定
   List<MyEvents> list = [];
-  late Map<DateTime, List<MyEvents>> _events;
   late SharedPreferences prefs;
-  late Map<DateTime, List<MyEvents>> mySelectedEvents;
-
+  late UserData userdata;
+  late String userName;
+  late String userEmail;
  @override
   void initState() {
-    mySelectedEvents = {};
-    _events = {};
     super.initState();
     Future(() async {
-    //   prefs = await SharedPreferences.getInstance();
-    //   mySelectedEvents = decodeMap(json.decode(prefs.getString("events") ?? "{}"));
-    //   //アラーム初期設定
-    //   mySelectedEvents.forEach((key, value) {
-    //     value.forEach((element) {
-    //       if (element.alarm != "") {
-    //         scheduleAlarm(DateTime.parse(element.alarm), element.eventTitle);
-    //       }
-    //    });
-    //   });
+     SharedPreferences retult = await SharedPreferences.getInstance();
+      //获取user token
+      retult.getString("userdata") == null
+          ? userdata = UserData(name: "", email: "", accessToken: "")
+          : userdata =
+              UserData.fromJson(json.decode(retult.getString("userdata")));
+      if (userdata.accessToken != "") {
+        prefs = await SharedPreferences.getInstance();
+       await loginFunction();
+      }
     });
   }
+  loginFunction() async {
+    Dio dio = new Dio();
+    dio.options.headers['content-Type'] = 'application/json';
+    ///请求header的配置
+    dio.options.headers['authorization'] = "Bearer ${userdata.accessToken}";
+    try {
+      Response response =
+        await dio.get("http://www.leishengle.com/api/v1/user");
+      // Response response =
+      //     await Dio().post("http://10.0.2.2:8000/api/v1/login", data:params);
+      if (response.statusCode == 500) {
+        prefs.remove("userdata");
+      }
+    } on DioError catch (e) {
+      if (e.response.statusCode == 500) {
+        prefs.remove("userdata");
+      }
+    }
+  }
+
   Map<DateTime, List<MyEvents>> decodeMap(Map<String, dynamic> map) {
       Map<DateTime, List<MyEvents>> newMap = {};
       List<MyEvents> list = [];

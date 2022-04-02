@@ -436,7 +436,7 @@ class _SignUpPageState extends State<SignUpPage> {
             print(prefs.getString("userdata"));
           }
           ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-            content: Text("アカウント新規しました"),
+            content: Text("登録しました"),
             duration: Duration(seconds: 1),
           ));
         }

@@ -167,7 +167,6 @@ class _ToDoListPageState extends State<ToDoListPage> with RouteAware {
     //ローカルストレージから、値をLISTに渡す、初期化する
     Future(() async {
       SharedPreferences retult = await SharedPreferences.getInstance();
-      retult = await SharedPreferences.getInstance();
       //获取user token
       retult.getString("userdata") == null
           ? userdata = UserData(name: "", email: "", accessToken: "")
