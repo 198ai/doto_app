@@ -7,6 +7,7 @@ import 'package:dio/dio.dart';
 import 'package:doto_app/main.dart';
 import 'package:doto_app/model/alarm.dart';
 import 'package:doto_app/model/eventsToJoson.dart';
+import 'package:doto_app/model/getQuestionnaire.dart';
 import 'package:doto_app/model/myevents.dart';
 import 'package:doto_app/model/userData.dart';
 import 'package:doto_app/services/ScreenAdapter.dart';
@@ -86,7 +87,8 @@ class _CalendarPageState extends State<CalendarPage> {
       //prefs.remove("events");
 
       //print(prefs.getString("events").toString());
-      userData();
+      await userData();
+      await questionnaire();
     });
   }
 
@@ -104,6 +106,125 @@ class _CalendarPageState extends State<CalendarPage> {
     }
   }
 
+  Future questionnaire() async {
+    Dio dio = new Dio();
+    dio.options.headers['content-type'] = 'application/x-www-form-urlencoded';
+    dio.options.headers['X-Requested-With'] = 'XMLHttpRequest';
+    dio.options.headers['Accept'] =
+        'application/json, text/javascript, */*; q=0.01';
+    dio.options.headers['Host'] = '10.10.1.56';
+    dio.options.headers['Cookie'] =
+        'dnzPtab=S; dnzSid=97kV%2B83MSqfVEkulgsIAggAt2HdrcF7YsGKwgOMC8rScVX6MShWGc37ze5KfNW6S; dnzToken=513568c79b9fbdd95706f591f35ea682; dnzHashcmd=fin';
+    dio.options.headers['Connection'] = 'keep-alive';
+    Map<String, dynamic> formMap = {
+      "row": "0",
+      "fldsort": "cretime",
+      "order": "-1",
+      "num": "100",
+      "cmd": "enqcmdindex",
+      "type": "0",
+      "sts": "-1",
+      "1649163734676400": "",
+      "513568c79b9fbdd95706f591f35ea682": "1"
+    };
+    try {
+      Response response = await dio.post(
+          "http://10.10.1.56/scripts/dneo/zrenquete.exe/enqcmdindex",
+          data: formMap);
+      Map apiData = response.data["list"];
+      List apiList = apiData["item"];
+      List<getQuestionnaire> getquestionnaire =
+          apiList.map((e) => getQuestionnaire.fromJson(e)).toList();
+      showDataFromFC(getquestionnaire);
+    } on DioError catch (e) {
+      print(e.response.data);
+    }
+  }
+
+  bool readFCData(List<getQuestionnaire> getquestionnaire) {
+    getquestionnaire.forEach((e) {
+      if (e.prstatus == "2") {
+        // if (e.subject == "【 4/6（水）】中国交流会") {
+        String date = e.cretime!.substring(0, 4) +
+            "-" +
+            e.cretime!.substring(4, 6) +
+            "" +
+            e.cretime!.substring(6, 8);
+
+        if (mySelectedEvents[DateTime.parse(date)] != null) {
+          mySelectedEvents[DateTime.parse(date)]?.add(MyEvents(
+              eventTitle: e.subject!,
+              eventDescp: e.entryname!,
+              alarm: dateController.text,
+              alarmId: alarmId,
+              status: 0,
+              updatetime: DateTime.now().toString()));
+        } else {
+          mySelectedEvents[DateTime.parse(date)] = [
+            MyEvents(
+                eventTitle: e.subject!,
+                eventDescp: e.entryname!,
+                alarm: dateController.text,
+                alarmId: alarmId,
+                status: 0,
+                updatetime: DateTime.now().toString())
+          ];
+        }
+      }
+    });
+    print(mySelectedEvents);
+    setState(() {});
+    return true;
+    //await sendEvents(mySelectedEvents);
+  }
+
+  showDataFromFC(List<getQuestionnaire> getquestionnaire) {
+    return showDialog(
+        context: context,
+        builder: (context) => StatefulBuilder(
+                //在这里为了区分，在构建builder的时候将setState方法命名为了setBottomSheetState。
+                builder: (context1, showDialogState) {
+              return AlertDialog(
+                content: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text('FCアンケート内容を取り込りますか'),
+                  ],
+                ),
+                actions: [
+                  TextButton(
+                    onPressed: () {
+                      Navigator.pop(context);
+                    },
+                    child: Text(
+                      'キャンセル',
+                      style: TextStyle(
+                          fontSize: ScreenAdapter.size(15),
+                          color: Colors.green),
+                    ),
+                  ),
+                  TextButton(
+                    onPressed: () {
+                      readFCData(getquestionnaire)?
+                    ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+                        content: Text('FCアンケートの取り込み成功'),
+                        duration: Duration(seconds: 1),
+                    )):null;
+                    Navigator.pop(context);
+                    },
+                    child: Text(
+                      '取り込み',
+                      style: TextStyle(
+                          fontSize: ScreenAdapter.size(15),
+                          color: Colors.green),
+                    ),
+                  ),
+                ],
+              );
+            }));
+  }
+
   Future deleteMyEvents(MyEvents events, DateTime selectedCalendarDate) async {
     var date = DateFormat('yyyy-MM-dd').format(selectedCalendarDate);
     Map calendar = {};
@@ -114,7 +235,6 @@ class _CalendarPageState extends State<CalendarPage> {
     calendar["calendar"] = date.toString();
     calendar["events"] = eventslist;
     calendarlist.add(calendar);
-    print(calendarlist);
     Dio dio = new Dio();
     dio.options.headers['content-Type'] = 'application/json';
 
@@ -138,7 +258,7 @@ class _CalendarPageState extends State<CalendarPage> {
       }
     } on DioError catch (e) {
       //400是错误，后台写法需要修改
-      if(e.response.statusCode==400){
+      if (e.response.statusCode == 400) {
         ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
           content: Text('メモ削除成功'),
           duration: Duration(seconds: 1),
@@ -166,17 +286,17 @@ class _CalendarPageState extends State<CalendarPage> {
         "http://www.leishengle.com/api/v1/myevents",
         data: jsonEncode(calendarlist));
     if (response.statusCode == 201) {
-        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-          content: Text('メモ追加成功'),
-          duration: Duration(seconds: 1),
-        ));
-      } else {
-        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-          backgroundColor: Colors.deepOrange,
-          content: Text('メモ追加失敗'),
-          duration: Duration(seconds: 1),
-        ));
-      }
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+        content: Text('メモ追加成功'),
+        duration: Duration(seconds: 1),
+      ));
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+        backgroundColor: Colors.deepOrange,
+        content: Text('メモ追加失敗'),
+        duration: Duration(seconds: 1),
+      ));
+    }
   }
 
   Future getEvents() async {
@@ -510,6 +630,8 @@ class _CalendarPageState extends State<CalendarPage> {
                           var date = DateFormat('yyyy-MM-dd').format(key);
                           _events[DateTime.parse(date)] = value;
                         });
+                        print(alarmId);
+                        print(mySelectedEvents);
                         //发送api
                         await sendEvents(mySelectedEvents);
                         // prefs.setString(
